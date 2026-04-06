@@ -8,8 +8,8 @@ export default function Navbar() {
   return (
     <>
       {/* NAVBAR */}
-      <div className="absolute top-0 left-0 w-full flex justify-center z-50 mt-4">
-        <nav className="w-full max-w-6xl max-h-20 bg-[#ffffff] flex items-center justify-between px-6 md:px-8 py-3 rounded-4xl shadow-md">
+      <div className="absolute w-full flex justify-center z-50 mt-4">
+        <nav className="w-full max-w-7xl max-h-20 bg-[#ffffff] flex items-center justify-between px-6 md:px-8 py-3 rounded-4xl shadow-md">
           {/* Logo */}
           <img src={logo} alt="Logo Conecta Estética" className="" />
 
