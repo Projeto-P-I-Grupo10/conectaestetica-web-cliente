@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { cadastrarUsuario } from "../service/usuarios";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function CadastroStepper() {
   const [step, setStep] = useState(1);
 
   const [nome, setNome] = useState("");
-  const [sobrenome, setSobrenome] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
 
   const [senha, setSenha] = useState("");
@@ -32,17 +33,44 @@ export default function CadastroStepper() {
   const allValid = Object.values(validations).every(Boolean);
   const validado = senha === confirmarSenha && confirmarSenha.length > 0;
 
-  const step1Valid = nome && sobrenome && emailValido;
+  const step1Valid = nome && telefone && emailValido;
   const step2Valid = allValid && validado;
   const step3Valid = cep && cidade && estado && logradouro && numero;
 
   const handleNext = () => {
+
     if (step === 1 && !step1Valid) return;
     if (step === 2 && !step2Valid) return;
     if (step === 3 && !step3Valid) return;
-
     setStep(step + 1);
   };
+
+  const handleCadastro = async () => {
+  if (!step1Valid || !step2Valid || !step3Valid) {
+    alert("Preencha todos os campos corretamente");
+    return;
+  }
+
+  const dados = {
+    nome,
+    telefone,
+    email,
+    senha,
+    cep,
+    cidade,
+    estado,
+    logradouro,
+    numero
+  };
+
+  try {
+    await cadastrarUsuario(dados);
+    alert("Cadastrado!");
+
+  } catch (e) {
+    console.error(e);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -71,10 +99,10 @@ export default function CadastroStepper() {
             </div>
 
             <div>
-              <label className="text-sm">Sobrenome:</label>
+              <label className="text-sm">Telefone:</label>
               <input
-                value={sobrenome}
-                onChange={(e) => setSobrenome(e.target.value)}
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
                 className="w-full border rounded-md p-2 mt-1"
               />
             </div>
@@ -251,7 +279,7 @@ export default function CadastroStepper() {
               <input
                 value={numero}
                 onChange={(e) => setNumero(e.target.value)}
-                className="w-full border rounded-md p-1 "
+                className="w-full border rounded-md p-1"
               />
             </div>
           </div>
@@ -280,6 +308,7 @@ export default function CadastroStepper() {
             </button>
           ) : (
             <button
+              onClick={handleCadastro}
               disabled={!step3Valid}
               className={`px-6 py-2 rounded-full text-white ${
                 step3Valid ? "bg-yellow-600" : "bg-gray-400"
