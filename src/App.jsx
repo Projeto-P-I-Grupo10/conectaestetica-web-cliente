@@ -1,7 +1,14 @@
+import Navbar from "./assets/components/Navbar";
+import CadastroStepper from "./assets/components/CadastroStepper";
+import Login from "./assets/components/Login";
+
 function App() {
   return (
-    <div className="bg-red-700">TESTE</div>
+    <>
+      <Navbar></Navbar>
+      <Login></Login>
+    </>
   );
 }
 
-export default App
+export default App;
