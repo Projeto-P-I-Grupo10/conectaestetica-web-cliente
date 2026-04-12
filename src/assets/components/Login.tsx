@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { loginService } from "../service/usuarios";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
@@ -9,10 +10,22 @@ export default function Login() {
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const formValido = emailValido && senha.length > 0;
 
-  const handleLogin = () => {
-    if (!formValido) return;
-
+  const handleLogin = async() => {
+    if (!formValido) 
+    {
+      alert("Preencha todos os campos corretamente");
+      return;
+    }
     console.log("Login:", { email, senha });
+
+    try {
+      const data = await loginService({ email, senha });
+      console.log(data.token);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("idUsuario", data.id); 
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (

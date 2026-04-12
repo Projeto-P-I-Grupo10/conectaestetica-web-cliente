@@ -18,13 +18,13 @@ export function cadastrarUsuario(dados) {
   });
 }
 
-export function LoginService({email, senha}){
-    axios.post("http://localhost:8080/usuarios/login", {
+export function loginService({email, senha}){
+    return axios.post("http://localhost:8080/usuarios/login", {
     email: email,
     senha: senha,
     })
     .then(response => {
-    console.log("Sucesso:", response.data);
+      return response.data;
     })
     .catch(error => {
     console.error("Erro:", error.response?.data || error.message);
