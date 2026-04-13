@@ -1,13 +1,19 @@
-import Navbar from "./assets/components/Navbar";
-import CadastroStepper from "./assets/components/CadastroStepper";
-import Login from "./assets/components/Login";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Cadastro from "./pages/cadastro";
 
 function App() {
   return (
-    <>
-      <Navbar></Navbar>
-      <Login></Login>
-    </>
+    <BrowserRouter>
+      <Routes>
+        {/* LOGIN */}
+        <Route path="/" element={<Login />} />
+
+         {/* LOGIN */}
+        <Route path="/cadastro" element={<Cadastro />} />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 
