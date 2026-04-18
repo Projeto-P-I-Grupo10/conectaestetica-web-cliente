@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import FiltroCursos from "../assets/components/FiltrosCursos";
@@ -7,6 +9,7 @@ import { listarCurso } from "../assets/service/cursos";
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function carregarCursos() {
@@ -37,9 +40,9 @@ export default function CursosPage() {
                   key={curso.id}
                   titulo={curso.nome}
                   preco={curso.preco}
-                  avaliacao={4.5} 
+                  avaliacao={4.5}
                   imagem="/placeholder.jpg"
-                  onClick={() => console.log("Curso:", curso.id)}
+                  onClick={() => navigate(`/curso/${curso.id}`)}
                 />
               ))}
             </div>

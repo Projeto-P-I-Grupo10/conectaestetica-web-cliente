@@ -19,7 +19,7 @@ function App() {
         <Route path="/cursos" element={<CursosPage />} />
 
         {/* Página de detalhes do cursos */}
-        <Route path="/cursosDetalhe" element={<CursoDetalhe />} />
+        <Route path="/curso/:id" element={<CursoDetalhe />} />
 
         {/* Página de Pagamento */}
         <Route path="/Pagamento" element={<Pagamento />} />
