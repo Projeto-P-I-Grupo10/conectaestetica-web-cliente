@@ -1,7 +1,31 @@
 import { Star } from "lucide-react";
 import CursoCard from "./CursoCard";
-
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { exibirCursoId } from "../service/cursos";
+import { useNavigate } from "react-router-dom";
 export default function CursoDetalhe() {
+    const { id } = useParams();
+    const [curso, setCurso] = useState([]);
+    const navigate = useNavigate();
+    useEffect(() => {
+        async function carregarCurso() {
+          try {
+            const data = await exibirCursoId(id);
+            setCurso(data);
+            console.log(data);
+          } catch (erro) {
+            console.error("Erro ao buscar cursos", erro);
+          }
+        }
+    
+        carregarCurso();
+      }, []);
+
+    const precoFormatado = Number(curso?.preco).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-6">
       <div className="w-[900px] bg-white rounded-xl shadow-md p-6 space-y-6">
@@ -16,13 +40,11 @@ export default function CursoDetalhe() {
 
           <div className="space-y-2">
             <h1 className="text-xl font-semibold">
-              Curso - Revitalização Facial
+              {curso.nome}
             </h1>
 
             <p className="text-sm text-gray-600 max-w-md">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Vestibulum vitae lectus ut velit fermentum varius integer posuere,
-              metus at facilisis efficitur, nunc
+             {curso.descricao}
             </p>
 
             <p className="text-lg font-semibold">R$ 200,00</p>
@@ -46,9 +68,7 @@ export default function CursoDetalhe() {
 
               <h3 className="text-sm font-medium">Descrição</h3>
               <p className="text-sm text-gray-600">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Vestibulum vitae lectus ut velit fermentum varius.
-                Integer posuere, metus at facilisis efficitur, nunc
+                 {curso.descricao}
               </p>
 
               <p className="text-xs text-gray-400 mt-1 cursor-pointer">
@@ -66,11 +86,8 @@ export default function CursoDetalhe() {
                 <div className="w-10 h-10 bg-gray-300 rounded-full" />
 
                 <div>
-                  <p className="text-sm font-medium">Nome</p>
-                  <p className="text-xs text-gray-500 max-w-sm">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Vestibulum vitae lectus ut velit fermentum varius.
-                  </p>
+                  <p className="text-sm font-medium">{curso.professor?.nome}</p>
+                  <p className="text-xs text-gray-500 max-w-sm">{curso.professor?.descricao}</p>
 
                   <p className="text-xs text-gray-400 mt-1 cursor-pointer">
                     Saiba mais
@@ -144,10 +161,10 @@ export default function CursoDetalhe() {
 
           {/* DIREITA (CARD COMPRA) */}
           <div className="border rounded-xl p-4 space-y-4 h-fit">
-            <h3 className="font-semibold">Curso 1</h3>
+            <h3 className="font-semibold">{curso.nome}</h3>
 
             <p className="text-sm text-gray-600">
-              R$ 200,00
+              {precoFormatado}
               <br />
               <span className="text-xs">
                 Parcele em até 10x sem juros
@@ -160,7 +177,8 @@ export default function CursoDetalhe() {
               ))}
             </div>
 
-            <button className="w-full bg-[#c9a46c] text-white py-2 rounded-md hover:bg-[#b8935c] transition">
+            <button className="w-full bg-[#c9a46c] text-white py-2 rounded-md hover:bg-[#b8935c] transition"
+            onClick={() => navigate(`/pagamentos/${curso.id}`)}>
               Começar Agora
             </button>
           </div>

@@ -22,7 +22,8 @@ function App() {
         <Route path="/curso/:id" element={<CursoDetalhe />} />
 
         {/* Página de Pagamento */}
-        <Route path="/Pagamento" element={<Pagamento />} />
+        <Route path="/pagamentos/:idcurso" element={<Pagamento />} />
+
 
       </Routes>
     </BrowserRouter>
