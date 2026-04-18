@@ -1,36 +1,28 @@
+import { useEffect, useState } from "react";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import FiltroCursos from "../assets/components/FiltrosCursos";
 import CursoCard from "../assets/components/CursoCard";
+import { listarCurso } from "../assets/service/cursos";
 
 export default function CursosPage() {
-  const cursos = [
-    {
-      id: 1,
-      titulo: "Limpeza de Pele Profunda",
-      preco: 120,
-      avaliacao: 4.8,
-      imagem: "/curso1.jpg",
-    },
-    {
-      id: 2,
-      titulo: "Drenagem Linfática",
-      preco: 200,
-      avaliacao: 4.7,
-      imagem: "/curso2.jpg",
-    },
-    {
-      id: 3,
-      titulo: "Botox Avançado",
-      preco: 450,
-      avaliacao: 5.0,
-      imagem: "/curso3.jpg",
-    },
-  ];
+  const [cursos, setCursos] = useState([]);
+
+  useEffect(() => {
+    async function carregarCursos() {
+      try {
+        const data = await listarCurso();
+        setCursos(data);
+      } catch (erro) {
+        console.error("Erro ao buscar cursos", erro);
+      }
+    }
+
+    carregarCursos();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      
       <Navbar />
 
       <main className="flex-1 flex justify-center py-10 mt-32">
@@ -43,7 +35,10 @@ export default function CursosPage() {
               {cursos.map((curso) => (
                 <CursoCard
                   key={curso.id}
-                  {...curso}
+                  titulo={curso.nome}
+                  preco={curso.preco}
+                  avaliacao={4.5} 
+                  imagem="/placeholder.jpg"
                   onClick={() => console.log("Curso:", curso.id)}
                 />
               ))}
