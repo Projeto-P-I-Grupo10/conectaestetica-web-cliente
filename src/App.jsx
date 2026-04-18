@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Cadastro from "./pages/cadastro";
 import CursosPage from "./pages/CursosPages";
 import CursoDetalhe from "./pages/CursoDetalhe";
+import Pagamento from "./pages/Pagamento"
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
 
         {/* Página de detalhes do cursos */}
         <Route path="/cursosDetalhe" element={<CursoDetalhe />} />
+
+        {/* Página de Pagamento */}
+        <Route path="/Pagamento" element={<Pagamento />} />
 
       </Routes>
     </BrowserRouter>
