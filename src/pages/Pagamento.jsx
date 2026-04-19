@@ -5,7 +5,7 @@ import PagamentoBox from "../assets/components/PagamentoBox";
 import { useParams } from "react-router-dom";
 
 export default function Pagamento() {
-    const { idcurso } = useParams();
+    const { id } = useParams();
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
 
@@ -22,7 +22,7 @@ export default function Pagamento() {
               Finalizar compra
             </h2>
 
-            <CursoResumo id={idcurso}/>
+            <CursoResumo id={id}/>
           </div>
 
           {/* DIREITA */}
