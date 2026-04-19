@@ -23,6 +23,7 @@ export default function Login() {
       console.log(data.token);
       localStorage.setItem("token", data.token);
       localStorage.setItem("idUsuario", data.id); 
+      localStorage.setItem("email", data.email);
     } catch (e) {
       console.error(e);
     }
