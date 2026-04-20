@@ -86,7 +86,6 @@ async function handlePagamento(tipo) {
 }
 
   
-
   function formatarTempo(segundos) {
     const min = String(Math.floor(segundos / 60)).padStart(2, "0");
     const sec = String(segundos % 60).padStart(2, "0");

@@ -1,72 +1,62 @@
+import logo from "../img/Logo-horizontal-branca.png";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
+
 export default function Footer() {
   return (
     <footer className="bg-[#6B4A3A] text-white px-10 py-10">
-
       {/* CONTEÚDO PRINCIPAL */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="flex flex-col md:flex-row justify-between gap-10">
+        {/* ESQUERDA */}
+        <div className="max-w-sm">
+          <img src={logo} alt="ConectaEstética" className="w-60" />
+          <div className="flex gap-4 mt-4 text-xl">
+            <a
+              href="https://wa.me/5511987654321"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80"
+            >
+              <FaWhatsapp />
+            </a>
 
-        {/* LOGO + DESCRIÇÃO */}
-        <div>
-          <h2 className="text-xl font-semibold text-yellow-300">
-            ConectaEstética
-          </h2>
-          <p className="text-sm mt-2 text-gray-200">
-            Curadoria digital especializada em soluções financeiras e estratégicas
-            para o ecossistema de beleza e saúde.
-          </p>
-
-          {/* ÍCONES (pode trocar depois) */}
-          <div className="flex gap-3 mt-4 text-sm">
-            <span>🔊</span>
-            <span>✉️</span>
+            <a
+              href="https://instagram.com/seuusuario"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80"
+            >
+              <FaInstagram />
+            </a>
           </div>
         </div>
 
-        {/* PARA VOCÊ */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">PARA VOCÊ</h3>
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li>Conta digital</li>
-            <li>Créditos</li>
-            <li>Investimentos</li>
-            <li>Seguros</li>
-            <li>Cartões</li>
-          </ul>
-        </div>
+        {/* DIREITA */}
+        <div className="flex gap-16">
+          {/* LINKS */}
+          <div>
+            <h3 className="text-lg font-bold mb-3 text-[#c9a46c]">Links</h3>
+            <ul className="space-y-2 text-sm text-gray-200">
+              <li>Home</li>
+              <li>Cursos</li>
+              <li>Divulgue o seu curso</li>
+            </ul>
+          </div>
 
-        {/* PARA SEU NEGÓCIO */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">PARA SEU NEGÓCIO</h3>
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li>Crie sua loja on-line</li>
-            <li>Empréstimos</li>
-            <li>Vendedores</li>
-            <li>Investimento Business</li>
-          </ul>
+          {/* CONTATO */}
+          <div>
+            <h3 className="text-lg font-bold mb-3 text-[#c9a46c]">Contato</h3>
+            <ul className="space-y-2 text-sm text-gray-200">
+              <li>Telefone: 11 98765-4321</li>
+              <li>Email: conectaestetica@gmail.com</li>
+            </ul>
+          </div>
         </div>
-
-        {/* CONTATO */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">CONTATO</h3>
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li>Telefone: 0800 555 0123</li>
-            <li>Email: atelier@conecta.com</li>
-            <li>Atendimento: Seg – Sex, 09h às 18h</li>
-          </ul>
-        </div>
-
       </div>
 
       {/* LINHA */}
-      <div className="border-t border-white/20 mt-8 pt-4 flex flex-col md:flex-row justify-between text-xs text-gray-300">
-        <span>© 2024 Digital Atelier. All rights reserved</span>
-
-        <div className="flex gap-4 mt-2 md:mt-0">
-          <span>Termos de uso</span>
-          <span>Privacidade</span>
-        </div>
+      <div className="border-t border-white/20 mt-8 pt-4 text-center text-xs text-gray-300">
+        © 2026 Conecta Estética. All rights reserved
       </div>
-
     </footer>
   );
 }
