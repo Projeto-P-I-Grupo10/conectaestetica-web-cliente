@@ -11,3 +11,13 @@ export async function pagamentoPix(dados){
   });
   return response.data;
 }
+
+export async function consultarStatusPix(idCurso, idUsuario) {
+  try {
+    const response = await apiPag.get(`/pagamentos/status/${idCurso}/${idUsuario}`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao consultar status do pagamento:", error);
+    throw error;
+  }
+}
