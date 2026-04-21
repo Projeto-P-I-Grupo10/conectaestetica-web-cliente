@@ -41,7 +41,7 @@ export default function CursosPage() {
                   titulo={curso.nome}
                   preco={curso.preco}
                   avaliacao={4.5}
-                  imagem="/placeholder.jpg"
+                  imagem={`/img/${curso.imagem}`}
                   onClick={() => navigate(`/curso/${curso.id}`)}
                 />
               ))}
