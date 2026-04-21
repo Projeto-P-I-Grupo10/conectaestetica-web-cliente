@@ -5,47 +5,42 @@ import { useEffect, useState } from "react";
 import { exibirCursoId } from "../service/cursos";
 import { useNavigate } from "react-router-dom";
 export default function CursoDetalhe() {
-    const { id } = useParams();
-    const [curso, setCurso] = useState([]);
-    const navigate = useNavigate();
-    useEffect(() => {
-        async function carregarCurso() {
-          try {
-            const data = await exibirCursoId(id);
-            setCurso(data);
-            console.log(data);
-          } catch (erro) {
-            console.error("Erro ao buscar cursos", erro);
-          }
-        }
-    
-        carregarCurso();
-      }, []);
+  const { id } = useParams();
+  const [curso, setCurso] = useState([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    async function carregarCurso() {
+      try {
+        const data = await exibirCursoId(id);
+        setCurso(data);
+        console.log(data);
+      } catch (erro) {
+        console.error("Erro ao buscar cursos", erro);
+      }
+    }
 
-    const precoFormatado = Number(curso?.preco).toLocaleString("pt-BR", {
+    carregarCurso();
+  }, []);
+
+  const precoFormatado = Number(curso?.preco).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-6">
       <div className="w-[900px] bg-white rounded-xl shadow-md p-6 space-y-6">
-
         {/* HEADER */}
         <div className="flex gap-6">
           <img
-            src="/pele.jpg"
+            src={`../img/${curso.imagem}`}
             alt="curso"
             className="w-60 h-52 object-cover rounded-lg"
           />
 
           <div className="space-y-2">
-            <h1 className="text-xl font-semibold">
-              {curso.nome}
-            </h1>
+            <h1 className="text-xl font-semibold">{curso.nome}</h1>
 
-            <p className="text-sm text-gray-600 max-w-md">
-             {curso.descricao}
-            </p>
+            <p className="text-sm text-gray-600 max-w-md">{curso.descricao}</p>
 
             <p className="text-lg font-semibold">R$ 200,00</p>
             <p className="text-xs text-gray-500">
@@ -56,20 +51,14 @@ export default function CursoDetalhe() {
 
         {/* CONTEÚDO */}
         <div className="grid grid-cols-3 gap-6">
-
           {/* ESQUERDA */}
           <div className="col-span-2 space-y-6">
-
             {/* INFORMAÇÕES */}
             <div>
-              <h2 className="font-semibold mb-2">
-                Informações do Curso
-              </h2>
+              <h2 className="font-semibold mb-2">Informações do Curso</h2>
 
               <h3 className="text-sm font-medium">Descrição</h3>
-              <p className="text-sm text-gray-600">
-                 {curso.descricao}
-              </p>
+              <p className="text-sm text-gray-600">{curso.descricao}</p>
 
               <p className="text-xs text-gray-400 mt-1 cursor-pointer">
                 Saiba mais
@@ -87,7 +76,9 @@ export default function CursoDetalhe() {
 
                 <div>
                   <p className="text-sm font-medium">{curso.professor?.nome}</p>
-                  <p className="text-xs text-gray-500 max-w-sm">{curso.professor?.descricao}</p>
+                  <p className="text-xs text-gray-500 max-w-sm">
+                    {curso.professor?.descricao}
+                  </p>
 
                   <p className="text-xs text-gray-400 mt-1 cursor-pointer">
                     Saiba mais
@@ -130,9 +121,7 @@ export default function CursoDetalhe() {
 
             {/* RELACIONADOS */}
             <div>
-              <h3 className="font-semibold mb-2">
-                Cursos Relacionados
-              </h3>
+              <h3 className="font-semibold mb-2">Cursos Relacionados</h3>
 
               <div className="flex gap-4">
                 <CursoCard
@@ -166,9 +155,7 @@ export default function CursoDetalhe() {
             <p className="text-sm text-gray-600">
               {precoFormatado}
               <br />
-              <span className="text-xs">
-                Parcele em até 10x sem juros
-              </span>
+              <span className="text-xs">Parcele em até 10x sem juros</span>
             </p>
 
             <div className="flex text-[#c9a46c]">
@@ -177,8 +164,10 @@ export default function CursoDetalhe() {
               ))}
             </div>
 
-            <button className="w-full bg-[#c9a46c] text-white py-2 rounded-md hover:bg-[#b8935c] transition"
-            onClick={() => navigate(`/pagamentos/${curso.id}`)}>
+            <button
+              className="w-full bg-[#c9a46c] text-white py-2 rounded-md hover:bg-[#b8935c] transition"
+              onClick={() => navigate(`/pagamentos/${curso.id}`)}
+            >
               Começar Agora
             </button>
           </div>

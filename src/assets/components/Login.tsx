@@ -10,9 +10,8 @@ export default function Login() {
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const formValido = emailValido && senha.length > 0;
 
-  const handleLogin = async() => {
-    if (!formValido) 
-    {
+  const handleLogin = async () => {
+    if (!formValido) {
       alert("Preencha todos os campos corretamente");
       return;
     }
@@ -22,8 +21,9 @@ export default function Login() {
       const data = await loginService({ email, senha });
       console.log(data.token);
       localStorage.setItem("token", data.token);
-      localStorage.setItem("idUsuario", data.id); 
+      localStorage.setItem("idUsuario", data.id);
       localStorage.setItem("email", data.email);
+      localStorage.setItem("nome", data.nome);
     } catch (e) {
       console.error(e);
     }
