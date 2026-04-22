@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { consultarStatusPix, pagamentoPix } from "../service/pagamento";
 import { useParams } from "react-router-dom";
 import { exibirCursoId } from "../service/cursos";
+import Swal from "sweetalert2";
 
 export default function PagamentoBox() {
   const { id } = useParams()
@@ -10,82 +11,132 @@ export default function PagamentoBox() {
   const [pagamento, setPagamento] =  useState(null);
   const [tempoRestante, setTempoRestante] = useState(null);
 
-    useEffect(() => {
-      console.log("ID DA URL:", id);
-          async function carregarCurso() {
-            try {
-              const data = await exibirCursoId(id);
-              setCurso(data);
-              console.log(data);
-            } catch (erro) {
-              console.error("Erro ao buscar cursos", erro);
-            }
-          }
-          carregarCurso();
-    }, []);
-  
+  useEffect(() => {
+    async function carregarCurso() {
+      try {
+        const data = await exibirCursoId(id);
+        setCurso(data);
+      } catch (erro) {
+        console.error("Erro ao buscar cursos", erro);
+      }
+    }
+    carregarCurso();
+  }, []);
 
-async function handlePagamento(tipo) {
-  if (tipo === "pix") {
-    const dadosPag = {
-      metodo: tipo,
-      idCurso: id,
-      idUsuario: Number(localStorage.getItem("idUsuario")),
-      email: localStorage.getItem("email"),
-      preco: curso?.preco,
-    };
+  function limitarTexto(texto, limite = 20) {
+    if (!texto) return "";
+    return texto.length > limite
+      ? texto.slice(0, limite) + "..."
+      : texto;
+  }
 
-    try {
-      const data = await pagamentoPix(dadosPag);
-      setPagamento(data);
+  function copiarPix() {
+    if (!pagamento?.qr_code) return;
 
-      // Tempo de expiração: 10 minutos (600 segundos)
-      setTempoRestante(600);
-
-      // Contador regressivo
-      const countdown = setInterval(() => {
-        setTempoRestante((prev) => {
-          if (prev <= 1) {
-            clearInterval(countdown);
-            return 0;
-          }
-          return prev - 1;
+    navigator.clipboard.writeText(pagamento.qr_code)
+      .then(() => {
+        Swal.fire({
+          title: "Copiado!",
+          text: "Código PIX copiado com sucesso",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
         });
-      }, 1000);
+      })
+      .catch(() => {
+        Swal.fire({
+          title: "Erro",
+          text: "Não foi possível copiar o código",
+          icon: "error",
+        });
+      });
+  }
 
-      // Polling para consultar status
-      const polling = setInterval(async () => {
-        try {
-          const statusResponse = await consultarStatusPix(id, dadosPag.idUsuario);
-          console.log("Status atual:", statusResponse.status);
+  async function handlePagamento(tipo) {
+    if (tipo === "pix") {
+      const dadosPag = {
+        metodo: tipo,
+        idCurso: id,
+        idUsuario: Number(localStorage.getItem("idUsuario")),
+        email: localStorage.getItem("email"),
+        preco: curso?.preco,
+      };
 
-          if (statusResponse.status === "approved") {
-            alert("Pagamento aprovado!");
+      try {
+        const data = await pagamentoPix(dadosPag);
+        setPagamento(data);
+
+        setTempoRestante(600);
+
+        const countdown = setInterval(() => {
+          setTempoRestante((prev) => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        const polling = setInterval(async () => {
+          try {
+            const statusResponse = await consultarStatusPix(id, dadosPag.idUsuario);
+
+            if (statusResponse.status === "approved") {
+              clearInterval(polling);
+              clearInterval(countdown);
+
+              Swal.fire({
+                title: "Pagamento aprovado!",
+                text: "Seu curso foi liberado 🎉",
+                icon: "success",
+                confirmButtonText: "Continuar"
+              });
+
+            } else if (statusResponse.status === "expired") {
+              clearInterval(polling);
+              clearInterval(countdown);
+
+              Swal.fire({
+                title: "Tempo esgotado",
+                text: "O PIX expirou, gere outro pagamento",
+                icon: "warning"
+              });
+            }
+
+          } catch (error) {
+            console.error("Erro ao consultar status:", error);
             clearInterval(polling);
             clearInterval(countdown);
-          } else if (statusResponse.status === "expired") {
-            alert("Pagamento expirado!");
-            clearInterval(polling);
-            clearInterval(countdown);
+
+            Swal.fire({
+              title: "Erro",
+              text: "Falha ao verificar pagamento",
+              icon: "error"
+            });
           }
-        } catch (error) {
-          console.error("Erro ao consultar status:", error);
-          clearInterval(polling);
-          clearInterval(countdown);
-        }
-      }, 5000); // consulta a cada 5 segundos
+        }, 5000);
 
-    } catch (e) {
-      if (e.response?.status === 409) {
-        alert("Já existe um pagamento PIX pendente para este curso.");
-      } else {
-        console.error(e);
+      } catch (e) {
+        if (e.response?.status === 409) {
+          Swal.fire({
+            title: "Atenção",
+            text: "Já existe um pagamento PIX pendente para este curso.",
+            icon: "info",
+          });
+        } else {
+          console.error(e);
+
+          Swal.fire({
+            title: "Erro",
+            text: "Não foi possível gerar o pagamento",
+            icon: "error",
+          });
+        }
       }
     }
   }
-}
 
-  
   function formatarTempo(segundos) {
     const min = String(Math.floor(segundos / 60)).padStart(2, "0");
     const sec = String(segundos % 60).padStart(2, "0");
@@ -112,13 +163,25 @@ async function handlePagamento(tipo) {
 
         {metodo === "pix" && (
           <div className="mt-4 flex flex-col items-center gap-3">
+
             <img
               src={`data:image/png;base64,${pagamento?.qr_code_base64}`}
               alt="qr"
             />
-            <button className="bg-[#c49a6c] text-white px-4 py-2 rounded-md">
-              {pagamento?.qr_code}
-            </button>
+
+            <div className="flex flex-col items-center gap-2">
+              <button className="bg-[#c49a6c] text-white px-4 py-2 rounded-md">
+                {limitarTexto(pagamento?.qr_code)}
+              </button>
+
+              <button
+                onClick={copiarPix}
+                className="text-sm text-blue-600 underline"
+              >
+                Copiar código PIX
+              </button>
+            </div>
+
             {tempoRestante !== null && (
               <p className="text-red-600 font-bold">
                 Expira em: {formatarTempo(tempoRestante)}
@@ -130,10 +193,7 @@ async function handlePagamento(tipo) {
 
       {/* CARTÃO */}
       <div
-        onClick={() => {
-          setMetodo("cartao")
-          handlePagamento
-        }}
+        onClick={() => setMetodo("cartao")}
         className={`border rounded-md p-3 cursor-pointer ${
           metodo === "cartao" ? "border-blue-500" : ""
         }`}
@@ -142,44 +202,8 @@ async function handlePagamento(tipo) {
           <input type="radio" checked={metodo === "cartao"} readOnly />
           <span>Cartão de Crédito</span>
         </div>
-
-        {metodo === "cartao" && (
-          <div className="mt-4 flex flex-col gap-2 text-sm">
-
-            <input
-              type="text"
-              placeholder="Número do cartão"
-              className="border rounded p-2"
-            />
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Validade"
-                className="border rounded p-2 w-full"
-              />
-              <input
-                type="text"
-                placeholder="CVV"
-                className="border rounded p-2 w-full"
-              />
-            </div>
-
-            <input
-              type="text"
-              placeholder="Titular do cartão"
-              className="border rounded p-2"
-            />
-
-            <select className="border rounded p-2">
-              <option>12x de 999,99</option>
-            </select>
-
-          </div>
-        )}
       </div>
 
-      {/* BOTÃO */}
       <button className="bg-[#c49a6c] text-white py-2 rounded-md mt-4">
         Finalizar compra
       </button>

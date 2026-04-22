@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cadastrarUsuario } from "../service/usuarios";
 import { Eye, EyeOff } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function CadastroStepper() {
   const [step, setStep] = useState(1);
@@ -38,7 +39,6 @@ export default function CadastroStepper() {
   const step3Valid = cep && cidade && estado && logradouro && numero;
 
   const handleNext = () => {
-
     if (step === 1 && !step1Valid) return;
     if (step === 2 && !step2Valid) return;
     if (step === 3 && !step3Valid) return;
@@ -46,54 +46,104 @@ export default function CadastroStepper() {
   };
 
   const handleCadastro = async () => {
-  if (!step1Valid || !step2Valid || !step3Valid) {
-    alert("Preencha todos os campos corretamente");
-    return;
-  }
-
-  const dados = {
-    nome,
-    telefone,
-    email,
-    senha,
-    cep,
-    cidade,
-    estado,
-    logradouro,
-    numero
-  };
-
-  try {
-    await cadastrarUsuario(dados);
-    alert("Cadastrado!");
-
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-const buscarCep = async (cepDigitado) => {
-  try {
-    const cepLimpo = cepDigitado.replace(/\D/g, "");
-
-    if (cepLimpo.length !== 8) return;
-
-    const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-    const data = await response.json();
-
-    if (data.erro) {
-      alert("CEP não encontrado");
+    if (!step1Valid || !step2Valid || !step3Valid) {
+      Swal.fire({
+        title: "Campos inválidos",
+        text: "Preencha todos os campos corretamente",
+        icon: "warning",
+      });
       return;
     }
 
-    setCidade(data.localidade);
-    setEstado(data.uf);
-    setLogradouro(data.logradouro);
+    const dados = {
+      nome,
+      telefone,
+      email,
+      senha,
+      cep,
+      cidade,
+      estado,
+      logradouro,
+      numero,
+    };
 
-  } catch (e) {
-    console.error("Erro ao buscar CEP", e);
+    try {
+      Swal.fire({
+        title: "Cadastrando...",
+        text: "Aguarde um momento",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      await cadastrarUsuario(dados);
+
+      Swal.fire({
+        title: "Cadastro realizado!",
+        text: "Sua conta foi criada com sucesso 🎉",
+        icon: "success",
+        confirmButtonText: "Continuar",
+      });
+    } catch (e) {
+      console.error(e);
+
+      Swal.fire({
+        title: "Erro ao cadastrar",
+        text: "Tente novamente mais tarde",
+        icon: "error",
+      });
+    }
+  };
+
+  const buscarCep = async (cepDigitado) => {
+    try {
+      const cepLimpo = cepDigitado.replace(/\D/g, "");
+
+      if (cepLimpo.length !== 8) return;
+
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cepLimpo}/json/`,
+      );
+      const data = await response.json();
+
+      if (data.erro) {
+        Swal.fire({
+          title: "CEP não encontrado",
+          text: "Verifique o número digitado",
+          icon: "warning",
+        });
+        return;
+      }
+
+      setCidade(data.localidade);
+      setEstado(data.uf);
+      setLogradouro(data.logradouro);
+    } catch (e) {
+      console.error("Erro ao buscar CEP", e);
+
+      Swal.fire({
+        title: "Erro",
+        text: "Não foi possível buscar o CEP",
+        icon: "error",
+      });
+    }
+  };
+
+  function formatarTelefone(valor) {
+    valor = valor.replace(/\D/g, ""); // só números
+    valor = valor.slice(0, 11); // limite
+
+    if (valor.length <= 10) {
+      return valor
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      return valor
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2");
+    }
   }
-};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -125,7 +175,7 @@ const buscarCep = async (cepDigitado) => {
               <label className="text-sm">Telefone:</label>
               <input
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
                 className="w-full border rounded-md p-2 mt-1"
               />
             </div>
