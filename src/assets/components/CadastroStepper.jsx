@@ -72,6 +72,29 @@ export default function CadastroStepper() {
   }
 };
 
+const buscarCep = async (cepDigitado) => {
+  try {
+    const cepLimpo = cepDigitado.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) return;
+
+    const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+    const data = await response.json();
+
+    if (data.erro) {
+      alert("CEP não encontrado");
+      return;
+    }
+
+    setCidade(data.localidade);
+    setEstado(data.uf);
+    setLogradouro(data.logradouro);
+
+  } catch (e) {
+    console.error("Erro ao buscar CEP", e);
+  }
+};
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-xl">
@@ -243,6 +266,7 @@ export default function CadastroStepper() {
 
                   setCep(value);
                 }}
+                onBlur={() => buscarCep(cep)}
                 className="w-full border rounded-md p-1 "
               />
             </div>
