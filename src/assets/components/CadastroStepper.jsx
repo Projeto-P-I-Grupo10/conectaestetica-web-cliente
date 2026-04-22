@@ -55,9 +55,11 @@ export default function CadastroStepper() {
       return;
     }
 
+    const telefoneLimpo = telefone.replace(/\D/g, "");
+
     const dados = {
       nome,
-      telefone,
+      telefone: telefoneLimpo,
       email,
       senha,
       cep,
