@@ -3,17 +3,18 @@ import Login from "./pages/Login";
 import Cadastro from "./pages/cadastro";
 import CursosPage from "./pages/CursosPages";
 import CursoDetalhe from "./pages/CursoDetalhe";
-import Pagamento from "./pages/Pagamento"
+import Pagamento from "./pages/Pagamento";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* LOGIN */}
-        <Route path="/" element={<Login />} />
 
         {/* Cadastro */}
-        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/" element={<Cadastro />} />
+
+        {/* LOGIN */}
+        <Route path="/Login" element={<Login />} />
 
         {/* Página de cursos */}
         <Route path="/cursos" element={<CursosPage />} />
@@ -23,8 +24,6 @@ function App() {
 
         {/* Página de Pagamento */}
         <Route path="/pagamentos/:id" element={<Pagamento />} />
-
-
       </Routes>
     </BrowserRouter>
   );

@@ -2,8 +2,11 @@ import { useState } from "react";
 import { cadastrarUsuario } from "../service/usuarios";
 import { Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 export default function CadastroStepper() {
+  const navigate = useNavigate();
+
   const [step, setStep] = useState(1);
 
   const [nome, setNome] = useState("");
@@ -81,12 +84,15 @@ export default function CadastroStepper() {
 
       await cadastrarUsuario(dados);
 
-      Swal.fire({
+      await Swal.fire({
         title: "Cadastro realizado!",
         text: "Sua conta foi criada com sucesso 🎉",
         icon: "success",
-        confirmButtonText: "Continuar",
+        confirmButtonText: "Ir para login",
       });
+
+      navigate("/login"); // 🔥 REDIRECIONAMENTO
+
     } catch (e) {
       console.error(e);
 
@@ -133,8 +139,8 @@ export default function CadastroStepper() {
   };
 
   function formatarTelefone(valor) {
-    valor = valor.replace(/\D/g, ""); // só números
-    valor = valor.slice(0, 11); // limite
+    valor = valor.replace(/\D/g, "");
+    valor = valor.slice(0, 11);
 
     if (valor.length <= 10) {
       return valor
@@ -231,39 +237,19 @@ export default function CadastroStepper() {
             </div>
 
             <div className="text-xs space-y-1">
-              <p
-                className={
-                  validations.length ? "text-green-600" : "text-gray-500"
-                }
-              >
+              <p className={validations.length ? "text-green-600" : "text-gray-500"}>
                 • Pelo menos 8 caracteres
               </p>
-              <p
-                className={
-                  validations.upper ? "text-green-600" : "text-gray-500"
-                }
-              >
+              <p className={validations.upper ? "text-green-600" : "text-gray-500"}>
                 • 1 letra maiúscula
               </p>
-              <p
-                className={
-                  validations.lower ? "text-green-600" : "text-gray-500"
-                }
-              >
+              <p className={validations.lower ? "text-green-600" : "text-gray-500"}>
                 • 1 letra minúscula
               </p>
-              <p
-                className={
-                  validations.number ? "text-green-600" : "text-gray-500"
-                }
-              >
+              <p className={validations.number ? "text-green-600" : "text-gray-500"}>
                 • 1 número
               </p>
-              <p
-                className={
-                  validations.special ? "text-green-600" : "text-gray-500"
-                }
-              >
+              <p className={validations.special ? "text-green-600" : "text-gray-500"}>
                 • 1 caractere especial
               </p>
             </div>
@@ -299,6 +285,7 @@ export default function CadastroStepper() {
           </div>
         )}
 
+        {/* STEP 3 */}
         {step === 3 && (
           <div className="space-y-4">
             <div>
@@ -308,14 +295,11 @@ export default function CadastroStepper() {
                 maxLength={9}
                 onChange={(e) => {
                   let value = e.target.value;
-
-                  value = value.replace(/\D/g, ""); // só números
-                  value = value.slice(0, 8); // máximo 8 dígitos
-
+                  value = value.replace(/\D/g, "");
+                  value = value.slice(0, 8);
                   if (value.length > 5) {
                     value = value.replace(/(\d{5})(\d+)/, "$1-$2");
                   }
-
                   setCep(value);
                 }}
                 onBlur={() => buscarCep(cep)}
@@ -325,43 +309,26 @@ export default function CadastroStepper() {
 
             <div>
               <label className="text-sm">Cidade:</label>
-              <input
-                value={cidade}
-                onChange={(e) => setCidade(e.target.value)}
-                className="w-full border rounded-md p-1 "
-              />
+              <input value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full border rounded-md p-1 " />
             </div>
 
             <div>
               <label className="text-sm">Estado:</label>
-              <input
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                className="w-full border rounded-md p-1 "
-              />
+              <input value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full border rounded-md p-1 " />
             </div>
 
             <div>
               <label className="text-sm">Logradouro:</label>
-              <input
-                value={logradouro}
-                onChange={(e) => setLogradouro(e.target.value)}
-                className="w-full border rounded-md p-1 "
-              />
+              <input value={logradouro} onChange={(e) => setLogradouro(e.target.value)} className="w-full border rounded-md p-1 " />
             </div>
 
             <div>
-              <label className="text-">Número:</label>
-              <input
-                value={numero}
-                onChange={(e) => setNumero(e.target.value)}
-                className="w-full border rounded-md p-1"
-              />
+              <label>Número:</label>
+              <input value={numero} onChange={(e) => setNumero(e.target.value)} className="w-full border rounded-md p-1" />
             </div>
           </div>
         )}
 
-        {/* BOTÕES */}
         <div className="flex justify-between mt-6">
           <button
             onClick={() => setStep(step - 1)}
