@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../img/Logo-horizontal-preta.png";
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+  const navigate = useNavigate() 
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [usuario] = useState(() => {
@@ -26,7 +28,7 @@ export default function Navbar() {
           {/* Links (desktop) */}
           <ul className="hidden md:flex items-center gap-8 text-gray-800 font-medium">
             <li className="cursor-pointer hover:text-black transition">Home</li>
-            <li className="cursor-pointer hover:text-black transition">
+            <li className="cursor-pointer hover:text-black transition" onClick={()=>navigate("/cursos")}>
               Cursos
             </li>
             <li className="cursor-pointer hover:text-black transition">
@@ -51,11 +53,11 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <button className="cursor-pointer px-5 py-1.5 border border-[#c9a46c] rounded-full hover:bg-gray-100 transition">
+                <button onClick={()=>navigate("/login")} className="cursor-pointer px-5 py-1.5 border border-[#c9a46c] rounded-full hover:bg-gray-100 transition">
                   Login
                 </button>
 
-                <button className="cursor-pointer px-5 py-1.5 bg-[#c9a46c] text-white rounded-full hover:opacity-90 transition">
+                <button onClick={()=>navigate("/")} className="cursor-pointer px-5 py-1.5 bg-[#c9a46c] text-white rounded-full hover:opacity-90 transition">
                   Cadastro
                 </button>
               </>

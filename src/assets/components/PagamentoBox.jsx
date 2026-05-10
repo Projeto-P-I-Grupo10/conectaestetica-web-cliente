@@ -31,9 +31,9 @@ export default function PagamentoBox() {
   }
 
   function copiarPix() {
-    if (!pagamento?.qr_code) return;
+    if (!pagamento?.qrCode) return;
 
-    navigator.clipboard.writeText(pagamento.qr_code)
+    navigator.clipboard.writeText(pagamento?.qrCode)
       .then(() => {
         Swal.fire({
           title: "Copiado!",
@@ -165,13 +165,13 @@ export default function PagamentoBox() {
           <div className="mt-4 flex flex-col items-center gap-3">
 
             <img
-              src={`data:image/png;base64,${pagamento?.qr_code_base64}`}
+              src={`data:image/png;base64,${pagamento?.qrCodeImage}`}
               alt="qr"
             />
 
             <div className="flex flex-col items-center gap-2">
               <button className="bg-[#c49a6c] text-white px-4 py-2 rounded-md">
-                {limitarTexto(pagamento?.qr_code)}
+                {limitarTexto(pagamento?.qrCode)}
               </button>
 
               <button

@@ -1,13 +1,13 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { exibirCursoId } from "../service/cursos";
+import { exibirCursoDetalheId } from "../service/cursos";
 
 export default function CursoResumo({ id }) {
   const [curso, setCurso] = useState([]);
   useEffect(() => {
     async function carregarCurso() {
       try {
-        const data = await exibirCursoId(id);
+        const data = await exibirCursoDetalheId(id);
         setCurso(data);
         console.log(data);
       } catch (erro) {
@@ -18,7 +18,7 @@ export default function CursoResumo({ id }) {
     carregarCurso();
   }, []);
 
-  const precoFormatado = Number(curso?.preco).toLocaleString("pt-BR", {
+  const precoFormatado = Number(curso?.turmaPreco).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
@@ -26,7 +26,7 @@ export default function CursoResumo({ id }) {
     <div className="bg-white rounded-xl shadow-md flex w-180 h-42 overflow-hidden">
       {/* IMAGEM */}
       <img
-        src={`/img/${curso.imagem}`}
+        src={`/img/${curso?.cursoImagem}`}
         alt="curso"
         className="w-40 object-cover"
       />
@@ -34,7 +34,7 @@ export default function CursoResumo({ id }) {
       {/* INFO */}
       <div className="p-4 flex flex-col justify-between w-full">
         <div className="flex justify-between">
-          <h3 className="font-semibold">{curso.nome}</h3>
+          <h3 className="font-semibold">{curso?.cursoNome}</h3>
 
           <X className="cursor-pointer" size={18} />
         </div>
