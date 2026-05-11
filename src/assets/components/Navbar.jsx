@@ -27,7 +27,7 @@ export default function Navbar() {
 
           {/* Links (desktop) */}
           <ul className="hidden md:flex items-center gap-8 text-gray-800 font-medium">
-            <li className="cursor-pointer hover:text-black transition">Home</li>
+            <li className="cursor-pointer hover:text-black transition"  onClick={()=>navigate("/home")}>Home</li>
             <li className="cursor-pointer hover:text-black transition" onClick={()=>navigate("/cursos")}>
               Cursos
             </li>
