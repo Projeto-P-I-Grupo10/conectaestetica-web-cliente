@@ -5,6 +5,7 @@ import CursosPage from "../pages/CursosPages";
 import CursoDetalhe from "../pages/CursoDetalhe";
 import Pagamento from "../pages/Pagamento";
 import Home from "../pages/Home"
+import Perfil from "../pages/Perfil"
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
   {
     path: "/pagamentos/:id",
     element: <Pagamento />,
+  },
+  {
+    path: "/perfil",
+    element: <Perfil />,
   },
   {
     path: "*",
