@@ -1,72 +1,255 @@
+import logo from "../img/Logo-horizontal-branca.png";
+
+import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa";
+
+import { Mail, Phone, ChevronRight } from "lucide-react";
+
+import { useNavigate } from "react-router-dom";
+
 export default function Footer() {
+  const navigate = useNavigate();
+
   return (
-    <footer className="bg-[#6B4A3A] text-white px-10 py-10">
+    <footer className="bg-[#5b3f31] text-white pt-28">
+      <div className="max-w-7xl mx-auto px-8">
+        {/* Conteúdo principal */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-20 pb-20">
+          {/* Branding */}
+          <div className="lg:col-span-2">
+            <img src={logo} alt="Conecta Estética" className="w-72 mb-8" />
 
-      {/* CONTEÚDO PRINCIPAL */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <p className="text-[#f1e6de] leading-loose max-w-lg text-[15px]">
+              A Conecta Estética conecta profissionais e alunos através de
+              cursos especializados, criando uma experiência moderna e acessível
+              para o universo da estética.
+            </p>
 
-        {/* LOGO + DESCRIÇÃO */}
-        <div>
-          <h2 className="text-xl font-semibold text-yellow-300">
-            ConectaEstética
-          </h2>
-          <p className="text-sm mt-2 text-gray-200">
-            Curadoria digital especializada em soluções financeiras e estratégicas
-            para o ecossistema de beleza e saúde.
-          </p>
+            {/* Redes sociais */}
+            <div className="flex items-center gap-5 mt-10">
+              <a
+                href="https://wa.me/5511987654321"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  w-12
+                  h-12
+                  rounded-full
+                  bg-white/10
+                  flex
+                  items-center
+                  justify-center
+                  hover:bg-[#c9a46c]
+                  transition-all
+                  duration-300
+                "
+              >
+                <FaWhatsapp size={18} />
+              </a>
 
-          {/* ÍCONES (pode trocar depois) */}
-          <div className="flex gap-3 mt-4 text-sm">
-            <span>🔊</span>
-            <span>✉️</span>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  w-12
+                  h-12
+                  rounded-full
+                  bg-white/10
+                  flex
+                  items-center
+                  justify-center
+                  hover:bg-[#c9a46c]
+                  transition-all
+                  duration-300
+                "
+              >
+                <FaInstagram size={18} />
+              </a>
+
+              <a
+                href="/"
+                className="
+                  w-12
+                  h-12
+                  rounded-full
+                  bg-white/10
+                  flex
+                  items-center
+                  justify-center
+                  hover:bg-[#c9a46c]
+                  transition-all
+                  duration-300
+                "
+              >
+                <FaFacebookF size={16} />
+              </a>
+            </div>
+          </div>
+
+          {/* Navegação */}
+          <div>
+            <h3 className="text-2xl font-medium mb-8 text-[#e7c48f]">
+              Navegação
+            </h3>
+
+            <ul className="space-y-6">
+              <li>
+                <button
+                  onClick={() => navigate("/home")}
+                  className="
+                    flex
+                    items-center
+                    gap-3
+                    text-[#f1e6de]
+                    hover:text-[#c9a46c]
+                    transition
+                  "
+                >
+                  <ChevronRight size={18} />
+                  Home
+                </button>
+              </li>
+
+              <li>
+                <button
+                  onClick={() => navigate("/cursos")}
+                  className="
+                    flex
+                    items-center
+                    gap-3
+                    text-[#f1e6de]
+                    hover:text-[#c9a46c]
+                    transition
+                  "
+                >
+                  <ChevronRight size={18} />
+                  Cursos
+                </button>
+              </li>
+
+              <li>
+                <button
+                  className="
+                    flex
+                    items-center
+                    gap-3
+                    text-[#f1e6de]
+                    hover:text-[#c9a46c]
+                    transition
+                  "
+                >
+                  <ChevronRight size={18} />
+                  Divulgue seu curso
+                </button>
+              </li>
+
+              <li>
+                <button
+                  className="
+                    flex
+                    items-center
+                    gap-3
+                    text-[#f1e6de]
+                    hover:text-[#c9a46c]
+                    transition
+                  "
+                >
+                  <ChevronRight size={18} />
+                  Sobre nós
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contato */}
+          <div>
+            <h3 className="text-2xl font-medium mb-8 text-[#e7c48f]">
+              Contato
+            </h3>
+
+            <div className="space-y-8">
+              {/* Email */}
+              <div className="flex items-start gap-4">
+                <div
+                  className="
+                    min-w-12
+                    h-12
+                    rounded-2xl
+                    bg-white/10
+                    flex
+                    items-center
+                    justify-center
+                    text-[#c9a46c]
+                  "
+                >
+                  <Mail size={20} />
+                </div>
+
+                <div>
+                  <p className="text-sm text-white/50 mb-2">E-mail</p>
+
+                  <span className="text-[#f1e6de] text-[15px]">
+                    conectaestetica@gmail.com
+                  </span>
+                </div>
+              </div>
+
+              {/* Telefone */}
+              <div className="flex items-start gap-4">
+                <div
+                  className="
+                    min-w-12
+                    h-12
+                    rounded-2xl
+                    bg-white/10
+                    flex
+                    items-center
+                    justify-center
+                    text-[#c9a46c]
+                  "
+                >
+                  <Phone size={20} />
+                </div>
+
+                <div>
+                  <p className="text-sm text-white/50 mb-2">Telefone</p>
+
+                  <span className="text-[#f1e6de] text-[15px]">
+                    (11) 98765-4321
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* PARA VOCÊ */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">PARA VOCÊ</h3>
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li>Conta digital</li>
-            <li>Créditos</li>
-            <li>Investimentos</li>
-            <li>Seguros</li>
-            <li>Cartões</li>
-          </ul>
-        </div>
+        {/* Linha inferior */}
+        <div
+          className="
+            border-t
+            border-white/10
+            py-8
+            flex
+            flex-col
+            md:flex-row
+            items-center
+            justify-between
+            gap-6
+          "
+        >
+          <p className="text-sm text-[#f1e6de]">
+            © 2026 Conecta Estética. Todos os direitos reservados.
+          </p>
 
-        {/* PARA SEU NEGÓCIO */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">PARA SEU NEGÓCIO</h3>
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li>Crie sua loja on-line</li>
-            <li>Empréstimos</li>
-            <li>Vendedores</li>
-            <li>Investimento Business</li>
-          </ul>
-        </div>
+          <div className="flex items-center gap-8 text-sm text-[#f1e6de]">
+            <button className="hover:text-[#c9a46c] transition">
+              Privacidade
+            </button>
 
-        {/* CONTATO */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">CONTATO</h3>
-          <ul className="space-y-2 text-sm text-gray-200">
-            <li>Telefone: 0800 555 0123</li>
-            <li>Email: atelier@conecta.com</li>
-            <li>Atendimento: Seg – Sex, 09h às 18h</li>
-          </ul>
-        </div>
-
-      </div>
-
-      {/* LINHA */}
-      <div className="border-t border-white/20 mt-8 pt-4 flex flex-col md:flex-row justify-between text-xs text-gray-300">
-        <span>© 2024 Digital Atelier. All rights reserved</span>
-
-        <div className="flex gap-4 mt-2 md:mt-0">
-          <span>Termos de uso</span>
-          <span>Privacidade</span>
+            <button className="hover:text-[#c9a46c] transition">Termos</button>
+          </div>
         </div>
       </div>
-
     </footer>
   );
 }

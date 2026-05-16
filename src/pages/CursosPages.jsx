@@ -34,18 +34,22 @@ export default function CursosPage() {
           <FiltroCursos />
 
           <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {cursos.map((curso) => (
-                <CursoCard
-                  key={curso.id}
-                  titulo={curso.nome}
-                  preco={curso.preco}
-                  avaliacao={4.5}
-                  imagem="/placeholder.jpg"
-                  onClick={() => navigate(`/curso/${curso.id}`)}
-                />
-              ))}
-            </div>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {Array.isArray(cursos) && cursos.length > 0 ? (
+                  cursos.map((curso) => (
+                    <CursoCard
+                      key={curso?.cursoId}
+                      titulo={curso?.cursoNome}
+                      preco={curso?.turmaPreco}
+                      avaliacao={4.5}
+                      imagem={`/img/${curso?.cursoImagem}`}
+                      onClick={() => navigate(`/curso/${curso?.cursoId}`)}
+                    />
+                  ))
+                ) : (
+                  <p>Nenhum curso disponível. Formata depois Vinicius</p>
+                )}
+              </div>
           </div>
 
         </div>

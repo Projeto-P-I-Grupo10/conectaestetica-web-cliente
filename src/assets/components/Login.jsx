@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { loginService } from "../service/usuarios";
 import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showSenha, setShowSenha] = useState(false);
@@ -10,22 +14,43 @@ export default function Login() {
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const formValido = emailValido && senha.length > 0;
 
-  const handleLogin = async() => {
-    if (!formValido) 
-    {
-      alert("Preencha todos os campos corretamente");
+  const handleLogin = async () => {
+    if (!formValido) {
+      Swal.fire({
+        title: "Campos inválidos",
+        text: "Preencha todos os campos corretamente",
+        icon: "warning",
+      });
       return;
     }
-    console.log("Login:", { email, senha });
 
     try {
       const data = await loginService({ email, senha });
-      console.log(data.token);
+
       localStorage.setItem("token", data.token);
-      localStorage.setItem("idUsuario", data.id); 
+      localStorage.setItem("idUsuario", data.id);
       localStorage.setItem("email", data.email);
+      localStorage.setItem("nome", data.nome);
+
+      // 👇 ALERTA + ESPERA
+      await Swal.fire({
+        title: "Login realizado!",
+        text: `Bem-vindo, ${data.nome} 👋`,
+        icon: "success",
+        confirmButtonText: "Continuar",
+      });
+
+      // 👇 REDIRECIONA DEPOIS
+      navigate("/cursos");
+
     } catch (e) {
       console.error(e);
+
+      Swal.fire({
+        title: "Erro no login",
+        text: "Email ou senha inválidos",
+        icon: "error",
+      });
     }
   };
 

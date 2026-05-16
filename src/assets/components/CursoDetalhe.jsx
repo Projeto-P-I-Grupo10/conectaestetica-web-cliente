@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 import CursoCard from "./CursoCard";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { exibirCursoId } from "../service/cursos";
+import { exibirCursoDetalheId } from "../service/cursos";
 import { useNavigate } from "react-router-dom";
 export default function CursoDetalhe() {
     const { id } = useParams();
@@ -11,7 +11,7 @@ export default function CursoDetalhe() {
     useEffect(() => {
         async function carregarCurso() {
           try {
-            const data = await exibirCursoId(id);
+            const data = await exibirCursoDetalheId(id);
             setCurso(data);
             console.log(data);
           } catch (erro) {
@@ -22,7 +22,7 @@ export default function CursoDetalhe() {
         carregarCurso();
       }, []);
 
-    const precoFormatado = Number(curso?.preco).toLocaleString("pt-BR", {
+    const precoFormatado = Number(curso?.turmaPreco).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
@@ -33,21 +33,21 @@ export default function CursoDetalhe() {
         {/* HEADER */}
         <div className="flex gap-6">
           <img
-            src="/pele.jpg"
+            src={curso?.cursoImagem}
             alt="curso"
             className="w-60 h-52 object-cover rounded-lg"
           />
 
           <div className="space-y-2">
             <h1 className="text-xl font-semibold">
-              {curso.nome}
+              {curso?.cursoNome}
             </h1>
 
             <p className="text-sm text-gray-600 max-w-md">
-             {curso.descricao}
+               {curso?.cursoDescricao}
             </p>
 
-            <p className="text-lg font-semibold">R$ 200,00</p>
+            <p className="text-lg font-semibold">{precoFormatado}</p>
             <p className="text-xs text-gray-500">
               Parcele em até 10x sem juros
             </p>
@@ -68,7 +68,7 @@ export default function CursoDetalhe() {
 
               <h3 className="text-sm font-medium">Descrição</h3>
               <p className="text-sm text-gray-600">
-                 {curso.descricao}
+                  {curso?.cursoDescricao}
               </p>
 
               <p className="text-xs text-gray-400 mt-1 cursor-pointer">
@@ -86,12 +86,30 @@ export default function CursoDetalhe() {
                 <div className="w-10 h-10 bg-gray-300 rounded-full" />
 
                 <div>
-                  <p className="text-sm font-medium">{curso.professor?.nome}</p>
-                  <p className="text-xs text-gray-500 max-w-sm">{curso.professor?.descricao}</p>
+                     <p className="text-sm font-medium">REDE SOCIAL: {curso?.professorRedesocial}</p>
+                  <p className="text-sm font-medium">{curso?.professorNome}</p>
+                  <p className="text-xs text-gray-500 max-w-sm">{curso?.professorDescricao}</p>
 
                   <p className="text-xs text-gray-400 mt-1 cursor-pointer">
                     Saiba mais
                   </p>
+                </div>
+              </div>
+            </div>
+
+                 {/* AUTOR */}
+            <div>
+              <h3 className="text-sm font-semibold mb-2">
+               Informações Turma
+              </h3>
+
+              <div className="flex items-center gap-3">
+                <div>
+                     <p className="text-sm font-medium">Aulas da turma começaram: {curso?.turmaCursoAtivo ? "Sim" : "Não"}</p>
+                     <p className="text-sm font-medium">Nome da turma: {curso?.turmaNome}</p>
+                  <p className="text-sm font-medium">Data Inicio{curso?.turmaDataInicio}</p>
+                  <p className="text-sm font-medium">Data Encerramento{curso?.turmaDataEncerramento}</p>
+                  <p className="text-sm font-medium">Vagas: {curso?.turmaQtdVagas}</p>
                 </div>
               </div>
             </div>
@@ -161,7 +179,7 @@ export default function CursoDetalhe() {
 
           {/* DIREITA (CARD COMPRA) */}
           <div className="border rounded-xl p-4 space-y-4 h-fit">
-            <h3 className="font-semibold">{curso.nome}</h3>
+            <h3 className="font-semibold">{curso?.cursoNome}</h3>
 
             <p className="text-sm text-gray-600">
               {precoFormatado}
@@ -178,7 +196,7 @@ export default function CursoDetalhe() {
             </div>
 
             <button className="w-full bg-[#c9a46c] text-white py-2 rounded-md hover:bg-[#b8935c] transition"
-            onClick={() => navigate(`/pagamentos/${curso.id}`)}>
+            onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}>
               Começar Agora
             </button>
           </div>
