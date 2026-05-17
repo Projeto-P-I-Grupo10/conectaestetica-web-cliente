@@ -1,16 +1,97 @@
-import { useState } from "react";
-import { Pencil, BookOpen, User, Mail, Phone, Lock } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import { Pencil, BookOpen, User, Mail, Phone, Lock, Check, X } from "lucide-react";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
+import { atualizarUsuario, detalharUsuario } from "../assets/service/usuarios";
 
 export default function PerfilUsuario() {
-  const [usuario] = useState({
-    nome: localStorage.getItem("nome") || "Usuário exemplo",
-    email: localStorage.getItem("email") || "usuario@gmail.com",
-    celular: "(11) 90000-0000",
-  });
 
+  const id = localStorage.getItem("idUsuario");
+  const [usuario,setUsuario] = useState({});
+  const [editando, setEditando] = useState(false);
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [imagem, setImagem] = useState(null);
+
+   useEffect(() => {
+      async function carregarUsuario() {
+        try {
+          const data = await detalharUsuario(id);
+          setUsuario(data);
+          setNome(data.nome);
+          setEmail(data.email);
+          setTelefone(data.telefone);
+        } catch (erro) {
+          console.error("Erro ao buscar usuario", erro);
+        }
+      }
+  
+      carregarUsuario();
+    }, [id]);
+    
+    async function salvarAlteracoes() {
+
+      if (!nome || nome.trim() === "") {
+        alert("O nome não pode ser vazio.");
+        return;
+      }
+
+      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailValido) {
+        alert("E-mail inválido.");
+        return;
+      }
+
+      const telefoneLimpo = telefone.replace(/\D/g, "");
+      if (telefoneLimpo.length < 10) {
+        alert("Telefone inválido. Informe pelo menos 10 dígitos.");
+        return;
+      }
+
+      const dadosIguais =
+      usuario.nome === nome &&
+      usuario.email === email &&
+      usuario.telefone.replace(/\D/g, "") === telefoneLimpo;
+
+    if (dadosIguais) {
+      alert("Nenhuma alteração detectada.");
+      setEditando(false);
+      return;
+    }
+
+      const usuarioAtualizado = {
+          ...usuario,
+          nome,
+          email,
+          telefone: telefoneLimpo,
+        }
+      
+      try {
+        const response = await atualizarUsuario(usuarioAtualizado, id);
+        console.log("Usuário atualizado:", response);
+        window.location.reload();
+      } catch (erro) {
+        console.error("Erro ao atualizar usuário", erro);  
+      }
+
+      setEditando(false);
+    }
+
+
+   function cancelar() {
+    setEditando(false);
+  }
+
+  function handleImagemChange(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setImagem(previewUrl);
+
+      //o resto eu faço quando a gente tive o s3 ee ertc.
+    }
+  }
   const cursos = [
     {
       id: 1,
@@ -150,48 +231,45 @@ export default function PerfilUsuario() {
                   <div className="relative">
                     <div
                       className="
-                        w-32
-                        h-32
+                         w-32 h-32
                         rounded-full
+                        overflow-hidden
                         bg-[#e7d8c9]
-                        flex
-                        items-center
-                        justify-center
+                        flex items-center justify-center
                         text-[#6B4A3A]
                       "
                     >
-                      <User size={42} />
+                      {imagem ? (
+                                  <img src={imagem} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                  <User size={42} />
+                                )}
                     </div>
 
-                    {/* Editar */}
-                    <button
-                      className="
-                        absolute
-                        bottom-1
-                        right-1
-                        w-10
-                        h-10
-                        rounded-full
-                        bg-white
-                        border
-                        border-[#ece7e2]
-                        flex
-                        items-center
-                        justify-center
-                        shadow-sm
-                        hover:bg-[#f5f5f5]
-                        transition
-                      "
-                    >
-                      <Pencil size={16} />
-                    </button>
+                    {/* Botão para trocar imagem */}
+                          <label
+                            htmlFor="uploadImagem"
+                            className="
+                              absolute bottom-1 right-1 w-10 h-10 rounded-full
+                              bg-white border border-[#ece7e2]
+                              flex items-center justify-center shadow-sm
+                              hover:bg-[#f5f5f5] transition cursor-pointer
+                            "
+                          >
+                            <Pencil size={16} />
+                          </label>
+                          <input
+                            id="uploadImagem"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImagemChange}
+                          />
                   </div>
 
                   <h2 className="text-2xl font-medium text-[#3d2b1f] mt-5">
-                    {usuario.nome}
+                    Aluno da plataforma
                   </h2>
-
-                  <p className="text-gray-500">Aluno da plataforma</p>
                 </div>
 
                 {/* Dados */}
@@ -201,15 +279,29 @@ export default function PerfilUsuario() {
                       Dados pessoais
                     </h3>
 
-                    <button
-                      className="
-                        text-[#c9a46c]
-                        hover:text-[#b89258]
-                        transition
-                      "
-                    >
-                      <Pencil size={18} />
-                    </button>
+                     {!editando ? (
+                      <button
+                        className="text-[#c9a46c] hover:text-[#b89258] transition"
+                        onClick={() => setEditando(true)}
+                      >
+                        <Pencil size={18} />
+                      </button>
+                    ) : (
+                      <div className="flex gap-3">
+                        <button
+                          className="text-green-600 hover:text-green-800 transition"
+                          onClick={salvarAlteracoes}
+                        >
+                          <Check size={20} />
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-800 transition"
+                          onClick={cancelar}
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-5">
@@ -221,8 +313,17 @@ export default function PerfilUsuario() {
                           Nome completo
                         </span>
                       </div>
-
-                      <p className="text-[#3d2b1f]">{usuario.nome}</p>
+                    {editando ? (
+                    <input
+                      type="text"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      className="text-[#3d2b1f] border rounded"
+                    />
+                  ) :
+                  (
+                    <p className="text-[#3d2b1f]">{usuario?.nome}</p>
+                  )}
                     </div>
 
                     {/* Email */}
@@ -231,8 +332,17 @@ export default function PerfilUsuario() {
                         <Mail size={18} />
                         <span className="text-sm font-medium">E-mail</span>
                       </div>
-
-                      <p className="text-[#3d2b1f]">{usuario.email}</p>
+                      {editando ? (
+                    <input
+                      type="text"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="text-[#3d2b1f] border rounded"
+                    />
+                  ) :
+                  (
+                    <p className="text-[#3d2b1f]">{usuario?.email}</p>
+                  )}
                     </div>
 
                     {/* Telefone */}
@@ -241,8 +351,17 @@ export default function PerfilUsuario() {
                         <Phone size={18} />
                         <span className="text-sm font-medium">Celular</span>
                       </div>
-
-                      <p className="text-[#3d2b1f]">{usuario.celular}</p>
+                           {editando ? (
+                    <input
+                      type="text"
+                      value={telefone}
+                      onChange={(e) => setTelefone(e.target.value)}
+                      className="text-[#3d2b1f] border rounded"
+                    />
+                  ) :
+                  (
+                  <p className="text-[#3d2b1f]">{usuario?.telefone}</p>
+                  )}
                     </div>
 
                     {/* Senha */}
