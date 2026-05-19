@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 
 export default function FiltroCursos() {
   const [aberto, setAberto] = useState({
-    ordenar: false,
+    ordenar: true,
     pele: false,
     corporal: false,
     facial: false,
@@ -17,86 +17,230 @@ export default function FiltroCursos() {
   };
 
   return (
-    <div className="w-64 bg-gray-200 p-4 h-full overflow-y-auto">
+    <aside
+      className="
+        w-full
+        md:w-80
+        h-fit
+        bg-[#faf8f6]
+        border
+        border-[#ece7e2]
+        rounded-4xl
+        p-7
+        shadow-sm
+      "
+    >
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-3xl font-light text-[#3d2b1f] mb-3">
+          Explorar cursos
+        </h2>
 
-      <h2 className="text-lg font-semibold mb-6">
-        Explorar Cursos
-      </h2>
-
-      {/* ORDENAR */}
-      <div className="border-t border-black py-3">
-        <button
-          onClick={() => toggle("ordenar")}
-          className="flex justify-between w-full text-sm"
-        >
-          Ordenar por
-          <ChevronDown size={16} />
-        </button>
-
-        {aberto.ordenar && (
-          <div className="mt-2 text-xs space-y-1 text-gray-600">
-            <p>Mais populares</p>
-            <p>Mais recentes</p>
-            <p>Menor preço</p>
-          </div>
-        )}
+        <p className="text-sm text-gray-500 leading-relaxed">
+          Encontre cursos ideais para desenvolver
+          suas habilidades na área da estética.
+        </p>
       </div>
 
-      {/* PELE */}
-      <div className="border-t border-black py-3">
-        <button
-          onClick={() => toggle("pele")}
-          className="flex justify-between w-full text-sm"
+      {/* Conteúdo */}
+      <div className="space-y-4">
+        
+        {/* ORDENAR */}
+        <div
+          className="
+            bg-white
+            border
+            border-[#ece7e2]
+            rounded-2xl
+            overflow-hidden
+          "
         >
-          Pele
-          <ChevronDown size={16} />
-        </button>
+          <button
+            onClick={() => toggle("ordenar")}
+            className="
+              w-full
+              flex
+              items-center
+              justify-between
+              px-5
+              py-4
+              text-[#3d2b1f]
+              font-medium
+            "
+          >
+            Ordenar por
 
-        {aberto.pele && (
-          <div className="mt-2 text-xs space-y-1 text-gray-600">
-            <p>Acne</p>
-            <p>Limpeza de pele</p>
-            <p>Tratamentos</p>
-          </div>
-        )}
-      </div>
+            <ChevronDown
+              size={18}
+              className={`
+                transition-transform duration-300
+                ${aberto.ordenar ? "rotate-180" : ""}
+              `}
+            />
+          </button>
 
-      {/* CORPORAL */}
-      <div className="border-t border-black py-3">
-        <button
-          onClick={() => toggle("corporal")}
-          className="flex justify-between w-full text-sm"
+          {aberto.ordenar && (
+            <div className="px-5 pb-5 space-y-3 text-sm">
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Mais populares
+              </button>
+
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Mais recentes
+              </button>
+
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Menor preço
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* PELE */}
+        <div
+          className="
+            bg-white
+            border
+            border-[#ece7e2]
+            rounded-2xl
+            overflow-hidden
+          "
         >
-          Corporal
-          <ChevronDown size={16} />
-        </button>
+          <button
+            onClick={() => toggle("pele")}
+            className="
+              w-full
+              flex
+              items-center
+              justify-between
+              px-5
+              py-4
+              text-[#3d2b1f]
+              font-medium
+            "
+          >
+            Pele
 
-        {aberto.corporal && (
-          <div className="mt-2 text-xs space-y-1 text-gray-600">
-            <p>Drenagem</p>
-            <p>Massagem</p>
-          </div>
-        )}
-      </div>
+            <ChevronDown
+              size={18}
+              className={`
+                transition-transform duration-300
+                ${aberto.pele ? "rotate-180" : ""}
+              `}
+            />
+          </button>
 
-      {/* FACIAL */}
-      <div className="border-t border-black py-3 border-b">
-        <button
-          onClick={() => toggle("facial")}
-          className="flex justify-between w-full text-sm"
+          {aberto.pele && (
+            <div className="px-5 pb-5 space-y-3 text-sm">
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Acne
+              </button>
+
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Limpeza de pele
+              </button>
+
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Tratamentos
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* CORPORAL */}
+        <div
+          className="
+            bg-white
+            border
+            border-[#ece7e2]
+            rounded-2xl
+            overflow-hidden
+          "
         >
-          Facial
-          <ChevronDown size={16} />
-        </button>
+          <button
+            onClick={() => toggle("corporal")}
+            className="
+              w-full
+              flex
+              items-center
+              justify-between
+              px-5
+              py-4
+              text-[#3d2b1f]
+              font-medium
+            "
+          >
+            Corporal
 
-        {aberto.facial && (
-          <div className="mt-2 text-xs space-y-1 text-gray-600">
-            <p>Botox</p>
-            <p>Skin care</p>
-          </div>
-        )}
+            <ChevronDown
+              size={18}
+              className={`
+                transition-transform duration-300
+                ${aberto.corporal ? "rotate-180" : ""}
+              `}
+            />
+          </button>
+
+          {aberto.corporal && (
+            <div className="px-5 pb-5 space-y-3 text-sm">
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Drenagem
+              </button>
+
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Massagem
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* FACIAL */}
+        <div
+          className="
+            bg-white
+            border
+            border-[#ece7e2]
+            rounded-2xl
+            overflow-hidden
+          "
+        >
+          <button
+            onClick={() => toggle("facial")}
+            className="
+              w-full
+              flex
+              items-center
+              justify-between
+              px-5
+              py-4
+              text-[#3d2b1f]
+              font-medium
+            "
+          >
+            Facial
+
+            <ChevronDown
+              size={18}
+              className={`
+                transition-transform duration-300
+                ${aberto.facial ? "rotate-180" : ""}
+              `}
+            />
+          </button>
+
+          {aberto.facial && (
+            <div className="px-5 pb-5 space-y-3 text-sm">
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Botox
+              </button>
+
+              <button className="block text-gray-600 hover:text-[#c9a46c] transition">
+                Skin care
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-
-    </div>
+    </aside>
   );
 }
