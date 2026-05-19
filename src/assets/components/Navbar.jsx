@@ -22,7 +22,6 @@ export default function Navbar() {
       {/* NAVBAR */}
       <div className="absolute w-full flex justify-center z-50 mt-4">
         <nav className="w-full max-w-7xl max-h-20 bg-[#ffffff] flex items-center justify-between px-6 md:px-8 py-3 rounded-4xl shadow-md">
-
           {/* Logo */}
           <img
             src={logo}
@@ -47,7 +46,10 @@ export default function Navbar() {
               Cursos
             </li>
 
-            <li className="cursor-pointer hover:text-black transition">
+            <li
+              className="cursor-pointer hover:text-black transition"
+              onClick={() => navigate("/formulario")}
+            >
               Divulgue seu curso
             </li>
           </ul>
@@ -135,10 +137,7 @@ export default function Navbar() {
           </div>
 
           {/* Botão Mobile */}
-          <button
-            className="md:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
+          <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </nav>
@@ -153,7 +152,6 @@ export default function Navbar() {
         }`}
       >
         <div className="mt-4 w-[95%] max-w-6xl bg-[#d9d9d9] rounded-2xl p-5 flex flex-col gap-4 md:hidden shadow-md">
-
           {/* Links */}
           <span
             onClick={() => {
@@ -173,17 +171,13 @@ export default function Navbar() {
             Cursos
           </span>
 
-          <span onClick={() => setMenuOpen(false)}>
-            Divulgue seu curso
-          </span>
+          <span onClick={() => setMenuOpen(false)}>Divulgue seu curso</span>
 
           <hr />
 
           {usuario ? (
             <>
-              <span className="font-medium text-[#6B4A3A]">
-                Olá, {usuario}
-              </span>
+              <span className="font-medium text-[#6B4A3A]">Olá, {usuario}</span>
 
               {/* Perfil */}
               <button
