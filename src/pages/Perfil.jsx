@@ -15,6 +15,7 @@ import Footer from "../assets/components/Footer";
 import ModalResetSenha from "../assets/components/ModalResetSenha";
 
 import { atualizarUsuario, detalharUsuario } from "../assets/service/usuarios";
+import ModalResetNovaSenha from "../assets/components/ModalResetNovaSenha";
 
 export default function PerfilUsuario() {
   const id = localStorage.getItem("idUsuario");
@@ -30,6 +31,8 @@ export default function PerfilUsuario() {
 
   // MODAL RESET SENHA
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
+  const [modalNovaSenhaOpen, setModalNovaSenhaOpen] = useState(false);
+
 
   useEffect(() => {
     async function carregarUsuario() {
@@ -520,6 +523,15 @@ export default function PerfilUsuario() {
       <ModalResetSenha
         open={modalSenhaOpen}
         onClose={() => setModalSenhaOpen(false)}
+        onSuccess={() => {
+          setModalSenhaOpen(false);
+          setModalNovaSenhaOpen(true);
+        }}
+      />
+
+      <ModalResetNovaSenha
+        open={modalNovaSenhaOpen}
+        onClose={() => setModalNovaSenhaOpen(false)}
       />
 
       <Footer />

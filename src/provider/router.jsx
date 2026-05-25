@@ -11,7 +11,7 @@ import Formulario from "../pages/Formulario";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/cadastro",
     element: <Cadastro />,
   },
   {
@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/Home",
+    path: "/",
     element: <Home />,
   },
   {

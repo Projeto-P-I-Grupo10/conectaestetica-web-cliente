@@ -1,17 +1,37 @@
 import { Eye, EyeOff, Lock, X } from "lucide-react";
 import { useState } from "react";
+import { verificarSenhaUsuario } from "../service/usuarios";
+import ModalResetNovaSenha from "./ModalResetNovaSenha";
 
 export default function ModalResetSenha({
   open,
   onClose,
+  onSuccess
 }) {
   const [showSenhaAtual, setShowSenhaAtual] = useState(false);
-  const [showNovaSenha, setShowNovaSenha] = useState(false);
-  const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
+  const [showSenhaNova, setShowSenhaNova] = useState(false);
+  const id = localStorage.getItem("idUsuario");
+  const [senha, setSenha] = useState("");
+
+      async function verificarSenhaUsuarioModal() {
+        try {
+          const data = await verificarSenhaUsuario(senha,id);
+           if (data?.status === 200) {
+            console.log(data?.mensagem)
+            console.log(data?.status)
+                 onSuccess();
+                  setShowSenhaNova(true);
+                  setSenha("");
+            }
+          
+        } catch (erro) {
+          console.error("Senha Digitada está incorreta", erro);
+        }
+      }
 
   if (!open) return null;
 
-  return (
+  return (<>
     <div
       className="
         fixed
@@ -75,7 +95,7 @@ export default function ModalResetSenha({
           </div>
 
           <p className="text-gray-500">
-            Atualize sua senha para manter sua conta segura.
+            Digite sua senha atual, para validarmos sua credencial.
           </p>
         </div>
 
@@ -101,6 +121,8 @@ export default function ModalResetSenha({
                   outline-none
                   focus:border-[#c9a46c]
                 "
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
               />
 
               <button
@@ -117,92 +139,6 @@ export default function ModalResetSenha({
                 "
               >
                 {showSenhaAtual ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Nova senha */}
-          <div>
-            <label className="block text-sm font-medium text-[#3d2b1f] mb-2">
-              Nova senha
-            </label>
-
-            <div className="relative">
-              <input
-                type={showNovaSenha ? "text" : "password"}
-                className="
-                  w-full
-                  border
-                  border-[#ece7e2]
-                  rounded-2xl
-                  px-5
-                  py-3
-                  outline-none
-                  focus:border-[#c9a46c]
-                "
-              />
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowNovaSenha(!showNovaSenha)
-                }
-                className="
-                  absolute
-                  right-4
-                  top-1/2
-                  -translate-y-1/2
-                  text-gray-400
-                "
-              >
-                {showNovaSenha ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirmar senha */}
-          <div>
-            <label className="block text-sm font-medium text-[#3d2b1f] mb-2">
-              Confirmar nova senha
-            </label>
-
-            <div className="relative">
-              <input
-                type={showConfirmarSenha ? "text" : "password"}
-                className="
-                  w-full
-                  border
-                  border-[#ece7e2]
-                  rounded-2xl
-                  px-5
-                  py-3
-                  outline-none
-                  focus:border-[#c9a46c]
-                "
-              />
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowConfirmarSenha(!showConfirmarSenha)
-                }
-                className="
-                  absolute
-                  right-4
-                  top-1/2
-                  -translate-y-1/2
-                  text-gray-400
-                "
-              >
-                {showConfirmarSenha ? (
                   <EyeOff size={20} />
                 ) : (
                   <Eye size={20} />
@@ -239,12 +175,21 @@ export default function ModalResetSenha({
                 transition
                 font-medium
               "
+              onClick={verificarSenhaUsuarioModal}
             >
-              Salvar senha
+              Verificar senha
             </button>
           </div>
         </div>
       </div>
     </div>
+   {showSenhaNova && (
+    <ModalResetNovaSenha
+      open={showSenhaNova}
+      onClose={() => setShowSenhaNova(false)}
+      />
+    )}
+
+              </>
   );
 }

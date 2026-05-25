@@ -95,7 +95,7 @@ export default function Footer() {
             <ul className="space-y-6">
               <li>
                 <button
-                  onClick={() => navigate("/home")}
+                  onClick={() => navigate("/")}
                   className="
                     flex
                     items-center

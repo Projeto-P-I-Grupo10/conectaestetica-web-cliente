@@ -27,14 +27,14 @@ export default function Navbar() {
             src={logo}
             alt="Logo Conecta Estética"
             className="cursor-pointer"
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("/")}
           />
 
           {/* Links Desktop */}
           <ul className="hidden md:flex items-center gap-8 text-gray-800 font-medium">
             <li
               className="cursor-pointer hover:text-black transition"
-              onClick={() => navigate("/home")}
+              onClick={() => navigate("/")}
             >
               Home
             </li>
@@ -155,7 +155,7 @@ export default function Navbar() {
           {/* Links */}
           <span
             onClick={() => {
-              navigate("/home");
+              navigate("/");
               setMenuOpen(false);
             }}
           >
