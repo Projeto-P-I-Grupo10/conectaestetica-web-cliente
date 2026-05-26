@@ -1,158 +1,325 @@
-import { Star } from "lucide-react";
+import { Star, BookOpen, User, CalendarDays, Users } from "lucide-react";
 import CursoCard from "./CursoCard";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { exibirCursoDetalheId } from "../service/cursos";
-import { useNavigate } from "react-router-dom";
-export default function CursoDetalhe() {
-    const { id } = useParams();
-    const [curso, setCurso] = useState([]);
-    const navigate = useNavigate();
-    useEffect(() => {
-        async function carregarCurso() {
-          try {
-            const data = await exibirCursoDetalheId(id);
-            setCurso(data);
-            console.log(data);
-          } catch (erro) {
-            console.error("Erro ao buscar cursos", erro);
-          }
-        }
-    
-        carregarCurso();
-      }, []);
 
-    const precoFormatado = Number(curso?.turmaPreco).toLocaleString("pt-BR", {
+export default function CursoDetalhe() {
+  const { id } = useParams();
+
+  const [curso, setCurso] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function carregarCurso() {
+      try {
+        const data = await exibirCursoDetalheId(id);
+        setCurso(data);
+      } catch (erro) {
+        console.error("Erro ao buscar cursos", erro);
+      }
+    }
+
+    carregarCurso();
+  }, []);
+
+  const precoFormatado = Number(curso?.turmaPreco).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
+
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center p-6">
-      <div className="w-[900px] bg-white rounded-xl shadow-md p-6 space-y-6">
-
+    <main className="min-h-screen bg-[#f5f5f5] py-36 px-6">
+      <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="flex gap-6">
-          <img
-            src={curso?.cursoImagem}
-            alt="curso"
-            className="w-60 h-52 object-cover rounded-lg"
-          />
+        <div
+          className="
+            bg-white
+            border
+            border-[#ece7e2]
+            rounded-b-4xl
+            overflow-hidden
+            shadow-sm
+            mb-6
+          "
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            {/* IMAGEM */}
+            <div className="h-full">
+              <img
+                src={curso?.cursoImagem}
+                alt="curso"
+                className="
+                  w-full
+                  h-96
+                  object-cover
+                "
+              />
+            </div>
 
-          <div className="space-y-2">
-            <h1 className="text-xl font-semibold">
-              {curso?.cursoNome}
-            </h1>
+            {/* INFO */}
+            <div className="p-10 flex flex-col justify-center">
+              <div
+                className="
+                  bg-[#c9a46c]/15
+                  text-[#c9a46c]
+                  w-fit
+                  px-4
+                  py-2
+                  rounded-full
+                  text-sm
+                  font-medium
+                  mb-6
+                "
+              >
+                Curso Profissional
+              </div>
 
-            <p className="text-sm text-gray-600 max-w-md">
-               {curso?.cursoDescricao}
-            </p>
+              <h1 className="text-5xl font-light text-[#3d2b1f] leading-tight mb-5">
+                {curso?.cursoNome}
+              </h1>
 
-            <p className="text-lg font-semibold">{precoFormatado}</p>
-            <p className="text-xs text-gray-500">
-              Parcele em até 10x sem juros
-            </p>
+              <p className="text-gray-600 leading-relaxed mb-8">
+                {curso?.cursoDescricao}
+              </p>
+
+              {/* Avaliação */}
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex text-[#c9a46c]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={18} fill="#c9a46c" />
+                  ))}
+                </div>
+
+                <span className="text-gray-500">5.0 (124 avaliações)</span>
+              </div>
+
+              {/* Preço */}
+              <div className="mb-8">
+                <h2 className="text-4xl font-semibold text-[#3d2b1f]">
+                  {precoFormatado}
+                </h2>
+
+                <p className="text-gray-500 mt-2">
+                  Parcele em até 10x sem juros
+                </p>
+              </div>
+
+              {/* Botão */}
+              <button
+                onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}
+                className="
+                  w-full
+                  md:w-fit
+                  bg-[#c9a46c]
+                  hover:bg-[#b89258]
+                  transition
+                  text-white
+                  px-10
+                  py-4
+                  rounded-full
+                  font-medium
+                  shadow-sm
+                "
+              >
+                Começar agora
+              </button>
+            </div>
           </div>
         </div>
 
         {/* CONTEÚDO */}
-        <div className="grid grid-cols-3 gap-6">
-
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-10">
           {/* ESQUERDA */}
-          <div className="col-span-2 space-y-6">
+          <div className="space-y-10">
+            {/* SOBRE */}
+            <section
+              className="
+                bg-white
+                border
+                border-[#ece7e2]
+                rounded-b-4xl
+                p-8
+              "
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className="
+                    w-12
+                    h-12
+                    rounded-2xl
+                    bg-[#c9a46c]/15
+                    flex
+                    items-center
+                    justify-center
+                    text-[#c9a46c]
+                  "
+                >
+                  <BookOpen size={24} />
+                </div>
 
-            {/* INFORMAÇÕES */}
-            <div>
-              <h2 className="font-semibold mb-2">
-                Informações do Curso
-              </h2>
+                <h2 className="text-2xl font-medium text-[#3d2b1f]">
+                  Sobre o curso
+                </h2>
+              </div>
 
-              <h3 className="text-sm font-medium">Descrição</h3>
-              <p className="text-sm text-gray-600">
-                  {curso?.cursoDescricao}
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {curso?.cursoDescricao}
               </p>
+            </section>
 
-              <p className="text-xs text-gray-400 mt-1 cursor-pointer">
-                Saiba mais
-              </p>
-            </div>
+            {/* PROFESSOR */}
+            <section
+              className="
+                bg-white
+                border
+                border-[#ece7e2]
+                rounded-b-4xl
+                p-8
+              "
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className="
+                    w-12
+                    h-12
+                    rounded-2xl
+                    bg-[#c9a46c]/15
+                    flex
+                    items-center
+                    justify-center
+                    text-[#c9a46c]
+                  "
+                >
+                  <User size={24} />
+                </div>
 
-            {/* AUTOR */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2">
-                Saiba mais sobre quem criou esse curso
-              </h3>
+                <h2 className="text-2xl font-medium text-[#3d2b1f]">
+                  Professor responsável
+                </h2>
+              </div>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full" />
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div
+                  className="
+                    w-24
+                    h-24
+                    rounded-full
+                    bg-[#e7d8c9]
+                  "
+                />
 
                 <div>
-                     <p className="text-sm font-medium">REDE SOCIAL: {curso?.professorRedesocial}</p>
-                  <p className="text-sm font-medium">{curso?.professorNome}</p>
-                  <p className="text-xs text-gray-500 max-w-sm">{curso?.professorDescricao}</p>
+                  <h3 className="text-2xl font-medium text-[#3d2b1f] mb-2">
+                    {curso?.professorNome}
+                  </h3>
 
-                  <p className="text-xs text-gray-400 mt-1 cursor-pointer">
-                    Saiba mais
+                  <p className="text-[#c9a46c] mb-4">
+                    @{curso?.professorRedesocial}
+                  </p>
+
+                  <p className="text-gray-600 leading-relaxed">
+                    {curso?.professorDescricao}
                   </p>
                 </div>
               </div>
-            </div>
+            </section>
 
-                 {/* AUTOR */}
-            <div>
-              <h3 className="text-sm font-semibold mb-2">
-               Informações Turma
-              </h3>
+            {/* TURMA */}
+            <section
+              className="
+                bg-white
+                border
+                border-[#ece7e2]
+                rounded-b-4xl
+                p-8
+              "
+            >
+              <div className="flex items-center gap-3 mb-8">
+                <div
+                  className="
+                    w-12
+                    h-12
+                    rounded-2xl
+                    bg-[#c9a46c]/15
+                    flex
+                    items-center
+                    justify-center
+                    text-[#c9a46c]
+                  "
+                >
+                  <CalendarDays size={24} />
+                </div>
 
-              <div className="flex items-center gap-3">
-                <div>
-                     <p className="text-sm font-medium">Aulas da turma começaram: {curso?.turmaCursoAtivo ? "Sim" : "Não"}</p>
-                     <p className="text-sm font-medium">Nome da turma: {curso?.turmaNome}</p>
-                  <p className="text-sm font-medium">Data Inicio{curso?.turmaDataInicio}</p>
-                  <p className="text-sm font-medium">Data Encerramento{curso?.turmaDataEncerramento}</p>
-                  <p className="text-sm font-medium">Vagas: {curso?.turmaQtdVagas}</p>
+                <h2 className="text-2xl font-medium text-[#3d2b1f]">
+                  Informações da turma
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-[#faf8f6] rounded-2xl p-5 border border-[#ece7e2]">
+                  <p className="text-sm text-gray-500 mb-2">Status da turma</p>
+
+                  <p className="text-lg font-medium text-[#3d2b1f]">
+                    {curso?.turmaCursoAtivo ? "Ativa" : "Encerrada"}
+                  </p>
+                </div>
+
+                <div className="bg-[#faf8f6] rounded-2xl p-5 border border-[#ece7e2]">
+                  <p className="text-sm text-gray-500 mb-2">Nome da turma</p>
+
+                  <p className="text-lg font-medium text-[#3d2b1f]">
+                    {curso?.turmaNome}
+                  </p>
+                </div>
+
+                <div className="bg-[#faf8f6] rounded-2xl p-5 border border-[#ece7e2]">
+                  <p className="text-sm text-gray-500 mb-2">Data de início</p>
+
+                  <p className="text-lg font-medium text-[#3d2b1f]">
+                    {curso?.turmaDataInicio}
+                  </p>
+                </div>
+
+                <div className="bg-[#faf8f6] rounded-2xl p-5 border border-[#ece7e2]">
+                  <p className="text-sm text-gray-500 mb-2">
+                    Data de encerramento
+                  </p>
+
+                  <p className="text-lg font-medium text-[#3d2b1f]">
+                    {curso?.turmaDataEncerramento}
+                  </p>
+                </div>
+
+                <div className="bg-[#faf8f6] rounded-2xl p-5 border border-[#ece7e2]">
+                  <p className="text-sm text-gray-500 mb-2">
+                    Quantidade de vagas
+                  </p>
+
+                  <div className="flex items-center gap-2 text-[#3d2b1f]">
+                    <Users size={18} />
+
+                    <p className="text-lg font-medium">
+                      {curso?.turmaQtdVagas}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* AVALIAÇÕES */}
-            <div>
-              <h3 className="font-semibold mb-2">Avaliações</h3>
-
-              <div className="flex gap-6 items-center">
-                <div>
-                  <p className="text-4xl font-bold">5.0</p>
-                  <p className="text-xs text-gray-500">X avaliações</p>
-                </div>
-
-                <div className="space-y-1">
-                  {[5, 4, 3, 2, 1].map((n) => (
-                    <div key={n} className="flex items-center gap-2">
-                      <div className="flex">
-                        {[...Array(n)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={14}
-                            className="text-[#c9a46c] fill-[#c9a46c]"
-                          />
-                        ))}
-                      </div>
-
-                      <div className="w-32 h-2 bg-gray-200 rounded-full">
-                        <div className="w-20 h-2 bg-[#c9a46c] rounded-full" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            </section>
 
             {/* RELACIONADOS */}
-            <div>
-              <h3 className="font-semibold mb-2">
-                Cursos Relacionados
-              </h3>
+            <section>
+              <div className="mb-6">
+                <h2 className="text-3xl font-light text-[#3d2b1f] mb-3">
+                  Cursos relacionados
+                </h2>
 
-              <div className="flex gap-4">
+                <p className="text-gray-500">
+                  Continue evoluindo com cursos similares.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <CursoCard
                   imagem="/botox.jpg"
                   titulo="Botox avançado"
@@ -174,34 +341,71 @@ export default function CursoDetalhe() {
                   avaliacao={4.8}
                 />
               </div>
-            </div>
+            </section>
           </div>
 
-          {/* DIREITA (CARD COMPRA) */}
-          <div className="border rounded-xl p-4 space-y-4 h-fit">
-            <h3 className="font-semibold">{curso?.cursoNome}</h3>
+          {/* CARD LATERAL */}
+          <aside
+            className="
+              bg-white
+              border
+              border-[#ece7e2]
+              rounded-b-4xl
+              p-8
+              h-fit
+              sticky
+              top-32
+              shadow-sm
+            "
+          >
+            <h3 className="text-2xl font-medium text-[#3d2b1f] mb-6">
+              Resumo da compra
+            </h3>
 
-            <p className="text-sm text-gray-600">
-              {precoFormatado}
-              <br />
-              <span className="text-xs">
-                Parcele em até 10x sem juros
-              </span>
-            </p>
+            <div className="space-y-5">
+              <div>
+                <p className="text-gray-500 text-sm mb-2">Curso</p>
 
-            <div className="flex text-[#c9a46c]">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} fill="#c9a46c" />
-              ))}
+                <p className="text-lg font-medium text-[#3d2b1f]">
+                  {curso?.cursoNome}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-gray-500 text-sm mb-2">Valor</p>
+
+                <p className="text-3xl font-semibold text-[#3d2b1f]">
+                  {precoFormatado}
+                </p>
+              </div>
+
+              <div className="flex text-[#c9a46c]">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} fill="#c9a46c" />
+                ))}
+              </div>
+
+              <button
+                onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}
+                className="
+                  w-full
+                  bg-[#c9a46c]
+                  hover:bg-[#b89258]
+                  transition
+                  text-white
+                  py-4
+                  rounded-full
+                  font-medium
+                  shadow-sm
+                  mt-4
+                "
+              >
+                Comprar curso
+              </button>
             </div>
-
-            <button className="w-full bg-[#c9a46c] text-white py-2 rounded-md hover:bg-[#b8935c] transition"
-            onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}>
-              Começar Agora
-            </button>
-          </div>
+          </aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

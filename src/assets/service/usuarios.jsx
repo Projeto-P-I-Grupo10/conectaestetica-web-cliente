@@ -56,3 +56,29 @@ export async function atualizarUsuario(usuario,id)
     console.error("Erro:", error.response?.data || error.message);
     });
 }
+
+export async function verificarSenhaUsuario(senhaAtual,id)
+{
+    return await api.post(`/usuarios/${id}/verificar-senha`, {
+    senhaAtual: senhaAtual,
+  })
+    .then(response => {
+      return response;
+    })
+    .catch(error => {
+    console.error("Erro:", error.response?.data || error.message);
+    });
+}
+
+export async function atualizarSenhaUsuario(novaSenha,id)
+{
+    return await api.patch(`/usuarios/${id}/senha`, {
+    novaSenha: novaSenha,
+  })
+    .then(response => {
+      return response;
+    })
+    .catch(error => {
+    console.error("Erro:", error.response?.data || error.message);
+    });
+}
