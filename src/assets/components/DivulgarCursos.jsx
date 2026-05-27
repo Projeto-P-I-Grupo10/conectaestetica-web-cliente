@@ -31,7 +31,7 @@ export default function DivulgarCurso() {
         
         {/* Título */}
         <div className="text-center text-white">
-          <h2 className="text-4xl md:text-5xl font-light mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Deseja divulgar seu curso?
           </h2>
 
