@@ -9,6 +9,10 @@ import Perfil from "../pages/Perfil";
 import Matricula from "../pages/Matricula";
 import Formulario from "../pages/Formulario";
 
+// Admin
+import AdminDashboard from "../pages/AdminDashboard";
+import AdminCursos from "../pages/AdminCursos";
+
 export const router = createBrowserRouter([
   {
     path: "/cadastro",
@@ -46,7 +50,21 @@ export const router = createBrowserRouter([
     path: "/formulario",
     element: <Formulario />,
   },
+
+  // Area de admin
+
   {
+    path: "Admin/Dashboard",
+    element: <AdminDashboard />,
+  },
+  {
+    path: "Admin/Cursos",
+    element: <AdminCursos/>,
+  },
+
+  {
+    // Caso o caminho esteja errado
+
     path: "*",
     element: <div>Página não encontrada</div>,
   },
