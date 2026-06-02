@@ -91,8 +91,7 @@ export default function CadastroStepper() {
         confirmButtonText: "Ir para login",
       });
 
-      navigate("/login"); // 🔥 REDIRECIONAMENTO
-
+      navigate("/login"); 
     } catch (e) {
       console.error(e);
 
@@ -154,186 +153,238 @@ export default function CadastroStepper() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-xl">
-        <h1 className="text-2xl font-semibold text-center underline mb-4">
+    <div className="min-h-screen flex items-center justify-center from-[#f6f1eb] via-[#fdfbf8] to-[#f3ebe3]">
+      <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl border border-[#eee] p-10">
+        {/* HEADER */}
+        <h1 className="text-3xl font-semibold text-center text-[#2c2c2c] mb-6">
           Cadastro
         </h1>
 
-        <div className="w-full bg-gray-200 h-2 rounded-full mb-6">
+        {/* PROGRESS */}
+        <div className="w-full h-2 bg-gray-200/70 rounded-full mb-8 overflow-hidden">
           <div
-            className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
+            className="h-2 bg-[#c9a46c] rounded-full transition-all duration-300"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
 
-        {/* STEP 1 */}
-        {step === 1 && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm">Nome:</label>
-              <input
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                className="w-full border rounded-md p-2 mt-1"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm">Telefone:</label>
-              <input
-                value={telefone}
-                onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
-                className="w-full border rounded-md p-2 mt-1"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm">Email:</label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full border rounded-md p-2 mt-1 ${
-                  email.length > 0
-                    ? emailValido
-                      ? "border-green-500"
-                      : "border-red-500"
-                    : ""
-                }`}
-              />
-              {email.length > 0 && !emailValido && (
-                <p className="text-xs text-red-500">Email inválido</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2 */}
-        {step === 2 && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm">Senha:</label>
-              <div className="relative">
+        {/* CONTEÚDO */}
+        <div className="space-y-6">
+          {/* STEP 1 */}
+          {step === 1 && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600">Nome</label>
                 <input
-                  type={showSenha ? "text" : "password"}
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  className={`w-full border rounded-md p-2 mt-1 pr-10 ${
-                    senha.length > 0
-                      ? allValid
-                        ? "border-green-500"
-                        : "border-red-500"
-                      : ""
-                  }`}
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowSenha(!showSenha)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
               </div>
-            </div>
 
-            <div className="text-xs space-y-1">
-              <p className={validations.length ? "text-green-600" : "text-gray-500"}>
-                • Pelo menos 8 caracteres
-              </p>
-              <p className={validations.upper ? "text-green-600" : "text-gray-500"}>
-                • 1 letra maiúscula
-              </p>
-              <p className={validations.lower ? "text-green-600" : "text-gray-500"}>
-                • 1 letra minúscula
-              </p>
-              <p className={validations.number ? "text-green-600" : "text-gray-500"}>
-                • 1 número
-              </p>
-              <p className={validations.special ? "text-green-600" : "text-gray-500"}>
-                • 1 caractere especial
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm">Confirmar Senha:</label>
-              <div className="relative">
+              <div>
+                <label className="text-sm text-gray-600">Telefone</label>
                 <input
-                  type={showConfirmar ? "text" : "password"}
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  className={`w-full border rounded-md p-2 mt-1 pr-10 ${
-                    confirmarSenha.length > 0
-                      ? validado
-                        ? "border-green-500"
-                        : "border-red-500"
-                      : ""
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmar(!showConfirmar)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  {showConfirmar ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            {confirmarSenha.length > 0 && !validado && (
-              <p className="text-xs text-red-500">As senhas não coincidem</p>
-            )}
-          </div>
-        )}
-
-        {/* STEP 3 */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm">CEP:</label>
-              <input
-                value={cep}
-                maxLength={9}
-                onChange={(e) => {
-                  let value = e.target.value;
-                  value = value.replace(/\D/g, "");
-                  value = value.slice(0, 8);
-                  if (value.length > 5) {
-                    value = value.replace(/(\d{5})(\d+)/, "$1-$2");
+                  value={telefone}
+                  onChange={(e) =>
+                    setTelefone(formatarTelefone(e.target.value))
                   }
-                  setCep(value);
-                }}
-                onBlur={() => buscarCep(cep)}
-                className="w-full border rounded-md p-1 "
-              />
-            </div>
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
+                />
+              </div>
 
-            <div>
-              <label className="text-sm">Cidade:</label>
-              <input value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full border rounded-md p-1 " />
-            </div>
+              <div>
+                <label className="text-sm text-gray-600">Email</label>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full mt-1 px-4 py-2 rounded-xl border bg-white/70 outline-none
+                  ${
+                    email.length > 0
+                      ? emailValido
+                        ? "border-green-400"
+                        : "border-red-400"
+                      : "border-gray-200"
+                  }
+                  focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20
+                `}
+                />
 
-            <div>
-              <label className="text-sm">Estado:</label>
-              <input value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full border rounded-md p-1 " />
+                {email.length > 0 && !emailValido && (
+                  <p className="text-xs text-red-500 mt-1">Email inválido</p>
+                )}
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="text-sm">Logradouro:</label>
-              <input value={logradouro} onChange={(e) => setLogradouro(e.target.value)} className="w-full border rounded-md p-1 " />
+          {/* STEP 2 */}
+          {step === 2 && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600">Senha</label>
+
+                <div className="relative mt-1">
+                  <input
+                    type={showSenha ? "text" : "password"}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    className={`w-full px-4 py-2 rounded-xl border bg-white/70 outline-none pr-10
+                    ${
+                      senha.length > 0
+                        ? allValid
+                          ? "border-green-400"
+                          : "border-red-400"
+                        : "border-gray-200"
+                    }
+                    focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20
+                  `}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowSenha(!showSenha)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#c9a46c]"
+                  >
+                    {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* REGRAS */}
+              <div className="text-xs space-y-1">
+                <p
+                  className={
+                    validations.length ? "text-green-600" : "text-gray-500"
+                  }
+                >
+                  • 8 caracteres
+                </p>
+                <p
+                  className={
+                    validations.upper ? "text-green-600" : "text-gray-500"
+                  }
+                >
+                  • 1 maiúscula
+                </p>
+                <p
+                  className={
+                    validations.lower ? "text-green-600" : "text-gray-500"
+                  }
+                >
+                  • 1 minúscula
+                </p>
+                <p
+                  className={
+                    validations.number ? "text-green-600" : "text-gray-500"
+                  }
+                >
+                  • 1 número
+                </p>
+                <p
+                  className={
+                    validations.special ? "text-green-600" : "text-gray-500"
+                  }
+                >
+                  • 1 especial
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Confirmar Senha</label>
+
+                <div className="relative mt-1">
+                  <input
+                    type={showConfirmar ? "text" : "password"}
+                    value={confirmarSenha}
+                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                    className={`w-full px-4 py-2 rounded-xl border bg-white/70 outline-none pr-10
+                    ${
+                      confirmarSenha.length > 0
+                        ? validado
+                          ? "border-green-400"
+                          : "border-red-400"
+                        : "border-gray-200"
+                    }
+                    focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20
+                  `}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmar(!showConfirmar)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#c9a46c]"
+                  >
+                    {showConfirmar ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+
+                {confirmarSenha.length > 0 && !validado && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Senhas não coincidem
+                  </p>
+                )}
+              </div>
             </div>
+          )}
 
-            <div>
-              <label>Número:</label>
-              <input value={numero} onChange={(e) => setNumero(e.target.value)} className="w-full border rounded-md p-1" />
+          {/* STEP 3 */}
+          {step === 3 && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600">CEP</label>
+                <input
+                  value={cep}
+                  onChange={(e) => setCep(e.target.value)}
+                  onBlur={() => buscarCep(cep)}
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Cidade</label>
+                <input
+                  value={cidade}
+                  onChange={(e) => setCidade(e.target.value)}
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Estado</label>
+                <input
+                  value={estado}
+                  onChange={(e) => setEstado(e.target.value)}
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Logradouro</label>
+                <input
+                  value={logradouro}
+                  onChange={(e) => setLogradouro(e.target.value)}
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600">Número</label>
+                <input
+                  value={numero}
+                  onChange={(e) => setNumero(e.target.value)}
+                  className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        <div className="flex justify-between mt-6">
+        {/* BOTÕES */}
+        <div className="flex justify-between mt-10">
           <button
             onClick={() => setStep(step - 1)}
             disabled={step === 1}
-            className="px-4 py-2 border border-yellow-600 text-yellow-600 rounded-full disabled:opacity-50"
+            className="px-5 py-2 rounded-xl border border-[#c9a46c] text-[#c9a46c] disabled:opacity-40"
           >
             Voltar
           </button>
@@ -341,11 +392,13 @@ export default function CadastroStepper() {
           {step < 3 ? (
             <button
               onClick={handleNext}
-              className={`px-6 py-2 rounded-full text-white ${
+              className={`px-6 py-2 rounded-xl text-white transition
+              ${
                 (step === 1 && !step1Valid) || (step === 2 && !step2Valid)
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-yellow-600"
-              }`}
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-[#c9a46c] hover:bg-[#b8935c]"
+              }
+            `}
             >
               Próximo
             </button>
@@ -353,9 +406,13 @@ export default function CadastroStepper() {
             <button
               onClick={handleCadastro}
               disabled={!step3Valid}
-              className={`px-6 py-2 rounded-full text-white ${
-                step3Valid ? "bg-yellow-600" : "bg-gray-400"
-              }`}
+              className={`px-6 py-2 rounded-xl text-white transition
+              ${
+                step3Valid
+                  ? "bg-[#c9a46c] hover:bg-[#b8935c]"
+                  : "bg-gray-300 cursor-not-allowed"
+              }
+            `}
             >
               Cadastrar
             </button>
