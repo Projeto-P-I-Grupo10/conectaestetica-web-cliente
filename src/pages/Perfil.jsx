@@ -148,7 +148,7 @@ export default function PerfilUsuario() {
           <div
             className="
               bg-white
-              rounded-[2rem]
+              rounded-4xl
               shadow-sm
               border
               border-[#ece7e2]

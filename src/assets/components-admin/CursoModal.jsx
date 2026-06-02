@@ -1,126 +1,124 @@
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
-import { X, UploadCloud } from "lucide-react";
+import { listarProfessores } from "../service/professor";
+import { cadastrarCursos, editarCursos } from "../service/cursos";
 
-export default function CursoModal({ aberto, fecharModal, cursoSelecionado }) {
+function normalizeCurso(curso) {
+  return {
+    id: curso.id || curso.cursoId,
+
+    nome: curso.nome || curso.cursoNome,
+    descricao: curso.descricao || curso.cursoDescricao,
+    imagem: curso.imagem || curso.cursoImagem,
+
+    professor: {
+      id: curso.professor?.id || curso.professorId || "",
+      nome: curso.professor?.nome || curso.professorNome || "",
+    },
+
+    area: {
+      id: curso.area?.id || curso.areaId || "",
+      nome: curso.area?.nome || curso.areaNome || "",
+    },
+  };
+}
+
+export default function CursoModal({
+  aberto,
+  fecharModal,
+  cursoSelecionado,
+  onSuccess,
+}) {
   const editando = !!cursoSelecionado;
 
-  const [nome, setNome] = useState("");
+  const [form, setForm] = useState({
+    nome: "",
+    professor: "",
+    descricao: "",
+    imagem: "",
+  });
 
-  const [professor, setProfessor] = useState("");
+  const [professores, setProfessores] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [preco, setPreco] = useState("");
-
-  const [vagas, setVagas] = useState("");
-
-  const [descricao, setDescricao] = useState("");
-
-  const [preview, setPreview] = useState(null);
+  const resetForm = () => {
+    setForm({
+      nome: "",
+      professor: "",
+      descricao: "",
+      imagem: "",
+    });
+  };
 
   useEffect(() => {
     if (cursoSelecionado) {
-        
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setNome(cursoSelecionado.nome || "");
+      const curso = normalizeCurso(cursoSelecionado);
 
-      setProfessor(cursoSelecionado.professor || "");
-
-      setPreco(cursoSelecionado.preco || "");
-
-      setVagas(cursoSelecionado.vagas || "");
-
-      setDescricao(cursoSelecionado.descricao || "");
-
-      setPreview(cursoSelecionado.imagem || null);
+      setForm({
+        nome: curso.nome,
+        professor: curso.professor.id,
+        descricao: curso.descricao,
+        imagem: curso.imagem,
+      });
     } else {
-      setNome("");
-
-      setProfessor("");
-
-      setPreco("");
-
-      setVagas("");
-
-      setDescricao("");
-
-      setPreview(null);
+      resetForm();
     }
   }, [cursoSelecionado]);
 
-  function formatarPreco(valor) {
-    valor = valor.replace(/\D/g, "");
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const data = await listarProfessores();
+        setProfessores(data);
+      } catch (err) {
+        console.error("Erro ao listar professores:", err);
+      }
+    }
 
-    valor = (Number(valor) / 100).toFixed(2) + "";
+    carregar();
+  }, []);
 
-    valor = valor.replace(".", ",");
+  async function handleSalvarCurso() {
+    try {
+      setLoading(true);
 
-    valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const payload = {
+        nome: form.nome,
+        descricao: form.descricao,
+        imagem: form.imagem, 
+        areaCursoId: 1,
+        professorId: Number(form.professor),
+      };
 
-    return "R$ " + valor;
-  }
+      const cursoId = cursoSelecionado
+        ? normalizeCurso(cursoSelecionado).id
+        : null;
 
-  function handlePreco(e) {
-    setPreco(formatarPreco(e.target.value));
-  }
+      if (editando) {
+        await editarCursos(cursoId, payload);
+      } else {
+        await cadastrarCursos(payload);
+      }
 
-  function handleImagem(file) {
-    if (!file) return;
-
-    const imageUrl = URL.createObjectURL(file);
-
-    setPreview(imageUrl);
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-
-    const file = e.dataTransfer.files[0];
-
-    handleImagem(file);
+      if (onSuccess) onSuccess();
+      fecharModal();
+    } catch (error) {
+      console.error("Erro ao salvar curso:", error.response?.data || error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (!aberto) return null;
 
+  console.log(normalizeCurso)
+
   return (
-    <div
-      className="
-        fixed
-        inset-0
-        bg-black/40
-        backdrop-blur-sm
-        flex
-        items-center
-        justify-center
-        z-50
-        p-6
-      "
-    >
-      {/* MODAL */}
-      <div
-        className="
-          w-full
-          max-w-5xl
-          max-h-[92vh]
-          bg-white
-          rounded-[2.5rem]
-          border
-          border-[#ece7e2]
-          shadow-xl
-          overflow-hidden
-        "
-      >
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
+      <div className="w-full max-w-5xl max-h-[92vh] bg-white rounded-[2.5rem] border border-[#ece7e2] shadow-xl overflow-hidden">
         {/* HEADER */}
-        <div
-          className="
-            flex
-            items-center
-            justify-between
-            px-8
-            py-6
-            border-b
-            border-[#ece7e2]
-          "
-        >
+        <div className="flex items-center justify-between px-8 py-6 border-b border-[#ece7e2]">
           <div>
             <h2 className="text-3xl font-light text-[#3d2b1f]">
               {editando ? "Editar Curso" : "Novo Curso"}
@@ -133,24 +131,9 @@ export default function CursoModal({ aberto, fecharModal, cursoSelecionado }) {
             </p>
           </div>
 
-          {/* FECHAR */}
           <button
             onClick={fecharModal}
-            className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-[#faf8f6]
-              border
-              border-[#ece7e2]
-              flex
-              items-center
-              justify-center
-              text-gray-500
-              hover:bg-red-50
-              hover:text-red-500
-              transition-all
-            "
+            className="w-12 h-12 rounded-2xl bg-[#faf8f6] border border-[#ece7e2] flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500"
           >
             <X size={22} />
           </button>
@@ -162,147 +145,54 @@ export default function CursoModal({ aberto, fecharModal, cursoSelecionado }) {
             {/* NOME */}
             <Input
               label="Nome do curso"
-              placeholder="Digite o nome"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              value={form.nome}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
             />
 
             {/* PROFESSOR */}
-            <Input
-              label="Professor"
-              placeholder="Nome do professor"
-              value={professor}
-              onChange={(e) => setProfessor(e.target.value)}
-            />
-
-            {/* PREÇO */}
             <div>
-              <label className="text-sm text-gray-500 mb-2 block">Preço</label>
-
-              <input
-                type="text"
-                value={preco}
-                onChange={handlePreco}
-                placeholder="R$ 0,00"
-                className="
-                  w-full
-                  bg-[#faf8f6]
-                  border
-                  border-[#ece7e2]
-                  rounded-2xl
-                  px-5
-                  py-4
-                  outline-none
-                  text-[#3d2b1f]
-                  placeholder:text-gray-400
-                  focus:border-[#c9a46c]
-                  transition
-                "
-              />
-            </div>
-
-            {/* VAGAS */}
-            <Input
-              label="Quantidade de vagas"
-              placeholder="Ex: 30"
-              value={vagas}
-              onChange={(e) => setVagas(e.target.value)}
-            />
-
-            {/* DRAG AND DROP */}
-            <div className="md:col-span-2">
               <label className="text-sm text-gray-500 mb-2 block">
-                Imagem do curso
+                Professor
               </label>
 
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                className="
-                  relative
-                  border-2
-                  border-dashed
-                  border-[#d8c2a0]
-                  rounded-3xl
-                  bg-[#faf8f6]
-                  p-8
-                  flex
-                  flex-col
-                  items-center
-                  justify-center
-                  text-center
-                  transition
-                  hover:bg-[#f8f3ec]
-                "
+              <select
+                value={form.professor}
+                onChange={(e) =>
+                  setForm({ ...form, professor: e.target.value })
+                }
+                className="w-full bg-[#faf8f6] border border-[#ece7e2] rounded-2xl px-5 py-4"
               >
-                {/* INPUT FILE */}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="
-                    absolute
-                    inset-0
-                    opacity-0
-                    cursor-pointer
-                  "
-                  onChange={(e) => handleImagem(e.target.files[0])}
+                <option value="">Selecione um professor</option>
+
+                {professores.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* IMAGEM (SIMPLES) */}
+            <div className="md:col-span-2">
+              <label className="text-sm text-gray-500 mb-2 block">
+                Imagem do curso (ex: botox.png)
+              </label>
+
+              <input
+                value={form.imagem}
+                onChange={(e) => setForm({ ...form, imagem: e.target.value })}
+                className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
+                placeholder="ex: botox.png"
+              />
+
+              {/* preview simples */}
+              {form.imagem && (
+                <img
+                  src={`/img/${form.imagem}`}
+                  alt="preview"
+                  className="mt-4 w-full h-64 object-cover rounded-2xl"
                 />
-
-                {preview ? (
-                  <div className="w-full">
-                    <img
-                      src={preview}
-                      alt="preview"
-                      className="
-                        w-full
-                        h-64
-                        object-cover
-                        rounded-2xl
-                      "
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <div
-                      className="
-                        w-20
-                        h-20
-                        rounded-3xl
-                        bg-[#c9a46c]/15
-                        flex
-                        items-center
-                        justify-center
-                        text-[#c9a46c]
-                        mb-5
-                      "
-                    >
-                      <UploadCloud size={36} />
-                    </div>
-
-                    <h3 className="text-xl text-[#3d2b1f] font-medium mb-2">
-                      Arraste sua imagem aqui
-                    </h3>
-
-                    <p className="text-gray-500 mb-4">
-                      ou clique para selecionar
-                    </p>
-
-                    <div
-                      className="
-                        bg-[#c9a46c]
-                        text-white
-                        px-6
-                        py-3
-                        rounded-2xl
-                        text-sm
-                        shadow-sm
-                      "
-                    >
-                      Escolher imagem
-                    </div>
-                  </>
-                )}
-              </div>
+              )}
             </div>
 
             {/* DESCRIÇÃO */}
@@ -312,64 +202,29 @@ export default function CursoModal({ aberto, fecharModal, cursoSelecionado }) {
               </label>
 
               <textarea
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                placeholder="Digite a descrição do curso..."
-                className="
-                  w-full
-                  min-h-36
-                  bg-[#faf8f6]
-                  border
-                  border-[#ece7e2]
-                  rounded-2xl
-                  px-5
-                  py-4
-                  outline-none
-                  resize-none
-                  text-[#3d2b1f]
-                  placeholder:text-gray-400
-                  focus:border-[#c9a46c]
-                  transition
-                "
+                value={form.descricao}
+                onChange={(e) =>
+                  setForm({ ...form, descricao: e.target.value })
+                }
+                className="w-full min-h-36 border rounded-2xl px-5 py-4"
               />
             </div>
           </div>
 
           {/* FOOTER */}
-          <div className="flex items-center justify-end gap-4 mt-10">
-            {/* CANCELAR */}
-            <button
-              onClick={fecharModal}
-              className="
-                px-6
-                py-4
-                rounded-2xl
-                border
-                border-[#ece7e2]
-                text-[#3d2b1f]
-                hover:bg-[#faf8f6]
-                transition
-              "
-            >
-              Cancelar
-            </button>
+          <div className="flex justify-end gap-4 mt-10">
+            <button onClick={fecharModal}>Cancelar</button>
 
-            {/* SALVAR */}
             <button
-              className="
-                bg-[#c9a46c]
-                hover:bg-[#b89258]
-                transition-all
-                text-white
-                px-8
-                py-4
-                rounded-2xl
-                shadow-sm
-                hover:scale-[1.02]
-                active:scale-[0.98]
-              "
+              onClick={handleSalvarCurso}
+              disabled={loading}
+              className="bg-[#c9a46c] text-white px-8 py-4 rounded-2xl"
             >
-              {editando ? "Salvar alterações" : "Salvar curso"}
+              {loading
+                ? "Salvando..."
+                : editando
+                  ? "Salvar alterações"
+                  : "Salvar curso"}
             </button>
           </div>
         </div>
@@ -378,30 +233,15 @@ export default function CursoModal({ aberto, fecharModal, cursoSelecionado }) {
   );
 }
 
-function Input({ label, placeholder, value, onChange }) {
+function Input({ label, value, onChange }) {
   return (
     <div>
       <label className="text-sm text-gray-500 mb-2 block">{label}</label>
 
       <input
-        type="text"
         value={value}
         onChange={onChange}
-        placeholder={placeholder}
-        className="
-          w-full
-          bg-[#faf8f6]
-          border
-          border-[#ece7e2]
-          rounded-2xl
-          px-5
-          py-4
-          outline-none
-          text-[#3d2b1f]
-          placeholder:text-gray-400
-          focus:border-[#c9a46c]
-          transition
-        "
+        className="w-full border rounded-2xl px-5 py-4"
       />
     </div>
   );
