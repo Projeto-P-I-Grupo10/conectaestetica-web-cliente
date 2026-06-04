@@ -1,44 +1,92 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import {
+  criarAvaliacaoCurso,
+  listarAvaliacoesCurso,
+} from "../service/avaliacaoCurso";
 
-export default function AvaliacaoForm() {
+export default function AvaliacaoForm({ cursoId }) {
   const [nota, setNota] = useState(0);
   const [hover, setHover] = useState(0);
+  const [comentario, setComentario] = useState("");
+  const [comentarios, setComentarios] = useState([]);
+  const [enviando, setEnviando] = useState(false);
   const [mostrarTodos, setMostrarTodos] = useState(false);
 
-  const comentarios = [
-    {
-      id: 1,
-      nome: "Mariana Costa",
-      nota: 5,
-      comentario:
-        "Curso extremamente completo. A didática da professora é excelente e consegui aplicar as técnicas já nas primeiras semanas.",
-    },
+  useEffect(() => {
+    async function carregarComentarios() {
+      try {
+        const data = await listarAvaliacoesCurso();
 
-    {
-      id: 2,
-      nome: "Juliana Mendes",
-      nota: 5,
-      comentario:
-        "Achei o conteúdo muito atualizado e bem explicado. Valeu cada centavo investido!",
-    },
+        const comentariosDoCurso = data.filter(
+          (item) =>
+            item.cursoId === Number(cursoId) ||
+            item.idCurso === Number(cursoId)
+        );
 
-    {
-      id: 3,
-      nome: "Fernanda Lima",
-      nota: 4,
-      comentario:
-        "Gostei bastante do curso, principalmente da parte prática. Super recomendo para quem quer começar na estética.",
-    },
+        setComentarios(comentariosDoCurso);
+      } catch (erro) {
+        console.error("Erro ao buscar comentários", erro);
+      }
+    }
 
-    {
-      id: 4,
-      nome: "Camila Rocha",
-      nota: 5,
-      comentario:
-        "Uma experiência incrível! O suporte e os materiais complementares fizeram toda diferença no aprendizado.",
-    },
-  ];
+    if (cursoId) {
+      carregarComentarios();
+    }
+  }, [cursoId]);
+
+  async function enviarAvaliacao() {
+    if (nota === 0) {
+      alert("Selecione uma nota.");
+      return;
+    }
+
+    if (!comentario.trim()) {
+      alert("Digite um comentário.");
+      return;
+    }
+
+    if (!cursoId) {
+      alert("Curso não identificado.");
+      return;
+    }
+
+    try {
+      setEnviando(true);
+
+      const dados = {
+        cursoId: Number(cursoId),
+        usuarioId: Number(sessionStorage.getItem("idUsuario")),
+        avaliacao: Number(nota),
+        comentario: comentario.trim(),
+      };
+
+      const novaAvaliacao = await criarAvaliacaoCurso(dados);
+
+      setComentarios((comentariosAtuais) => [
+        ...comentariosAtuais,
+        {
+          ...novaAvaliacao,
+          id: novaAvaliacao.id || Date.now(),
+          nome: sessionStorage.getItem("nome") || "Usuário",
+          avaliacao: Number(nota),
+          comentario: comentario.trim(),
+        },
+      ]);
+
+      alert("Avaliação enviada com sucesso!");
+
+      setNota(0);
+      setComentario("");
+    } catch (erro) {
+      console.error("Erro ao enviar avaliação", erro);
+      console.log("Resposta do back:", erro.response?.data);
+      console.log("Status:", erro.response?.status);
+      alert(erro.response?.data?.message || erro.response?.data || "Erro ao enviar avaliação.");
+    } finally {
+      setEnviando(false);
+    }
+  }
 
   const comentariosVisiveis = mostrarTodos
     ? comentarios
@@ -46,7 +94,6 @@ export default function AvaliacaoForm() {
 
   return (
     <div className="p-8">
-      {/* TÍTULO */}
       <div className="mb-8">
         <h2 className="text-3xl font-light text-[#3d2b1f] mb-3">
           Avaliações dos alunos
@@ -57,7 +104,6 @@ export default function AvaliacaoForm() {
         </p>
       </div>
 
-      {/* CARD AVALIAÇÃO */}
       <div
         className="
           bg-[#faf8f6]
@@ -68,7 +114,6 @@ export default function AvaliacaoForm() {
           mb-10
         "
       >
-        {/* ESTRELAS */}
         <div className="mb-8">
           <p className="text-[#3d2b1f] text-lg mb-4 font-medium">
             Sua avaliação
@@ -82,10 +127,7 @@ export default function AvaliacaoForm() {
                 onClick={() => setNota(estrela)}
                 onMouseEnter={() => setHover(estrela)}
                 onMouseLeave={() => setHover(0)}
-                className="
-                  transition
-                  hover:scale-110
-                "
+                className="transition hover:scale-110"
               >
                 <Star
                   size={34}
@@ -103,12 +145,14 @@ export default function AvaliacaoForm() {
           </div>
         </div>
 
-        {/* COMENTÁRIO */}
         <div className="mb-8">
           <p className="text-[#3d2b1f] text-lg mb-4 font-medium">Comentário</p>
 
           <textarea
+            value={comentario}
+            onChange={(e) => setComentario(e.target.value)}
             placeholder="Conte como foi sua experiência com o curso..."
+            maxLength={500}
             className="
               w-full
               min-h-44
@@ -127,8 +171,10 @@ export default function AvaliacaoForm() {
           />
         </div>
 
-        {/* BOTÃO */}
         <button
+          type="button"
+          onClick={enviarAvaliacao}
+          disabled={enviando}
           className="
             w-full
             bg-[#c9a46c]
@@ -139,13 +185,13 @@ export default function AvaliacaoForm() {
             rounded-full
             font-medium
             shadow-sm
+            disabled:opacity-60
           "
         >
-          Enviar avaliação
+          {enviando ? "Enviando..." : "Enviar avaliação"}
         </button>
       </div>
 
-      {/* COMENTÁRIOS */}
       <div className="space-y-6">
         {comentariosVisiveis.map((item) => (
           <div
@@ -161,20 +207,22 @@ export default function AvaliacaoForm() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-medium text-[#3d2b1f]">
-                  {item.nome}
+                  {item.nome || item.nomeUsuario || "Usuário"}
                 </h3>
 
-                <p className="text-sm text-gray-500">Aluna verificada</p>
+                <p className="text-sm text-gray-500">Aluno verificado</p>
               </div>
 
               <div className="flex gap-1">
-                {[...Array(item.nota)].map((_, index) => (
-                  <Star
-                    key={index}
-                    size={18}
-                    className="fill-[#c9a46c] text-[#c9a46c]"
-                  />
-                ))}
+                {[...Array(Number(item.nota || item.avaliacao || 0))].map(
+                  (_, index) => (
+                    <Star
+                      key={index}
+                      size={18}
+                      className="fill-[#c9a46c] text-[#c9a46c]"
+                    />
+                  )
+                )}
               </div>
             </div>
 
@@ -183,7 +231,6 @@ export default function AvaliacaoForm() {
         ))}
       </div>
 
-      {/* VER MAIS */}
       {!mostrarTodos && comentarios.length > 2 && (
         <div className="flex justify-center mt-8">
           <button

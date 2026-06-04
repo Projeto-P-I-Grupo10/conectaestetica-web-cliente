@@ -7,6 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { exibirCursoDetalheId } from "../service/cursos";
+import { listarAvaliacoesCurso } from "../service/avaliacaoCurso";
 
 export default function CursoDetalhe() {
   const { id } = useParams();
@@ -14,11 +15,35 @@ export default function CursoDetalhe() {
   const navigate = useNavigate();
 
   const [curso, setCurso] = useState(null);
+  const [avaliacaoCurso, setAvaliacaoCurso] = useState({
+    media: 0,
+    quantidade: 0,
+  });
 
   useEffect(() => {
     async function carregarCurso() {
       try {
         const data = await exibirCursoDetalheId(id);
+        const avaliacoes = await listarAvaliacoesCurso();
+
+        const avaliacoesDoCurso = avaliacoes.filter(
+          (item) => item.idCurso === Number(id)
+        );
+
+        const quantidade = avaliacoesDoCurso.length;
+
+        const media =
+          quantidade > 0
+            ? avaliacoesDoCurso.reduce(
+              (soma, item) => soma + item.avaliacao,
+              0
+            ) / quantidade
+            : 0;
+
+        setAvaliacaoCurso({
+          media: media.toFixed(1),
+          quantidade,
+        });
 
         console.log("Curso recebido:", data);
 
@@ -112,13 +137,23 @@ export default function CursoDetalhe() {
 
               {/* AVALIAÇÃO */}
               <div className="flex items-center gap-4 mb-8">
-                <div className="flex text-[#c9a46c]">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={20} fill="#c9a46c" />
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((estrela) => (
+                    <Star
+                      key={estrela}
+                      size={20}
+                      className={
+                        estrela <= Math.round(avaliacaoCurso.media)
+                          ? "fill-[#c9a46c] text-[#c9a46c]"
+                          : "text-gray-300"
+                      }
+                    />
                   ))}
                 </div>
 
-                <span className="text-gray-500">5.0 • 124 avaliações</span>
+                <span className="text-gray-500">
+                  {avaliacaoCurso.media} • {avaliacaoCurso.quantidade} avaliações
+                </span>
               </div>
 
               {/* PREÇO */}
@@ -349,7 +384,7 @@ export default function CursoDetalhe() {
                 p-2
               "
             >
-              <AvaliacaoForm />
+              <AvaliacaoForm cursoId={curso?.cursoId} />
             </section>
           </div>
 
@@ -404,11 +439,23 @@ export default function CursoDetalhe() {
                 </p>
               </div>
 
-              <div className="flex justify-center text-[#c9a46c]">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={20} fill="#c9a46c" />
+              <div className="flex justify-center">
+                {[1, 2, 3, 4, 5].map((estrela) => (
+                  <Star
+                    key={estrela}
+                    size={20}
+                    className={
+                      estrela <= Math.round(avaliacaoCurso.media)
+                        ? "fill-[#c9a46c] text-[#c9a46c]"
+                        : "text-gray-300"
+                    }
+                  />
                 ))}
               </div>
+
+              <p className="text-center text-sm text-gray-500">
+                {avaliacaoCurso.media} • {avaliacaoCurso.quantidade} avaliações
+              </p>
 
               <button
                 onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}
