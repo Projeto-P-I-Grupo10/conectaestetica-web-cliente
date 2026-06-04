@@ -27,19 +27,19 @@ export default function Login() {
     try {
       const data = await loginService({ email, senha });
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("idUsuario", data.id);
-      localStorage.setItem("email", data.email);
-      localStorage.setItem("nome", data.nome);
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("idUsuario", data.id);
+      sessionStorage.setItem("email", data.email);
+      sessionStorage.setItem("nome", data.nome);
 
       await Swal.fire({
         title: "Login realizado!",
         text: `Bem-vindo, ${data.nome} 👋`,
-        icon: "success",
+        icon: "success",  
         confirmButtonText: "Continuar",
       });
 
-      navigate("/home");
+      navigate("/cursos");
     } catch (e) {
       console.error(e);
 

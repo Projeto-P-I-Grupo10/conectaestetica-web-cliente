@@ -57,8 +57,8 @@ export default function PagamentoBox() {
       const dadosPag = {
         metodo: tipo,
         idCurso: id,
-        idUsuario: Number(localStorage.getItem("idUsuario")),
-        email: localStorage.getItem("email"),
+        idUsuario: Number(sessionStorage.getItem("idUsuario")),
+        email: sessionStorage.getItem("email"),
         preco: curso?.preco,
       };
 

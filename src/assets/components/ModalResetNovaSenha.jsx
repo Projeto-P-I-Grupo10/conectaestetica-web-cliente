@@ -22,7 +22,7 @@ export default function ModalResetNovaSenha({
 
   const allValid = Object.values(validations).every(Boolean);
   const validado = novaSenha === confirmarSenha && confirmarSenha.length > 0;
-   const id = localStorage.getItem("idUsuario");
+   const id = sessionStorage.getItem("idUsuario");
   
   async function atualizarSenhaUsuarioModal() {
       try {

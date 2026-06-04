@@ -18,7 +18,7 @@ import { atualizarUsuario, detalharUsuario } from "../assets/service/usuarios";
 import ModalResetNovaSenha from "../assets/components/ModalResetNovaSenha";
 
 export default function PerfilUsuario() {
-  const id = localStorage.getItem("idUsuario");
+  const id = sessionStorage.getItem("idUsuario");
 
   const [usuario, setUsuario] = useState({});
   const [editando, setEditando] = useState(false);
