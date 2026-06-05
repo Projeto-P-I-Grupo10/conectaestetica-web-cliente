@@ -12,6 +12,8 @@ import Formulario from "../pages/Formulario";
 // Admin
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminCursos from "../pages/AdminCursos";
+import AdminProfessor from "../pages/AdminProfessor"
+import AdminTurmas from "../pages/AdminTurmas"
 
 export const router = createBrowserRouter([
   {
@@ -59,7 +61,15 @@ export const router = createBrowserRouter([
   },
   {
     path: "Admin/Cursos",
-    element: <AdminCursos/>,
+    element: <AdminCursos />,
+  },
+  {
+    path: "Admin/Professor",
+    element: <AdminProfessor />,
+  },
+  {
+    path: "Admin/Turmas",
+    element: <AdminTurmas />,
   },
 
   {

@@ -55,6 +55,7 @@ export default function CursoModal({
     if (cursoSelecionado) {
       const curso = normalizeCurso(cursoSelecionado);
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         nome: curso.nome,
         professor: curso.professor.id,

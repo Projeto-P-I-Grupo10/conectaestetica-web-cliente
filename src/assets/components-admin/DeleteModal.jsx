@@ -15,7 +15,7 @@ export default function DeleteModal({
   async function handleConfirmar() {
     try {
       setLoading(true);
-      await onConfirmar(); // chama função do componente pai
+      await onConfirmar(); 
       fecharModal();
     } catch (error) {
       console.error("Erro ao excluir:", error);
