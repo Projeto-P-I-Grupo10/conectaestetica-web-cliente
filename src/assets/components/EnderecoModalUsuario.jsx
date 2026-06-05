@@ -1,110 +1,143 @@
-import { useEffect, useState } from "react";
-import { X, Plus, MapPin, Trash2, Home } from "lucide-react";
+import { useState } from "react";
+import { X, Plus, MapPin, Trash2, CheckCircle } from "lucide-react";
 
 export default function EnderecoModalUsuario({
   aberto,
   fecharModal,
-  enderecos = [],
   onSalvar,
   onExcluir,
 }) {
-  const enderecosMock =
-    enderecos.length > 0
-      ? enderecos
-      : [
-          {
-            id: 1,
-            cep: "01310-100",
-            rua: "Av. Paulista",
-            numero: "1578",
-            complemento: "Sala 5",
-            bairro: "Bela Vista",
-            cidade: "São Paulo",
-            estado: "SP",
-          },
-          {
-            id: 2,
-            cep: "01305-000",
-            rua: "Rua Augusta",
-            numero: "450",
-            complemento: "",
-            bairro: "Consolação",
-            cidade: "São Paulo",
-            estado: "SP",
-          },
-          {
-            id: 3,
-            cep: "01000-000",
-            rua: "Rua das Flores",
-            numero: "123",
-            complemento: "Andar 2",
-            bairro: "Centro",
-            cidade: "São Paulo",
-            estado: "SP",
-          },
-        ];
+  const [enderecos, setEnderecos] = useState([
+    {
+      id: 1,
+      cep: "01310-100",
+      rua: "Av. Paulista",
+      numero: "1500",
+      complemento: "Andar 8",
+      bairro: "Bela Vista",
+      cidade: "São Paulo",
+      estado: "SP",
+    },
+    {
+      id: 2,
+      cep: "01000-000",
+      rua: "Rua das Flores",
+      numero: "123",
+      complemento: "Sala 5",
+      bairro: "Centro",
+      cidade: "São Paulo",
+      estado: "SP",
+    },
+    {
+      id: 3,
+      cep: "01305-000",
+      rua: "Rua Augusta",
+      numero: "450",
+      complemento: "",
+      bairro: "Consolação",
+      cidade: "São Paulo",
+      estado: "SP",
+    },
+  ]);
 
-  const [idSelecionado, setIdSelecionado] = useState(null);
+  const [enderecoAtualId, setEnderecoAtualId] = useState(1);
 
-  const [cep, setCep] = useState("");
-  const [rua, setRua] = useState("");
-  const [numero, setNumero] = useState("");
-  const [complemento, setComplemento] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [estado, setEstado] = useState("");
+  const [form, setForm] = useState({
+    id: null,
+    cep: "",
+    rua: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+  });
 
-  useEffect(() => {
-    if (enderecosMock.length > 0) {
-      carregarEndereco(enderecosMock[0]);
-    }
-  }, []);
-
-  function carregarEndereco(endereco) {
-    setIdSelecionado(endereco.id);
-
-    setCep(endereco.cep || "");
-    setRua(endereco.rua || "");
-    setNumero(endereco.numero || "");
-    setComplemento(endereco.complemento || "");
-    setBairro(endereco.bairro || "");
-    setCidade(endereco.cidade || "");
-    setEstado(endereco.estado || "");
+  function handleChange(e) {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   }
 
   function limparFormulario() {
-    setIdSelecionado(null);
+    setForm({
+      id: null,
+      cep: "",
+      rua: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
+    });
+  }
 
-    setCep("");
-    setRua("");
-    setNumero("");
-    setComplemento("");
-    setBairro("");
-    setCidade("");
-    setEstado("");
+  function selecionarEndereco(endereco) {
+    setEnderecoAtualId(endereco.id);
+
+    setForm({
+      id: endereco.id,
+      cep: endereco.cep || "",
+      rua: endereco.rua || "",
+      numero: endereco.numero || "",
+      complemento: endereco.complemento || "",
+      bairro: endereco.bairro || "",
+      cidade: endereco.cidade || "",
+      estado: endereco.estado || "",
+    });
   }
 
   function handleSalvar() {
-    const payload = {
-      id: idSelecionado,
-      cep,
-      rua,
-      numero,
-      complemento,
-      bairro,
-      cidade,
-      estado,
-    };
+    if (
+      !form.cep ||
+      !form.rua ||
+      !form.numero ||
+      !form.bairro ||
+      !form.cidade ||
+      !form.estado
+    ) {
+      alert("Preencha os campos obrigatórios.");
+      return;
+    }
 
-    onSalvar?.(payload);
-  }
+    if (form.id) {
+      setEnderecos((prev) =>
+        prev.map((endereco) =>
+          endereco.id === form.id ? { ...form } : endereco,
+        ),
+      );
+    } else {
+      const novoEndereco = {
+        ...form,
+        id: Date.now(),
+      };
 
-  function handleExcluir() {
-    if (!idSelecionado) return;
+      setEnderecos((prev) => [...prev, novoEndereco]);
+    }
 
-    onExcluir?.(idSelecionado);
+    if (onSalvar) {
+      onSalvar(form);
+    }
 
     limparFormulario();
+  }
+
+  function handleExcluir(id) {
+    if (id === enderecoAtualId) {
+      alert("Você não pode excluir o endereço atualmente selecionado.");
+      return;
+    }
+
+    setEnderecos((prev) => prev.filter((endereco) => endereco.id !== id));
+
+    if (onExcluir) {
+      onExcluir(id);
+    }
+
+    if (form.id === id) {
+      limparFormulario();
+    }
   }
 
   if (!aberto) return null;
@@ -135,6 +168,7 @@ export default function EnderecoModalUsuario({
               text-gray-500
               hover:bg-red-50
               hover:text-red-500
+              transition-all
             "
           >
             <X size={22} />
@@ -144,179 +178,227 @@ export default function EnderecoModalUsuario({
         {/* BODY */}
         <div className="grid lg:grid-cols-[380px_1fr] h-[calc(85vh-90px)]">
           {/* FORMULÁRIO */}
-          <div className="border-r border-[#ece7e2] p-6 overflow-y-auto">
+          <div className="border-r border-[#ece7e2] p-8 overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-xl font-medium text-[#3d2b1f]">
-                  {idSelecionado ? "Editar Endereço" : "Novo Endereço"}
-                </h3>
+              <h3 className="text-xl font-medium text-[#3d2b1f]">
+                {form.id ? "Editar Endereço" : "Novo Endereço"}
+              </h3>
 
-                <p className="text-sm text-gray-500 mt-1">
-                  Preencha os dados abaixo.
-                </p>
-              </div>
+              <button
+                onClick={limparFormulario}
+                className="
+                  w-10 h-10
+                  rounded-xl
+                  bg-[#c9a46c]
+                  text-white
+                  flex items-center justify-center
+                  hover:bg-[#b89258]
+                  transition-all
+                "
+              >
+                <Plus size={18} />
+              </button>
             </div>
 
             <div className="space-y-4">
               <Input
                 label="CEP"
-                value={cep}
-                onChange={(e) => setCep(e.target.value)}
+                name="cep"
+                value={form.cep}
+                onChange={handleChange}
               />
 
               <Input
                 label="Rua"
-                value={rua}
-                onChange={(e) => setRua(e.target.value)}
+                name="rua"
+                value={form.rua}
+                onChange={handleChange}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Número"
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                />
-
-                <Input
-                  label="Estado"
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
-                />
-              </div>
+              <Input
+                label="Número"
+                name="numero"
+                value={form.numero}
+                onChange={handleChange}
+              />
 
               <Input
                 label="Complemento"
-                value={complemento}
-                onChange={(e) => setComplemento(e.target.value)}
+                name="complemento"
+                value={form.complemento}
+                onChange={handleChange}
               />
 
               <Input
                 label="Bairro"
-                value={bairro}
-                onChange={(e) => setBairro(e.target.value)}
+                name="bairro"
+                value={form.bairro}
+                onChange={handleChange}
               />
 
               <Input
                 label="Cidade"
-                value={cidade}
-                onChange={(e) => setCidade(e.target.value)}
+                name="cidade"
+                value={form.cidade}
+                onChange={handleChange}
               />
-            </div>
 
-            <div className="flex flex-col gap-3 mt-8">
+              <Input
+                label="Estado"
+                name="estado"
+                value={form.estado}
+                onChange={handleChange}
+              />
+
               <button
                 onClick={handleSalvar}
                 className="
+                  w-full
+                  mt-6
                   bg-[#c9a46c]
                   hover:bg-[#b89258]
                   text-white
                   py-4
                   rounded-2xl
+                  transition-all
                   font-medium
                 "
               >
-                Salvar Endereço
+                {form.id ? "Salvar Alterações" : "Adicionar Endereço"}
               </button>
-
-              {idSelecionado && (
-                <button
-                  onClick={handleExcluir}
-                  className="
-                    border border-red-200
-                    text-red-500
-                    py-4
-                    rounded-2xl
-                    font-medium
-                  "
-                >
-                  Excluir Endereço
-                </button>
-              )}
             </div>
           </div>
 
           {/* CARDS */}
-          <div className="p-8 bg-[#faf8f6] overflow-y-auto">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-2xl font-light text-[#3d2b1f]">
-                  Endereços Cadastrados
-                </h3>
-
-                <p className="text-gray-500 mt-1">
-                  Clique em um endereço para editar.
-                </p>
-              </div>
-
-              <div className="bg-white border border-[#ece7e2] rounded-xl px-4 py-2 text-sm">
-                {enderecosMock.length} endereços
-              </div>
-            </div>
+          <div className="p-8 overflow-y-auto">
+            <h3 className="text-xl font-medium text-[#3d2b1f] mb-6">
+              Endereços Cadastrados
+            </h3>
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {enderecosMock.map((endereco) => (
-                <button
+              {enderecos.map((endereco) => (
+                <div
                   key={endereco.id}
-                  onClick={() => carregarEndereco(endereco)}
-                  className={`
-                    text-left
-                    bg-white
-                    rounded-4xl
+                  className="
+                    bg-[#faf8f6]
+                    border border-[#ece7e2]
+                    rounded-3xl
                     p-5
-                    border
-                    transition-all
                     hover:shadow-md
-
-                    ${
-                      idSelecionado === endereco.id
-                        ? "border-[#c9a46c] ring-2 ring-[#c9a46c]/20"
-                        : "border-[#ece7e2]"
-                    }
-                  `}
+                    transition-all
+                    flex flex-col
+                    min-h-52
+                  "
                 >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="
-                        w-14 h-14
-                        rounded-2xl
-                        bg-[#f8f3eb]
-                        flex items-center justify-center
-                      "
-                    >
-                      <Home size={24} className="text-[#c9a46c]" />
-                    </div>
+                  <div className="flex items-start gap-3 flex-1">
+                    <MapPin size={20} className="text-[#c9a46c] mt-1" />
 
-                    <div>
-                      <h4 className="font-medium text-[#3d2b1f]">
-                        {endereco.rua}, {endereco.numero}
-                      </h4>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-[#3d2b1f]">
+                          {endereco.rua}, {endereco.numero}
+                        </h4>
 
-                      <p className="text-gray-500 text-sm mt-1">
+                        {enderecoAtualId === endereco.id && (
+                          <span
+                            className="
+                              flex items-center gap-1
+                              text-xs
+                              bg-green-100
+                              text-green-700
+                              px-2 py-1
+                              rounded-full
+                            "
+                          >
+                            <CheckCircle size={12} />
+                            Atual
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-gray-500 mt-3">
                         {endereco.bairro}
                       </p>
 
-                      <p className="text-gray-500 text-sm">
+                      <p className="text-sm text-gray-500">
                         {endereco.cidade} - {endereco.estado}
                       </p>
 
-                      <div className="flex items-center gap-2 mt-4">
-                        <MapPin size={14} className="text-[#c9a46c]" />
-
-                        <span className="text-xs text-gray-400">
-                          CEP {endereco.cep}
-                        </span>
-                      </div>
+                      <p className="text-sm text-gray-500">
+                        CEP {endereco.cep}
+                      </p>
 
                       {endereco.complemento && (
-                        <p className="text-xs text-gray-400 mt-2">
+                        <p className="text-sm text-gray-500 mt-2">
                           {endereco.complemento}
                         </p>
                       )}
                     </div>
                   </div>
-                </button>
+
+                  <div className="flex gap-3 mt-auto pt-5">
+                    {enderecoAtualId === endereco.id ? (
+                      <button
+                        disabled
+                        className="
+                          flex-1
+                          py-3
+                          rounded-xl
+                          bg-green-50
+                          border border-green-200
+                          text-green-700
+                          font-medium
+                        "
+                      >
+                        Selecionado
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => selecionarEndereco(endereco)}
+                        className="
+                          flex-1
+                          py-3
+                          rounded-xl
+                          border border-[#c9a46c]
+                          text-[#c9a46c]
+                          font-medium
+                          hover:bg-[#c9a46c]
+                          hover:text-white
+                          transition-all
+                        "
+                      >
+                        Selecionar
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => handleExcluir(endereco.id)}
+                      disabled={enderecoAtualId === endereco.id}
+                      className={`
+                        w-12 h-12
+                        rounded-xl
+                        flex items-center justify-center
+                        transition-all
+
+                        ${
+                          enderecoAtualId === endereco.id
+                            ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                            : "bg-red-50 text-red-500 hover:bg-red-500 hover:text-white"
+                        }
+                      `}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
+
+            {enderecos.length === 0 && (
+              <div className="text-center py-20 text-gray-500">
+                Nenhum endereço cadastrado.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -324,20 +406,21 @@ export default function EnderecoModalUsuario({
   );
 }
 
-function Input({ label, value, onChange, type = "text" }) {
+function Input({ label, name, value, onChange, type = "text" }) {
   return (
     <div>
       <label className="block text-sm text-gray-500 mb-2">{label}</label>
 
       <input
         type={type}
+        name={name}
         value={value}
         onChange={onChange}
         className="
           w-full
           border border-[#ece7e2]
           rounded-2xl
-          px-5 py-4
+          px-4 py-3
           focus:outline-none
           focus:border-[#c9a46c]
         "
