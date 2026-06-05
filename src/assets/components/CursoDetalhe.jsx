@@ -14,7 +14,7 @@ export default function CursoDetalhe() {
 
   const navigate = useNavigate();
 
-  const [curso, setCurso] = useState(null);
+  const [curso, setCurso] = useState({});
   const [avaliacaoCurso, setAvaliacaoCurso] = useState({
     media: 0,
     quantidade: 0,
@@ -24,7 +24,7 @@ export default function CursoDetalhe() {
     async function carregarCurso() {
       try {
         const data = await exibirCursoDetalheId(id);
-        const avaliacoes = await listarAvaliacoesCurso();
+        const avaliacoes = await listarAvaliacoesCurso(id);
 
         const avaliacoesDoCurso = avaliacoes.filter(
           (item) => item.idCurso === Number(id)

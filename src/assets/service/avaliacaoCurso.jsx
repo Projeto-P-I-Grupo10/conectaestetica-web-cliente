@@ -1,7 +1,7 @@
 import api from "./api";
 
-export async function listarAvaliacoesCurso() {
-  const response = await api.get("/avaliacaoCurso");
+export async function listarAvaliacoesCurso(cursoId) {
+  const response = await api.get(`/avaliacaoCurso/${cursoId}`);
   return response.data;
 }
 

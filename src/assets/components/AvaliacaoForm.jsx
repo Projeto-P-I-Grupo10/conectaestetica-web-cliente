@@ -7,33 +7,28 @@ import {
 
 export default function AvaliacaoForm({ cursoId }) {
   const [nota, setNota] = useState(0);
-  const [hover, setHover] = useState(0);
+  const [hover, setHover] = useState(0)
   const [comentario, setComentario] = useState("");
   const [comentarios, setComentarios] = useState([]);
   const [enviando, setEnviando] = useState(false);
   const [mostrarTodos, setMostrarTodos] = useState(false);
 
+  console.log("testeasfewfwrwefefe" + cursoId)
   useEffect(() => {
     async function carregarComentarios() {
-      try {
-        const data = await listarAvaliacoesCurso();
-
-        const comentariosDoCurso = data.filter(
-          (item) =>
-            item.cursoId === Number(cursoId) ||
-            item.idCurso === Number(cursoId)
-        );
-
-        setComentarios(comentariosDoCurso);
-      } catch (erro) {
-        console.error("Erro ao buscar comentários", erro);
-      }
+        try {
+            const data = await listarAvaliacoesCurso(cursoId);
+            setComentarios(data);
+            console.log(data)
+        } catch (erro) {
+            console.error("Erro ao buscar comentários", erro);
+        }
     }
 
     if (cursoId) {
-      carregarComentarios();
+        carregarComentarios();
     }
-  }, [cursoId]);
+}, [cursoId]);
 
   async function enviarAvaliacao() {
     if (nota === 0) {
@@ -67,7 +62,7 @@ export default function AvaliacaoForm({ cursoId }) {
         ...comentariosAtuais,
         {
           ...novaAvaliacao,
-          id: novaAvaliacao.id || Date.now(),
+          id: novaAvaliacao.id,
           nome: sessionStorage.getItem("nome") || "Usuário",
           avaliacao: Number(nota),
           comentario: comentario.trim(),
@@ -207,7 +202,7 @@ export default function AvaliacaoForm({ cursoId }) {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-medium text-[#3d2b1f]">
-                  {item.nome || item.nomeUsuario || "Usuário"}
+                  {item.usuario.nome || item.nomeUsuario || "Usuário"}
                 </h3>
 
                 <p className="text-sm text-gray-500">Aluno verificado</p>
