@@ -8,6 +8,7 @@ import {
   Lock,
   Check,
   X,
+  MapPin,
 } from "lucide-react";
 
 import Navbar from "../assets/components/Navbar";
@@ -16,6 +17,8 @@ import ModalResetSenha from "../assets/components/ModalResetSenha";
 
 import { atualizarUsuario, detalharUsuario } from "../assets/service/usuarios";
 import ModalResetNovaSenha from "../assets/components/ModalResetNovaSenha";
+
+import ModalEnderecos from "../assets/components/EnderecoModalUsuario";
 
 export default function PerfilUsuario() {
   const id = sessionStorage.getItem("idUsuario");
@@ -29,10 +32,9 @@ export default function PerfilUsuario() {
 
   const [imagem, setImagem] = useState(null);
 
-  // MODAL RESET SENHA
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
   const [modalNovaSenhaOpen, setModalNovaSenhaOpen] = useState(false);
-
+  const [modalEnderecoOpen, setModalEnderecoOpen] = useState(false);
 
   useEffect(() => {
     async function carregarUsuario() {
@@ -511,6 +513,42 @@ export default function PerfilUsuario() {
                         </button>
                       </div>
                     </div>
+
+                    {/* ENDEREÇOS */}
+                    <div className="bg-white rounded-2xl p-4 border border-[#ece7e2]">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-3 mb-2 text-[#c9a46c]">
+                            <MapPin size={18} />
+
+                            <span className="text-sm font-medium">
+                              Endereços
+                            </span>
+                          </div>
+
+                          <p className="text-[#3d2b1f]">
+                            Gerencie seus endereços cadastrados
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => setModalEnderecoOpen(true)}
+                          className="
+                          px-4
+                          py-2
+                          rounded-full
+                          bg-[#c9a46c]
+                          hover:bg-[#b89258]
+                          transition
+                          text-white
+                          text-sm
+                          font-medium
+                        "
+                        >
+                          Gerenciar
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -532,6 +570,11 @@ export default function PerfilUsuario() {
       <ModalResetNovaSenha
         open={modalNovaSenhaOpen}
         onClose={() => setModalNovaSenhaOpen(false)}
+      />
+
+      <ModalEnderecos
+        aberto={modalEnderecoOpen}
+        fecharModal={() => setModalEnderecoOpen(false)}
       />
 
       <Footer />

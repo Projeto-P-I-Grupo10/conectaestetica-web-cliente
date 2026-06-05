@@ -41,7 +41,7 @@ export default function ModalResetSenha({
         flex
         items-center
         justify-center
-        z-[999]
+        z-999
         p-6
       "
     >

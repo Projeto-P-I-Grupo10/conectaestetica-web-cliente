@@ -12,8 +12,9 @@ import Formulario from "../pages/Formulario";
 // Admin
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminCursos from "../pages/AdminCursos";
-import AdminProfessor from "../pages/AdminProfessor"
-import AdminTurmas from "../pages/AdminTurmas"
+import AdminProfessor from "../pages/AdminProfessor";
+import AdminTurmas from "../pages/AdminTurmas";
+import AdminEnderecos from "../pages/AdminEnderecos";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
   {
     path: "Admin/Turmas",
     element: <AdminTurmas />,
+  },
+  {
+    path: "Admin/Endereco",
+    element: <AdminEnderecos />,
   },
 
   {
