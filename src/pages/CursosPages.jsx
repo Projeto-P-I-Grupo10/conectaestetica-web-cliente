@@ -8,9 +8,11 @@ import FiltroCursos from "../assets/components/FiltrosCursos";
 import CursoCard from "../assets/components/CursoCard";
 
 import { listarCurso } from "../assets/service/cursos";
+import { listarAvaliacoesCurso } from "../assets/service/avaliacaoCurso";
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState([]);
+  const [avaliacoesPorCurso, setAvaliacoesPorCurso] = useState({});
   const [pesquisa, setPesquisa] = useState("");
 
   const navigate = useNavigate();
@@ -19,12 +21,34 @@ export default function CursosPage() {
     async function carregarCursos() {
       try {
         const data = await listarCurso();
+        const cursosRecebidos = Array.isArray(data) ? data : [];
 
-        console.log("Cursos recebidos:", data);
+        setCursos(cursosRecebidos);
 
-        setCursos(Array.isArray(data) ? data : []);
+        const avaliacoesMap = {};
+
+        for (const curso of cursosRecebidos) {
+          const avaliacoes = await listarAvaliacoesCurso(curso.cursoId);
+
+          const quantidade = avaliacoes.length;
+
+          const media =
+            quantidade > 0
+              ? avaliacoes.reduce(
+                  (soma, item) => soma + Number(item.avaliacao),
+                  0
+                ) / quantidade
+              : 0;
+
+          avaliacoesMap[curso.cursoId] = {
+            media: media.toFixed(1),
+            quantidade,
+          };
+        }
+
+        setAvaliacoesPorCurso(avaliacoesMap);
       } catch (erro) {
-        console.error("Erro ao buscar cursos", erro);
+        console.error("Erro ao buscar cursos ou avaliações", erro);
         setCursos([]);
       }
     }
@@ -57,22 +81,7 @@ export default function CursosPage() {
                 profissionais da área.
               </p>
 
-              <div
-                className="
-                  bg-white
-                  border
-                  border-[#ece7e2]
-                  rounded-full
-                  px-5
-                  py-4
-                  flex
-                  items-center
-                  gap-4
-                  shadow-sm
-                  focus-within:border-[#c9a46c]
-                  transition
-                "
-              >
+              <div className="bg-white border border-[#ece7e2] rounded-full px-5 py-4 flex items-center gap-4 shadow-sm focus-within:border-[#c9a46c] transition">
                 <Search size={20} className="text-[#c9a46c]" />
 
                 <input
@@ -80,13 +89,7 @@ export default function CursosPage() {
                   placeholder="Pesquisar cursos..."
                   value={pesquisa}
                   onChange={(e) => setPesquisa(e.target.value)}
-                  className="
-                    w-full
-                    bg-transparent
-                    outline-none
-                    text-[#3d2b1f]
-                    placeholder:text-gray-400
-                  "
+                  className="w-full bg-transparent outline-none text-[#3d2b1f] placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -98,31 +101,22 @@ export default function CursosPage() {
                     key={curso?.cursoId}
                     titulo={curso?.cursoNome}
                     preco={curso?.turmaPreco}
-                    avaliacao={4.5}
-                    imagem={`/img/${curso?.cursoImagem}`}
-                    onClick={() =>
-                      navigate(`/curso/${curso?.cursoId}`)
+                    avaliacao={
+                      avaliacoesPorCurso[curso?.cursoId]?.media || 0
                     }
+                    imagem={`/img/${curso?.cursoImagem}`}
+                    onClick={() => navigate(`/curso/${curso?.cursoId}`)}
                   />
                 ))
               ) : (
-                <div
-                  className="
-                    col-span-full
-                    bg-white
-                    border
-                    border-[#ece7e2]
-                    rounded-3xl
-                    p-10
-                    text-center
-                  "
-                >
+                <div className="col-span-full bg-white border border-[#ece7e2] rounded-3xl p-10 text-center">
                   <h2 className="text-2xl text-[#3d2b1f] mb-2">
                     Nenhum curso encontrado
                   </h2>
 
                   <p className="text-gray-500">
-                    Não existem cursos cadastrados ou sua pesquisa não encontrou resultados.
+                    Não existem cursos cadastrados ou sua pesquisa não encontrou
+                    resultados.
                   </p>
                 </div>
               )}
@@ -134,4 +128,4 @@ export default function CursosPage() {
       <Footer />
     </div>
   );
-}
+} 

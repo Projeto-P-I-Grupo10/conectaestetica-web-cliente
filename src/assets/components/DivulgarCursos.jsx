@@ -53,7 +53,7 @@ export default function DivulgarCurso() {
               <div className="absolute -top-5 left-5 w-12 h-12 rounded-full bg-[#c9a46c] text-[#3d2b1f] font-bold flex items-center justify-center shadow-md">
                 {etapa.id}
               </div>
-
+            
               {/* Conteúdo */}
               <div className="mt-8">
                 <div className="flex items-center gap-2 text-[#3d2b1f] mb-4">

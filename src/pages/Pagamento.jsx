@@ -15,37 +15,33 @@ export default function Pagamento() {
   });
 
   useEffect(() => {
-    async function carregarAvaliacoes() {
-      try {
-        const avaliacoes = await listarAvaliacoesCurso();
+  async function carregarAvaliacoes() {
+    try {
+      const avaliacoesDoCurso = await listarAvaliacoesCurso(id);
 
-        const avaliacoesDoCurso = avaliacoes.filter(
-          (item) =>
-            item.cursoId === Number(id) ||
-            item.idCurso === Number(id)
-        );
+      const quantidade = avaliacoesDoCurso.length;
 
-        const quantidade = avaliacoesDoCurso.length;
+      const media =
+        quantidade > 0
+          ? avaliacoesDoCurso.reduce(
+              (soma, item) => soma + Number(item.avaliacao),
+              0
+            ) / quantidade
+          : 0;
 
-        const media =
-          quantidade > 0
-            ? avaliacoesDoCurso.reduce(
-                (soma, item) => soma + Number(item.avaliacao),
-                0
-              ) / quantidade
-            : 0;
-
-        setAvaliacaoCurso({
-          media: media.toFixed(1),
-          quantidade,
-        });
-      } catch (erro) {
-        console.error("Erro ao buscar avaliações", erro);
-      }
+      setAvaliacaoCurso({
+        media: media.toFixed(1),
+        quantidade,
+      });
+    } catch (erro) {
+      console.error("Erro ao buscar avaliações", erro);
     }
+  }
 
+  if (id) {
     carregarAvaliacoes();
-  }, [id]);
+  }
+}, [id]);
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
