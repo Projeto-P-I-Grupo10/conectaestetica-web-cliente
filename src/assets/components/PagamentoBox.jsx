@@ -80,7 +80,8 @@ export default function PagamentoBox() {
 
         const polling = setInterval(async () => {
           try {
-            const statusResponse = await consultarStatusPix(id, dadosPag.idUsuario);
+            console.log(curso.turmaId)
+            const statusResponse = await consultarStatusPix(curso.turmaId, dadosPag.idUsuario);
 
             if (statusResponse.status === "approved") {
               clearInterval(polling);

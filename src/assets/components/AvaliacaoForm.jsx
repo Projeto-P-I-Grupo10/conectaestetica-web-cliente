@@ -209,7 +209,7 @@ export default function AvaliacaoForm({ cursoId }) {
               </div>
 
               <div className="flex gap-1">
-                {[...Array(Number(item.nota || item.avaliacao || 0))].map(
+                {[...Array(Math.round(Number(item.nota || item.avaliacao || 0)))].map(
                   (_, index) => (
                     <Star
                       key={index}

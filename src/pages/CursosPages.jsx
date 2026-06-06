@@ -204,7 +204,7 @@ export default function CursosPage() {
                       avaliacao={4.5}
                       imagem={null}
                       distancia={curso.distancia}
-                      onClick={() => navigate(`/curso/${curso.cursoId}`)}
+                      onClick={() => navigate(`/curso/${curso.turmaId}`)}
                     />
                   ))
                 ) : (
@@ -223,7 +223,7 @@ export default function CursosPage() {
                       preco={curso?.turmaPreco}
                       avaliacao={avaliacoesPorCurso[curso?.cursoId]?.media || 0}
                       imagem={curso?.cursoImagem}
-                      onClick={() => navigate(`/curso/${curso?.cursoId}`)}
+                      onClick={() => navigate(`/curso/${curso?.turmaId}`)}
                     />
                   ))
                 ) : (
