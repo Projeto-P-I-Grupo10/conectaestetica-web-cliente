@@ -15,6 +15,7 @@ import AdminCursos from "../pages/AdminCursos";
 import AdminProfessor from "../pages/AdminProfessor";
 import AdminTurmas from "../pages/AdminTurmas";
 import AdminEnderecos from "../pages/AdminEnderecos";
+import AdminAreas from "../pages/AdminAreas"
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
   {
     path: "Admin/Endereco",
     element: <AdminEnderecos />,
+  },
+  {
+    path: "Admin/Areas",
+    element: <AdminAreas />,
   },
 
   {

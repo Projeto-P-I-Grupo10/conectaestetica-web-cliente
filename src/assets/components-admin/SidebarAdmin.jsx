@@ -46,15 +46,15 @@ export default function SidebarAdmin() {
       icon: <MapPin size={22} />,
       path: "/admin/endereco",
     },
-    {
-      nome: "Alunos",
+    // {
+    //   nome: "Alunos",
+    //   icon: <Users size={22} />,
+    //   path: "/admin/alunos",
+    // },
+      {
+      nome: "Areas",
       icon: <Users size={22} />,
-      path: "/admin/alunos",
-    },
-    {
-      nome: "Configurações",
-      icon: <Settings size={22} />,
-      path: "/admin/configuracoes",
+      path: "/admin/areas",
     },
   ];
 
