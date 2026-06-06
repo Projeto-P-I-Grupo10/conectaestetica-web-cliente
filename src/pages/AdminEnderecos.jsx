@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 import SidebarAdmin from "../assets/components-admin/SidebarAdmin";
 import EnderecoModal from "../assets/components-admin/EnderecoModal";
 import DeleteModal from "../assets/components-admin/DeleteModal";
+import {
+  listarEnderecosCurso,
+  cadastrarEnderecoCurso,
+  editarEnderecoCurso,
+  deletarEnderecoCurso
+} from "../assets/service/enderecoCurso";
+
 
 function normalizeEndereco(endereco) {
   return {
@@ -20,44 +27,19 @@ function normalizeEndereco(endereco) {
 }
 
 export default function AdminEnderecos() {
-  const [enderecos, setEnderecos] = useState([
-    {
-      id: 1,
-      rua: "Rua das Flores",
-      numero: "123",
-      bairro: "Centro",
-      cidade: "São Paulo",
-      estado: "SP",
-      cep: "01000-000",
-      complemento: "Sala 5",
-    },
-    {
-      id: 2,
-      rua: "Av. Paulista",
-      numero: "1500",
-      bairro: "Bela Vista",
-      cidade: "São Paulo",
-      estado: "SP",
-      cep: "01310-100",
-      complemento: "Andar 8",
-    },
-    {
-      id: 3,
-      rua: "Rua Augusta",
-      numero: "450",
-      bairro: "Consolação",
-      cidade: "São Paulo",
-      estado: "SP",
-      cep: "01305-000",
-      complemento: "",
-    },
-  ].map(normalizeEndereco));
+  const [enderecos, setEnderecos] = useState([]);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [enderecoSelecionado, setEnderecoSelecionado] = useState(null);
 
   const [deleteModalAberto, setDeleteModalAberto] = useState(false);
   const [enderecoExcluir, setEnderecoExcluir] = useState(null);
+
+
+  useEffect(() => {
+    listarEnderecosCurso().then((lista) => setEnderecos(lista.map(normalizeEndereco)));
+  }, []);
+
 
   function abrirCriar() {
     setEnderecoSelecionado(null);
@@ -231,7 +213,16 @@ export default function AdminEnderecos() {
         aberto={modalAberto}
         fecharModal={() => setModalAberto(false)}
         enderecoSelecionado={enderecoSelecionado}
-        onSuccess={() => {
+        onSuccess={async (data) => {
+          if (data.id) {
+            const atualizado = await editarEnderecoCurso(data.id, data);
+            setEnderecos((prev) =>
+              prev.map((e) => (e.id === data.id ? atualizado : e))
+            );
+          } else {
+            const novo = await cadastrarEnderecoCurso(data);
+            setEnderecos((prev) => [...prev, novo]);
+          }
           setModalAberto(false);
         }}
       />
@@ -243,10 +234,12 @@ export default function AdminEnderecos() {
         titulo="Excluir endereço"
         descricao={`Tem certeza que deseja excluir o endereço "${enderecoExcluir?.rua}"?`}
         onConfirmar={async () => {
+          await deletarEnderecoCurso(enderecoExcluir.id);
           await confirmarDelete();
           setDeleteModalAberto(false);
         }}
       />
+
     </main>
   );
 }

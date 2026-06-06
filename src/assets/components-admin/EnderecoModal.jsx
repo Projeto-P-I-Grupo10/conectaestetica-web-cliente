@@ -20,34 +20,51 @@ export default function EnderecoModal({
   });
 
   useEffect(() => {
-    if (enderecoSelecionado) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setForm({
-        rua: enderecoSelecionado.rua || "",
-        numero: enderecoSelecionado.numero || "",
-        bairro: enderecoSelecionado.bairro || "",
-        cidade: enderecoSelecionado.cidade || "",
-        estado: enderecoSelecionado.estado || "",
-        cep: enderecoSelecionado.cep || "",
-        complemento: enderecoSelecionado.complemento || "",
-      });
-    } 
-  }, [enderecoSelecionado, aberto]);
+  if (enderecoSelecionado) {
+    setForm({
+      rua: enderecoSelecionado.rua || "",
+      numero: enderecoSelecionado.numero || "",
+      bairro: enderecoSelecionado.bairro || "",
+      cidade: enderecoSelecionado.cidade || "",
+      estado: enderecoSelecionado.estado || "",
+      cep: enderecoSelecionado.cep || "",
+      complemento: enderecoSelecionado.complemento || "",
+    });
+  } else {
+    setForm({
+      rua: "",
+      numero: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
+      cep: "",
+      complemento: "",
+    });
+  }
+}, [enderecoSelecionado]);
+
 
  
   async function handleSalvar() {
-    try {
-      console.log(editando ? "Editando endereço:" : "Criando endereço:", form);
+    if (!form.rua || !form.numero || !form.bairro || !form.cidade || !form.estado || !form.cep) {
+        alert("Preencha todos os campos obrigatórios.");
+        return;
+      }
+      if (!/^\d{8}$/.test(form.cep)) {
+        alert("CEP deve conter 8 dígitos numéricos.");
+        return;
+      }
+      if (form.estado.length !== 2) {
+        alert("Estado deve ter 2 letras (ex: SP).");
+        return;
+      }
 
       if (onSuccess) {
         onSuccess(form);
       }
-
       fecharModal();
-    } catch (error) {
-      console.error(error);
     }
-  }
+
 
   if (!aberto) return null;
 
