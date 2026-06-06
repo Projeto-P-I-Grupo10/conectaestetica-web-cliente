@@ -46,7 +46,6 @@ export default function CursoDetalhe() {
         });
 
         console.log("Curso recebido:", data);
-
         setCurso(data);
       } catch (erro) {
         console.error("Erro ao buscar curso", erro);
@@ -170,7 +169,7 @@ export default function CursoDetalhe() {
               {/* BOTÕES */}
               <div className="flex flex-col md:flex-row gap-4">
                 <button
-                  onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}
+                  onClick={() => navigate(`/pagamentos/${curso?.turmaId}`)}
                   className="
                     bg-[#c9a46c]
                     hover:bg-[#b89258]
@@ -445,7 +444,7 @@ export default function CursoDetalhe() {
                     key={estrela}
                     size={20}
                     className={
-                      estrela <= Math.round(avaliacaoCurso.media)
+                      estrela <= Math.round(avaliacaoCurso.media) 
                         ? "fill-[#c9a46c] text-[#c9a46c]"
                         : "text-gray-300"
                     }
@@ -458,7 +457,7 @@ export default function CursoDetalhe() {
               </p>
 
               <button
-                onClick={() => navigate(`/pagamentos/${curso?.cursoId}`)}
+                onClick={() => navigate(`/pagamentos/${curso?.turmaId}`)}
                 className="
                   w-full
                   bg-[#c9a46c]
