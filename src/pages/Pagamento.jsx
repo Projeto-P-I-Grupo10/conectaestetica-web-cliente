@@ -62,7 +62,9 @@ export default function Pagamento() {
           </div>
 
           <div className="w-[320px]">
-            <PagamentoBox />
+            <PagamentoBox 
+              id={id}
+            />
           </div>
 
         </div>

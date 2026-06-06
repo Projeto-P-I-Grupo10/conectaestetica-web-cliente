@@ -1,21 +1,22 @@
 import { useEffect, useState } from "react";
 import { consultarStatusPix, pagamentoPix } from "../service/pagamento";
 import { useParams } from "react-router-dom";
-import { exibirCursoId } from "../service/cursos";
+import { exibirCursoId, exibirCursoDetalheId } from "../service/cursos";
 import Swal from "sweetalert2";
 
-export default function PagamentoBox() {
-  const { id } = useParams()
+export default function PagamentoBox({ id }) {
   const [metodo, setMetodo] = useState(null);
-  const [curso, setCurso] = useState(null);
+  const [curso, setCurso] = useState({});
   const [pagamento, setPagamento] =  useState(null);
   const [tempoRestante, setTempoRestante] = useState(null);
 
   useEffect(() => {
     async function carregarCurso() {
       try {
-        const data = await exibirCursoId(id);
+        const data = await exibirCursoDetalheId(id);
         setCurso(data);
+        console.log("data: " + data?.turmaPreco)
+        console.log("curso: " +curso?.turmaPreco)
       } catch (erro) {
         console.error("Erro ao buscar cursos", erro);
       }
@@ -52,15 +53,19 @@ export default function PagamentoBox() {
       });
   }
 
-  async function handlePagamento(tipo) {
+  async function handlePagamento(tipo, cursoData) {
+
+    console.log("trazendo o preco: " + cursoData?.turmaPreco)
     if (tipo === "pix") {
       const dadosPag = {
-        metodo: tipo,
-        idCurso: id,
+        metodoPagamento: tipo,
+        idTurma: Number(id),
         idUsuario: Number(sessionStorage.getItem("idUsuario")),
         email: sessionStorage.getItem("email"),
-        preco: curso?.preco,
+        valor: parseFloat(cursoData?.turmaPreco)
       };
+
+      console.log("JSON enviado:", JSON.stringify(dadosPag));
 
       try {
         const data = await pagamentoPix(dadosPag);
@@ -151,7 +156,7 @@ export default function PagamentoBox() {
       <div
         onClick={() => {
           setMetodo("pix");
-          handlePagamento("pix");
+          handlePagamento("pix", curso);
         }}
         className={`border rounded-md p-3 cursor-pointer ${
           metodo === "pix" ? "border-blue-500" : ""
