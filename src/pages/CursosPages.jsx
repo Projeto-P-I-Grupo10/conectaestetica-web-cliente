@@ -7,13 +7,11 @@ import Footer from "../assets/components/Footer";
 import FiltroCursos from "../assets/components/FiltrosCursos";
 import CursoCard from "../assets/components/CursoCard";
 
-import { listarAvaliacoesCurso } from "../assets/service/avaliacaoCurso";
 import { listarCurso } from "../assets/service/cursos";
 import api from "../assets/service/api"; // ajusta o caminho conforme o projeto
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState([]);
-  const [avaliacoesPorCurso, setAvaliacoesPorCurso] = useState({});
   const [pesquisa, setPesquisa] = useState("");
   const [cursosProximos, setCursosProximos] = useState(null);
   const [loadingProximos, setLoadingProximos] = useState(false);
@@ -221,7 +219,7 @@ export default function CursosPage() {
                       key={curso?.cursoId}
                       titulo={curso?.cursoNome}
                       preco={curso?.turmaPreco}
-                      avaliacao={avaliacoesPorCurso[curso?.cursoId]?.media || 0}
+                      avaliacao={Number(curso?.avaliacaoCurso || 0).toFixed(1)}
                       imagem={curso?.cursoImagem}
                       onClick={() => navigate(`/curso/${curso?.turmaId}`)}
                     />
