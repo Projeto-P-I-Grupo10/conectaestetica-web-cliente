@@ -1,46 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Plus, MapPin, Trash2, CheckCircle } from "lucide-react";
+import {
+  cadastrarEndereco,
+  deletarEndereco,
+  editarEndereco,
+  listarEnderecosPorUsuario,
+  selecionarEnderecoAtual
+} from "../service/enderecoUsuario"; 
 
 export default function EnderecoModalUsuario({
   aberto,
   fecharModal,
   onSalvar,
-  onExcluir,
+  onExcluir
 }) {
-  const [enderecos, setEnderecos] = useState([
-    {
-      id: 1,
-      cep: "01310-100",
-      rua: "Av. Paulista",
-      numero: "1500",
-      complemento: "Andar 8",
-      bairro: "Bela Vista",
-      cidade: "São Paulo",
-      estado: "SP",
-    },
-    {
-      id: 2,
-      cep: "01000-000",
-      rua: "Rua das Flores",
-      numero: "123",
-      complemento: "Sala 5",
-      bairro: "Centro",
-      cidade: "São Paulo",
-      estado: "SP",
-    },
-    {
-      id: 3,
-      cep: "01305-000",
-      rua: "Rua Augusta",
-      numero: "450",
-      complemento: "",
-      bairro: "Consolação",
-      cidade: "São Paulo",
-      estado: "SP",
-    },
-  ]);
+  const [enderecos, setEnderecos] = useState([]);
 
-  const [enderecoAtualId, setEnderecoAtualId] = useState(1);
+  const [enderecoAtualId, setEnderecoAtualId] = useState(null);
 
   const [form, setForm] = useState({
     id: null,
@@ -50,9 +26,35 @@ export default function EnderecoModalUsuario({
     complemento: "",
     bairro: "",
     cidade: "",
-    estado: "",
+    uf: "",
   });
+  const usuarioId = Number(sessionStorage.getItem('idUsuario'));
+  console.log("usuarioId do sessionStorage:", sessionStorage.getItem('idUsuario'));
 
+  useEffect(() => {
+    if (aberto && usuarioId) {
+      listarEnderecosPorUsuario(usuarioId).then((lista) => {
+           setEnderecos(lista);
+
+        const atual = lista.find((e) => e.enderecoAtual === true);
+        if (atual) {
+          setEnderecoAtualId(atual.id);
+          setForm({
+            id: atual.id,
+            cep: atual.cep || "",
+            rua: atual.rua || "",
+            numero: atual.numero || "",
+            complemento: atual.complemento || "",
+            bairro: atual.bairro || "",
+            cidade: atual.cidade || "",
+            uf: atual.uf || "",
+          });
+        }
+      });
+    }
+  }, [aberto, usuarioId]);
+
+  console.log(enderecos)
   function handleChange(e) {
     setForm({
       ...form,
@@ -69,51 +71,55 @@ export default function EnderecoModalUsuario({
       complemento: "",
       bairro: "",
       cidade: "",
-      estado: "",
+      uf: "",
     });
   }
 
-  function selecionarEndereco(endereco) {
-    setEnderecoAtualId(endereco.id);
+  async function selecionarEndereco(endereco) {
+    const atualizado = await selecionarEnderecoAtual(endereco.id);
+
+    setEnderecoAtualId(atualizado.id);
+
+    listarEnderecosPorUsuario(usuarioId).then(setEnderecos);
 
     setForm({
-      id: endereco.id,
-      cep: endereco.cep || "",
-      rua: endereco.rua || "",
-      numero: endereco.numero || "",
-      complemento: endereco.complemento || "",
-      bairro: endereco.bairro || "",
-      cidade: endereco.cidade || "",
-      estado: endereco.estado || "",
+      id: atualizado.id,
+      cep: atualizado.cep || "",
+      rua: atualizado.rua || "",
+      numero: atualizado.numero || "",
+      complemento: atualizado.complemento || "",
+      bairro: atualizado.bairro || "",
+      cidade: atualizado.cidade || "",
+      uf: atualizado.uf || "",
     });
+
+    if (onSalvar) {
+      onSalvar(atualizado);
+    }
   }
 
-  function handleSalvar() {
+  async function handleSalvar() {
     if (
       !form.cep ||
       !form.rua ||
       !form.numero ||
       !form.bairro ||
       !form.cidade ||
-      !form.estado
+      !form.uf
     ) {
       alert("Preencha os campos obrigatórios.");
       return;
     }
 
+    
     if (form.id) {
+      const atualizado = await editarEndereco(form.id, { ...form, usuarioId });
       setEnderecos((prev) =>
-        prev.map((endereco) =>
-          endereco.id === form.id ? { ...form } : endereco,
-        ),
+        prev.map((endereco) => (endereco.id === form.id ? atualizado : endereco))
       );
     } else {
-      const novoEndereco = {
-        ...form,
-        id: Date.now(),
-      };
-
-      setEnderecos((prev) => [...prev, novoEndereco]);
+      const novo = await cadastrarEndereco({ ...form, usuarioId });
+      setEnderecos((prev) => [...prev, novo]);
     }
 
     if (onSalvar) {
@@ -121,24 +127,19 @@ export default function EnderecoModalUsuario({
     }
 
     limparFormulario();
+    
+    }
+
+  async function handleExcluir(id) {
+  await deletarEndereco(id);
+  setEnderecos((prev) => prev.filter((endereco) => endereco.id !== id));
+  if (form.id === id) limparFormulario();
+
+  if (onExcluir) {
+    onExcluir(id);
   }
+}
 
-  function handleExcluir(id) {
-    if (id === enderecoAtualId) {
-      alert("Você não pode excluir o endereço atualmente selecionado.");
-      return;
-    }
-
-    setEnderecos((prev) => prev.filter((endereco) => endereco.id !== id));
-
-    if (onExcluir) {
-      onExcluir(id);
-    }
-
-    if (form.id === id) {
-      limparFormulario();
-    }
-  }
 
   if (!aberto) return null;
 
@@ -244,9 +245,9 @@ export default function EnderecoModalUsuario({
               />
 
               <Input
-                label="Estado"
-                name="estado"
-                value={form.estado}
+                label="uf"
+                name="uf"
+                value={form.uf}
                 onChange={handleChange}
               />
 
@@ -276,9 +277,9 @@ export default function EnderecoModalUsuario({
             </h3>
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {enderecos.map((endereco) => (
+              {enderecos.map((endereco,index) => (
                 <div
-                  key={endereco.id}
+                 key={endereco.id ?? index}
                   className="
                     bg-[#faf8f6]
                     border border-[#ece7e2]
@@ -321,7 +322,7 @@ export default function EnderecoModalUsuario({
                       </p>
 
                       <p className="text-sm text-gray-500">
-                        {endereco.cidade} - {endereco.estado}
+                        {endereco.cidade} - {endereco.uf}
                       </p>
 
                       <p className="text-sm text-gray-500">
