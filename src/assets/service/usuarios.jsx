@@ -11,8 +11,8 @@ export async function cadastrarUsuario(dados) {
       cep: dados.cep,
       cidade: dados.cidade,
       numero: dados.numero,
-      uf: dados.uf,
-      rua: dados.rua,
+      uf: dados.estado,
+      rua: dados.logradouro,
       complemento: dados.complemento,
     }]
   });

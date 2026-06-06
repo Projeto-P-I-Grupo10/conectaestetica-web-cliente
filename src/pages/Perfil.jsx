@@ -140,6 +140,21 @@ export default function PerfilUsuario() {
     },
   ];
 
+  function formatarTelefone(valor) {
+    valor = valor.replace(/\D/g, "");
+    valor = valor.slice(0, 11);
+
+    if (valor.length <= 10) {
+      return valor
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      return valor
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f5f5]">
       <Navbar />
@@ -465,7 +480,9 @@ export default function PerfilUsuario() {
                         <input
                           type="text"
                           value={telefone}
-                          onChange={(e) => setTelefone(e.target.value)}
+                          onChange={(e) =>
+                            setTelefone(formatarTelefone(e.target.value))
+                          }
                           className="
                             w-full
                             border
@@ -478,7 +495,9 @@ export default function PerfilUsuario() {
                           "
                         />
                       ) : (
-                        <p className="text-[#3d2b1f]">{usuario?.telefone}</p>
+                        <p className="text-[#3d2b1f]">
+                          {formatarTelefone(usuario?.telefone || "")}
+                        </p>
                       )}
                     </div>
 

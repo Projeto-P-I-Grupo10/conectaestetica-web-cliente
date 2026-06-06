@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 import { listarProfessores } from "../service/professor";
+import { listarAreas } from "../service/area";
 import { cadastrarCursos, editarCursos } from "../service/cursos";
 
 function normalizeCurso(curso) {
@@ -35,17 +36,20 @@ export default function CursoModal({
   const [form, setForm] = useState({
     nome: "",
     professor: "",
+    area: "",
     descricao: "",
     imagem: "",
   });
 
   const [professores, setProfessores] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
     setForm({
       nome: "",
       professor: "",
+      area: "",
       descricao: "",
       imagem: "",
     });
@@ -59,6 +63,7 @@ export default function CursoModal({
       setForm({
         nome: curso.nome,
         professor: curso.professor.id,
+        area: curso.area.id,
         descricao: curso.descricao,
         imagem: curso.imagem,
       });
@@ -70,10 +75,20 @@ export default function CursoModal({
   useEffect(() => {
     async function carregar() {
       try {
-        const data = await listarProfessores();
-        setProfessores(data);
+        const [professoresData, areasData] = await Promise.all([
+          listarProfessores(),
+          listarAreas(),
+        ]);
+
+        setProfessores(
+          Array.isArray(professoresData)
+            ? professoresData
+            : professoresData?.professores || [],
+        );
+
+        setAreas(Array.isArray(areasData) ? areasData : areasData?.areas || []);
       } catch (err) {
-        console.error("Erro ao listar professores:", err);
+        console.error(err);
       }
     }
 
@@ -82,13 +97,21 @@ export default function CursoModal({
 
   async function handleSalvarCurso() {
     try {
+      if (!form.professor) {
+        return alert("Selecione um professor.");
+      }
+
+      if (!form.area) {
+        return alert("Selecione uma área.");
+      }
+
       setLoading(true);
 
       const payload = {
         nome: form.nome,
         descricao: form.descricao,
-        imagem: form.imagem, 
-        areaCursoId: 1,
+        imagem: form.imagem,
+        areaCursoId: Number(form.area),
         professorId: Number(form.professor),
       };
 
@@ -103,6 +126,7 @@ export default function CursoModal({
       }
 
       if (onSuccess) onSuccess();
+
       fecharModal();
     } catch (error) {
       console.error("Erro ao salvar curso:", error.response?.data || error);
@@ -112,8 +136,6 @@ export default function CursoModal({
   }
 
   if (!aberto) return null;
-
-  console.log(normalizeCurso)
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
@@ -147,7 +169,12 @@ export default function CursoModal({
             <Input
               label="Nome do curso"
               value={form.nome}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  nome: e.target.value,
+                })
+              }
             />
 
             {/* PROFESSOR */}
@@ -159,7 +186,10 @@ export default function CursoModal({
               <select
                 value={form.professor}
                 onChange={(e) =>
-                  setForm({ ...form, professor: e.target.value })
+                  setForm({
+                    ...form,
+                    professor: e.target.value,
+                  })
                 }
                 className="w-full bg-[#faf8f6] border border-[#ece7e2] rounded-2xl px-5 py-4"
               >
@@ -173,7 +203,37 @@ export default function CursoModal({
               </select>
             </div>
 
-            {/* IMAGEM (SIMPLES) */}
+            {/* ÁREA */}
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">Área</label>
+
+              <select
+                value={form.area}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    area: e.target.value,
+                  })
+                }
+                className="
+                  w-full
+                  bg-[#faf8f6]
+                  border border-[#ece7e2]
+                  rounded-2xl
+                  px-5 py-4
+                "
+              >
+                <option value="">Selecione uma área</option>
+
+                {areas.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* IMAGEM */}
             <div className="md:col-span-2">
               <label className="text-sm text-gray-500 mb-2 block">
                 Imagem do curso (ex: botox.png)
@@ -181,12 +241,16 @@ export default function CursoModal({
 
               <input
                 value={form.imagem}
-                onChange={(e) => setForm({ ...form, imagem: e.target.value })}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    imagem: e.target.value,
+                  })
+                }
                 className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
                 placeholder="ex: botox.png"
               />
 
-              {/* preview simples */}
               {form.imagem && (
                 <img
                   src={`/img/${form.imagem}`}
@@ -205,7 +269,10 @@ export default function CursoModal({
               <textarea
                 value={form.descricao}
                 onChange={(e) =>
-                  setForm({ ...form, descricao: e.target.value })
+                  setForm({
+                    ...form,
+                    descricao: e.target.value,
+                  })
                 }
                 className="w-full min-h-36 border rounded-2xl px-5 py-4"
               />

@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Layers,
   MapPin,
+  BookMarked,
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -27,9 +28,9 @@ export default function SidebarAdmin() {
       path: "/admin/dashboard",
     },
     {
-      nome: "Cursos",
-      icon: <BookOpen size={22} />,
-      path: "/admin/cursos",
+      nome: "Endereço",
+      icon: <MapPin size={22} />,
+      path: "/admin/endereco",
     },
     {
       nome: "Professores",
@@ -41,20 +42,20 @@ export default function SidebarAdmin() {
       icon: <Layers size={22} />,
       path: "/admin/turmas",
     },
-    {
-      nome: "Endereço",
-      icon: <MapPin size={22} />,
-      path: "/admin/endereco",
-    },
     // {
     //   nome: "Alunos",
     //   icon: <Users size={22} />,
     //   path: "/admin/alunos",
     // },
-      {
+    {
       nome: "Areas",
-      icon: <Users size={22} />,
+      icon: <BookMarked size={22} />,
       path: "/admin/areas",
+    },
+    {
+      nome: "Cursos",
+      icon: <BookOpen size={22} />,
+      path: "/admin/cursos",
     },
   ];
 

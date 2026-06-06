@@ -92,13 +92,21 @@ export default function CadastroStepper() {
         confirmButtonText: "Ir para login",
       });
 
-      navigate("/login"); 
+      navigate("/login");
     } catch (e) {
-      console.error(e);
+      console.error("Erro completo da API:", e);
+
+      const erroAPI = e?.response?.errors?.length
+        ? e.response.data.errors.join("\n")
+        : e?.response?.data?.message ||
+          e?.response?.data?.erro ||
+          e?.response?.data ||
+          e?.message ||
+          "Erro inesperado ao cadastrar";
 
       Swal.fire({
         title: "Erro ao cadastrar",
-        text: "Tente novamente mais tarde",
+        text: erroAPI,
         icon: "error",
       });
     }
@@ -151,6 +159,13 @@ export default function CadastroStepper() {
         .replace(/(\d{2})(\d)/, "($1) $2")
         .replace(/(\d{5})(\d)/, "$1-$2");
     }
+  }
+
+  function formatarCep(valor) {
+    return valor
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 9);
   }
 
   return (
@@ -335,7 +350,7 @@ export default function CadastroStepper() {
                 <label className="text-sm text-gray-600">CEP</label>
                 <input
                   value={cep}
-                  onChange={(e) => setCep(e.target.value)}
+                  onChange={(e) => setCep(formatarCep(e.target.value))}
                   onBlur={() => buscarCep(cep)}
                   className="w-full mt-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/70 outline-none focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
                 />
