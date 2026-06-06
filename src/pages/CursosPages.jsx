@@ -7,11 +7,13 @@ import Footer from "../assets/components/Footer";
 import FiltroCursos from "../assets/components/FiltrosCursos";
 import CursoCard from "../assets/components/CursoCard";
 
+import { listarAvaliacoesCurso } from "../assets/service/avaliacaoCurso";
 import { listarCurso } from "../assets/service/cursos";
 import api from "../assets/service/api"; // ajusta o caminho conforme o projeto
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState([]);
+  const [avaliacoesPorCurso, setAvaliacoesPorCurso] = useState({});
   const [pesquisa, setPesquisa] = useState("");
   const [cursosProximos, setCursosProximos] = useState(null);
   const [loadingProximos, setLoadingProximos] = useState(false);
@@ -19,13 +21,48 @@ export default function CursosPage() {
 
   const navigate = useNavigate();
 
+  async function carregarAvaliacoesDosCursos(listaCursos) {
+    const avaliacoesMap = {};
+
+    for (const curso of listaCursos) {
+      try {
+        const avaliacoes = await listarAvaliacoesCurso(curso.cursoId);
+
+        const quantidade = avaliacoes.length;
+
+        const media =
+          quantidade > 0
+            ? avaliacoes.reduce(
+              (soma, item) => soma + Number(item.avaliacao),
+              0
+            ) / quantidade
+            : 0;
+
+        avaliacoesMap[curso.cursoId] = {
+          media: media.toFixed(1),
+          quantidade,
+        };
+      } catch (erro) {
+        console.error(`Erro ao buscar avaliações do curso ${curso.cursoId}`, erro);
+
+        avaliacoesMap[curso.cursoId] = {
+          media: 0,
+          quantidade: 0,
+        };
+      }
+    }
+
+    setAvaliacoesPorCurso(avaliacoesMap);
+  }
+
   useEffect(() => {
     async function carregarCursos() {
       try {
         const data = await listarCurso();
         if (Array.isArray(data) && data.length > 0) {
           setCursos(data);
-          console.log(data)
+          console.log(data);
+          carregarAvaliacoesDosCursos(data);
         } else {
           setCursos([
             { cursoId: 1, cursoNome: "Skin Care Profissional", turmaPreco: 299.9, cursoImagem: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop" },
@@ -184,7 +221,7 @@ export default function CursosPage() {
                       key={curso?.cursoId}
                       titulo={curso?.cursoNome}
                       preco={curso?.turmaPreco}
-                      avaliacao={4.5}
+                      avaliacao={avaliacoesPorCurso[curso?.cursoId]?.media || 0}
                       imagem={curso?.cursoImagem}
                       onClick={() => navigate(`/curso/${curso?.cursoId}`)}
                     />
