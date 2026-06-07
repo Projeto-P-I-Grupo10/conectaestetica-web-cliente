@@ -3,6 +3,29 @@ import { X } from "lucide-react";
 
 import { cadastrarTurma, editarTurma } from "../service/turmas";
 
+/* =========================
+   MÁSCARA DE MOEDA
+========================= */
+
+function formatarMoeda(valor) {
+  if (!valor) return "";
+
+  const numero = valor.toString().replace(/\D/g, "");
+
+  return (Number(numero) / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function limparMoeda(valor) {
+  return Number(valor.toString().replace(/\D/g, "")) / 100;
+}
+
+/* =========================
+   COMPONENTE
+========================= */
+
 export default function TurmaModal({
   aberto,
   fecharModal,
@@ -22,61 +45,107 @@ export default function TurmaModal({
     dataEncerramento: "",
     preco: "",
     qtdVagas: "",
+    porcentagemLucro: "10",
     cursoId: "",
     enderecoId: "",
   });
 
   useEffect(() => {
-    if (turmaSelecionada) {
+    if (editando && turmaSelecionada) {
+      const turma =
+        typeof turmaSelecionada === "object"
+          ? turmaSelecionada
+          : null;
+
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
-        nome: turmaSelecionada.nome || "",
-        cursoAtivo: turmaSelecionada.cursoAtivo ?? true,
-        dataInicio: turmaSelecionada.dataInicio || "",
-        dataEncerramento: turmaSelecionada.dataEncerramento || "",
-        preco: turmaSelecionada.preco || "",
-        qtdVagas: turmaSelecionada.qtdVagas || "",
-        cursoId: turmaSelecionada.cursoId || "",
-        enderecoId: turmaSelecionada.enderecoId || "",
+        nome: turma?.nome || "",
+        cursoAtivo: turma?.cursoAtivo ?? true,
+
+        dataInicio: turma?.dataInicio
+          ? turma.dataInicio.slice(0, 16)
+          : "",
+
+        dataEncerramento: turma?.dataEncerramento
+          ? turma.dataEncerramento.slice(0, 16)
+          : "",
+
+        // 🔥 converte para centavos para máscara funcionar
+        preco: turma?.preco
+          ? String(Math.round(Number(turma.preco) * 100))
+          : "",
+
+        qtdVagas: turma?.qtdVagas
+          ? String(turma.qtdVagas)
+          : "",
+
+        porcentagemLucro: turma?.porcentagemLucro
+          ? String(Number(turma.porcentagemLucro) * 100)
+          : "10",
+
+        cursoId: turma?.cursoId
+          ? String(turma.cursoId)
+          : "",
+
+        enderecoId: turma?.enderecoId
+          ? String(turma.enderecoId)
+          : "",
       });
-    } else {
-      setForm({
-        nome: "",
-        cursoAtivo: true,
-        dataInicio: "",
-        dataEncerramento: "",
-        preco: "",
-        qtdVagas: "",
-        cursoId: "",
-        enderecoId: "",
-      });
+
+      return;
     }
-  }, [turmaSelecionada]);
+
+    setForm({
+      nome: "",
+      cursoAtivo: true,
+      dataInicio: "",
+      dataEncerramento: "",
+      preco: "",
+      qtdVagas: "",
+      porcentagemLucro: "10",
+      cursoId: "",
+      enderecoId: "",
+    });
+  }, [turmaSelecionada, aberto, editando]);
 
   async function handleSalvar() {
     try {
+      if (!form.nome.trim()) return alert("Informe o nome da turma.");
+      if (!form.cursoId) return alert("Selecione um curso.");
+      if (!editando && !form.enderecoId)
+        return alert("Selecione um endereço.");
+      if (!form.dataInicio)
+        return alert("Informe a data de início.");
+      if (!form.dataEncerramento)
+        return alert("Informe a data de encerramento.");
+      if (!form.porcentagemLucro)
+        return alert("Informe a porcentagem de lucro.");
+
       setLoading(true);
 
       const payload = {
         nome: form.nome,
-        curso_ativo: form.cursoAtivo,
-        data_inicio: form.dataInicio,
-        data_encerramento: form.dataEncerramento,
-        preco: Number(form.preco),
-        qtd_vagas: Number(form.qtdVagas),
-        curso_id: Number(form.cursoId),
-        endereco_id: Number(form.enderecoId),
+        dataInicio: form.dataInicio,
+        dataEncerramento: form.dataEncerramento,
+
+        preco: limparMoeda(form.preco),
+        qtdVagas: Number(form.qtdVagas || 0),
+
+        cursoAtivo: form.cursoAtivo,
+        cursoId: Number(form.cursoId),
+        enderecoId: Number(form.enderecoId),
+
+        porcentagemLucro:
+          Number(form.porcentagemLucro || 0) / 100,
       };
 
-      const id = turmaSelecionada?.id || turmaSelecionada?.turmaId;
-
       if (editando) {
-        await editarTurma(id, payload);
+        await editarTurma(turmaSelecionada.id || turmaSelecionada, payload);
       } else {
         await cadastrarTurma(payload);
       }
 
-      if (onSuccess) onSuccess();
+      onSuccess?.();
       fecharModal();
     } catch (error) {
       console.error("Erro ao salvar turma:", error.response?.data || error);
@@ -89,22 +158,14 @@ export default function TurmaModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-
       <div className="w-full max-w-5xl max-h-[92vh] bg-white rounded-[2.5rem] border border-[#ece7e2] shadow-xl overflow-hidden">
 
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-[#ece7e2]">
-
           <div>
             <h2 className="text-3xl font-light text-[#3d2b1f]">
               {editando ? "Editar Turma" : "Nova Turma"}
             </h2>
-
-            <p className="text-gray-500 mt-1">
-              {editando
-                ? "Atualize as informações da turma"
-                : "Preencha os dados da turma"}
-            </p>
           </div>
 
           <button
@@ -117,12 +178,11 @@ export default function TurmaModal({
 
         {/* BODY */}
         <div className="p-8 overflow-y-auto max-h-[75vh]">
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* NOME */}
             <Input
-              label="Nome da turma"
+              label="Nome da Turma"
               value={form.nome}
               onChange={(e) =>
                 setForm({ ...form, nome: e.target.value })
@@ -136,7 +196,7 @@ export default function TurmaModal({
               </label>
 
               <select
-                value={form.cursoAtivo}
+                value={String(form.cursoAtivo)}
                 onChange={(e) =>
                   setForm({
                     ...form,
@@ -164,52 +224,59 @@ export default function TurmaModal({
                 className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
               >
                 <option value="">Selecione um curso</option>
-
-                {cursos.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
+                {cursos.map((curso) => (
+                  <option key={curso.id} value={curso.id}>
+                    {curso.nome}
                   </option>
                 ))}
               </select>
             </div>
 
             {/* ENDEREÇO */}
-            <div>
-              <label className="text-sm text-gray-500 mb-2 block">
-                Endereço
-              </label>
+            {!editando && (
+              <div>
+                <label className="text-sm text-gray-500 mb-2 block">
+                  Endereço
+                </label>
 
-              <select
-                value={form.enderecoId}
-                onChange={(e) =>
-                  setForm({ ...form, enderecoId: e.target.value })
-                }
-                className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
-              >
-                <option value="">Selecione um endereço</option>
+                <select
+                  value={form.enderecoId}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      enderecoId: e.target.value,
+                    })
+                  }
+                  className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
+                >
+                  <option value="">Selecione um endereço</option>
+                  {enderecos.map((endereco) => (
+                    <option key={endereco.id} value={endereco.id}>
+                      {endereco.rua}, {endereco.numero} -{" "}
+                      {endereco.cidade}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-                {enderecos.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.nome || e.rua || `Endereço ${e.id}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* DATA INÍCIO */}
+            {/* DATA INICIO */}
             <Input
-              type="date"
-              label="Data de início"
+              type="datetime-local"
+              label="Data de Início"
               value={form.dataInicio}
               onChange={(e) =>
-                setForm({ ...form, dataInicio: e.target.value })
+                setForm({
+                  ...form,
+                  dataInicio: e.target.value,
+                })
               }
             />
 
-            {/* DATA ENCERRAMENTO */}
+            {/* DATA FIM */}
             <Input
-              type="date"
-              label="Data de encerramento"
+              type="datetime-local"
+              label="Data de Encerramento"
               value={form.dataEncerramento}
               onChange={(e) =>
                 setForm({
@@ -219,28 +286,56 @@ export default function TurmaModal({
               }
             />
 
-            {/* PREÇO */}
-            <Input
-              label="Preço"
-              value={form.preco}
-              onChange={(e) =>
-                setForm({ ...form, preco: e.target.value })
-              }
-            />
+            {/* PREÇO (COM MÁSCARA) */}
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                Preço
+              </label>
+
+              <input
+                value={formatarMoeda(form.preco)}
+                onChange={(e) => {
+                  const apenasNumeros =
+                    e.target.value.replace(/\D/g, "");
+
+                  setForm({
+                    ...form,
+                    preco: apenasNumeros,
+                  });
+                }}
+                className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
+              />
+            </div>
 
             {/* VAGAS */}
             <Input
-              label="Quantidade de vagas"
+              type="number"
+              label="Quantidade de Vagas"
               value={form.qtdVagas}
               onChange={(e) =>
-                setForm({ ...form, qtdVagas: e.target.value })
+                setForm({
+                  ...form,
+                  qtdVagas: e.target.value,
+                })
+              }
+            />
+
+            {/* LUCRO */}
+            <Input
+              type="number"
+              label="Porcentagem de Lucro (%)"
+              value={form.porcentagemLucro}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  porcentagemLucro: e.target.value,
+                })
               }
             />
           </div>
 
           {/* FOOTER */}
           <div className="flex justify-end gap-4 mt-10">
-
             <button
               onClick={fecharModal}
               className="px-6 py-3 rounded-2xl border border-[#ece7e2]"
@@ -256,19 +351,17 @@ export default function TurmaModal({
               {loading
                 ? "Salvando..."
                 : editando
-                ? "Salvar alterações"
-                : "Salvar turma"}
+                ? "Salvar Alterações"
+                : "Salvar Turma"}
             </button>
-
           </div>
-
         </div>
       </div>
     </div>
   );
 }
 
-/* INPUT PADRÃO */
+/* INPUT */
 function Input({ label, value, onChange, type = "text" }) {
   return (
     <div>

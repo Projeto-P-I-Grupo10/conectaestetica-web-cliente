@@ -7,9 +7,6 @@ import DeleteModal from "../assets/components-admin/DeleteModal";
 
 import { tabelaCursos, deletarCurso } from "../assets/service/cursos";
 
-/**
- * 🔥 NORMALIZER (resolve qualquer formato da API)
- */
 function normalizeCurso(curso) {
   return {
     id: curso.id || curso.cursoId,
