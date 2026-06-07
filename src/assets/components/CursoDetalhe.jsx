@@ -5,9 +5,10 @@ import AvaliacaoForm from "./AvaliacaoForm";
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { listarAvaliacoesCurso } from "../service/avaliacaoCurso";
 
 import { exibirCursoDetalheId } from "../service/cursos";
-import { listarAvaliacoesCurso } from "../service/avaliacaoCurso";
+
 
 export default function CursoDetalhe() {
   const { id } = useParams();
@@ -20,41 +21,34 @@ export default function CursoDetalhe() {
     quantidade: 0,
   });
 
+
   useEffect(() => {
-    async function carregarCurso() {
-      try {
-        const data = await exibirCursoDetalheId(id);
-        const avaliacoes = await listarAvaliacoesCurso(id);
+  async function carregarCurso() {
+    try {
+      const data = await exibirCursoDetalheId(id);
 
-        const avaliacoesDoCurso = avaliacoes.filter(
-          (item) => item.idCurso === Number(id)
-        );
+      setCurso(data);
 
-        const quantidade = avaliacoesDoCurso.length;
+      const avaliacoes = await listarAvaliacoesCurso(data.cursoId);
 
-        const media =
-          quantidade > 0
-            ? avaliacoesDoCurso.reduce(
-              (soma, item) => soma + item.avaliacao,
-              0
-            ) / quantidade
-            : 0;
+      const media = Number(data?.avaliacaoCurso || 0);
+      const quantidade = avaliacoes.length;
 
-        setAvaliacaoCurso({
-          media: media.toFixed(1),
-          quantidade,
-        });
+      setAvaliacaoCurso({
+        media: media.toFixed(1),
+        quantidade,
+      });
 
-        console.log("Curso recebido:", data);
-        setCurso(data);
-      } catch (erro) {
-        console.error("Erro ao buscar curso", erro);
-        setCurso(null);
-      }
+      console.log("Curso recebido:", data);
+      console.log("Avaliações recebidas:", avaliacoes);
+    } catch (erro) {
+      console.error("Erro ao buscar curso", erro);
+      setCurso(null);
     }
+  }
 
-    carregarCurso();
-  }, [id]);
+  carregarCurso();
+}, [id]);
 
   const precoFormatado = Number(curso?.turmaPreco || 0).toLocaleString(
     "pt-BR",
