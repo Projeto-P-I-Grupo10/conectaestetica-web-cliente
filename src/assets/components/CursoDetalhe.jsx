@@ -30,8 +30,15 @@ export default function CursoDetalhe() {
           (item) => item.idCurso === Number(id)
         );
 
-        const quantidade = data.avaliacoesTotal;
-        const media = data.avaliacaoCurso;
+        const quantidade = avaliacoesDoCurso.length;
+
+        const media =
+          quantidade > 0
+            ? avaliacoesDoCurso.reduce(
+              (soma, item) => soma + item.avaliacao,
+              0
+            ) / quantidade
+            : 0;
 
         setAvaliacaoCurso({
           media: media.toFixed(1),
@@ -162,7 +169,7 @@ export default function CursoDetalhe() {
               {/* BOTÕES */}
               <div className="flex flex-col md:flex-row gap-4">
                 <button
-                  onClick={() => navigate(`/pagamentos/${curso?.turmaId}`)}
+                  onClick={() => navigate(`/matricula`, { state: { turmaId: curso?.turmaId } })}
                   className="
                     bg-[#c9a46c]
                     hover:bg-[#b89258]
@@ -437,7 +444,7 @@ export default function CursoDetalhe() {
                     key={estrela}
                     size={20}
                     className={
-                      estrela <= Math.round(avaliacaoCurso.media) 
+                      estrela <= Math.round(avaliacaoCurso.media)
                         ? "fill-[#c9a46c] text-[#c9a46c]"
                         : "text-gray-300"
                     }

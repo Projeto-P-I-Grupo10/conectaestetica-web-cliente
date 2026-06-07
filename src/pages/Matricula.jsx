@@ -1,19 +1,81 @@
 import { useState } from "react";
 import { Upload, FileCheck, BadgeCheck } from "lucide-react";
+import { criarMatricula } from "../assets/service/matricula"
 
+import Swal from "sweetalert2";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function MatriculaPage() {
+  const location = useLocation()
+  const dadosRecebidos = location.state;
+
+  const navigate = useNavigate()
+
   const [certificado, setCertificado] = useState(null);
   const [documento, setDocumento] = useState(null);
 
   const handleCertificado = (e) => {
-    setCertificado(e.target.files[0]);
+    const arquivo = e.target.files[0]
+
+    if (arquivo) {
+      setCertificado(arquivo);
+    }
   };
 
   const handleDocumento = (e) => {
-    setDocumento(e.target.files[0]);
+    const arquivo = e.target.files[0]
+
+    if (arquivo) {
+      setDocumento(arquivo);
+    }
+  };
+
+  const handleCriarMatricula = async () => {
+    try {
+      if (certificado == null || documento == null) {
+        Swal.fire({
+          title: "Documentos não preenchidos!",
+          text: "Anexe todos os documentos",
+          icon: "warning",
+        });
+
+        return;
+      }
+
+      const payload = {
+        usuarioId: sessionStorage.idUsuario,
+        turmaId: dadosRecebidos.turmaId,
+        documentos: certificado
+          ? [
+            {
+              arquivo: certificado.name
+            }
+          ]
+          : []
+      };
+
+      const matricula = await criarMatricula(payload);
+
+      console.log("Matrícula criada:", matricula);
+
+      Swal.fire({
+          title: "Matrícula realizada com sucesso!",
+          text: "Seus documentos foram enviados para avaliação!",
+          icon: "success",
+        });
+      
+      navigate(`/pagamentos/${dadosRecebidos.turmaId}`)
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+          title: "Erro!",
+          text: "Erro ao realizar matrícula.",
+          icon: "error",
+        });
+    }
   };
 
   return (
@@ -233,6 +295,8 @@ export default function MatriculaPage() {
               </p>
 
               <button
+                type="button"
+                onClick={handleCriarMatricula}
                 className="
                   bg-[#c9a46c]
                   hover:bg-[#b89258]
