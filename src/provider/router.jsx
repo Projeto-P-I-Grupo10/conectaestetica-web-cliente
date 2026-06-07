@@ -9,6 +9,14 @@ import Perfil from "../pages/Perfil";
 import Matricula from "../pages/Matricula";
 import Formulario from "../pages/Formulario";
 
+// Admin
+import AdminDashboard from "../pages/AdminDashboard";
+import AdminCursos from "../pages/AdminCursos";
+import AdminProfessor from "../pages/AdminProfessor";
+import AdminTurmas from "../pages/AdminTurmas";
+import AdminEnderecos from "../pages/AdminEnderecos";
+import AdminAreas from "../pages/AdminAreas"
+
 export const router = createBrowserRouter([
   {
     path: "/cadastro",
@@ -46,7 +54,37 @@ export const router = createBrowserRouter([
     path: "/formulario",
     element: <Formulario />,
   },
+
+  // Area de admin
+
   {
+    path: "Admin/Dashboard",
+    element: <AdminDashboard />,
+  },
+  {
+    path: "Admin/Cursos",
+    element: <AdminCursos />,
+  },
+  {
+    path: "Admin/Professor",
+    element: <AdminProfessor />,
+  },
+  {
+    path: "Admin/Turmas",
+    element: <AdminTurmas />,
+  },
+  {
+    path: "Admin/Endereco",
+    element: <AdminEnderecos />,
+  },
+  {
+    path: "Admin/Areas",
+    element: <AdminAreas />,
+  },
+
+  {
+    // Caso o caminho esteja errado
+
     path: "*",
     element: <div>Página não encontrada</div>,
   },

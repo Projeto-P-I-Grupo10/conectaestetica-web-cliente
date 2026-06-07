@@ -11,9 +11,9 @@ export async function cadastrarUsuario(dados) {
       cep: dados.cep,
       cidade: dados.cidade,
       numero: dados.numero,
-      uf: "SP",
-      rua: "Feliciano de Mendonça",
-      complemento: "São paulo",
+      uf: dados.estado,
+      rua: dados.logradouro,
+      complemento: dados.complemento,
     }]
   });
 }

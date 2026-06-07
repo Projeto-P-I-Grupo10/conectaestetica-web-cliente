@@ -10,7 +10,7 @@ export default function ModalResetSenha({
 }) {
   const [showSenhaAtual, setShowSenhaAtual] = useState(false);
   const [showSenhaNova, setShowSenhaNova] = useState(false);
-  const id = localStorage.getItem("idUsuario");
+  const id = sessionStorage.getItem("idUsuario");
   const [senha, setSenha] = useState("");
 
       async function verificarSenhaUsuarioModal() {
@@ -41,7 +41,7 @@ export default function ModalResetSenha({
         flex
         items-center
         justify-center
-        z-[999]
+        z-999
         p-6
       "
     >

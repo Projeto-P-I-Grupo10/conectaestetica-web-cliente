@@ -9,11 +9,11 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [usuario] = useState(() => {
-    return localStorage.getItem("nome") || "";
+    return sessionStorage.getItem("nome") || "";
   });
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     window.location.reload();
   };
 

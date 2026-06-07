@@ -27,22 +27,19 @@ export default function Login() {
     try {
       const data = await loginService({ email, senha });
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("idUsuario", data.id);
-      localStorage.setItem("email", data.email);
-      localStorage.setItem("nome", data.nome);
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("idUsuario", data.id);
+      sessionStorage.setItem("email", data.email);
+      sessionStorage.setItem("nome", data.nome);
 
-      // 👇 ALERTA + ESPERA
       await Swal.fire({
         title: "Login realizado!",
         text: `Bem-vindo, ${data.nome} 👋`,
-        icon: "success",
+        icon: "success",  
         confirmButtonText: "Continuar",
       });
 
-      // 👇 REDIRECIONA DEPOIS
       navigate("/cursos");
-
     } catch (e) {
       console.error(e);
 
@@ -55,46 +52,52 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-xl">
-        <h1 className="text-2xl font-semibold text-center underline mb-6">
+    <div className="min-h-screen flex items-center justify-center from-[#f6f1eb] via-[#fdfbf8] to-[#f3ebe3]">
+      <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl border border-[#eee] p-10">
+        {/* TÍTULO */}
+        <h1 className="text-3xl font-semibold text-center text-[#2c2c2c] mb-8">
           Login
         </h1>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* EMAIL */}
           <div>
-            <label className="text-sm">Email:</label>
+            <label className="text-sm text-gray-600">Email</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full border rounded-md p-2 mt-1 ${
+              className={`w-full mt-1 px-4 py-2 rounded-xl border outline-none transition bg-white/70
+              ${
                 email.length > 0
                   ? emailValido
-                    ? "border-green-500"
-                    : "border-red-500"
-                  : ""
-              }`}
+                    ? "border-green-400"
+                    : "border-red-400"
+                  : "border-gray-200"
+              }
+              focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20
+            `}
             />
             {email.length > 0 && !emailValido && (
-              <p className="text-xs text-red-500">Email inválido</p>
+              <p className="text-xs text-red-500 mt-1">Email inválido</p>
             )}
           </div>
 
           {/* SENHA */}
           <div>
-            <label className="text-sm">Senha:</label>
-            <div className="relative">
+            <label className="text-sm text-gray-600">Senha</label>
+
+            <div className="relative mt-1">
               <input
                 type={showSenha ? "text" : "password"}
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                className="w-full border rounded-md p-2 mt-1 pr-10"
+                className="w-full px-4 py-2 rounded-xl border border-gray-200 outline-none transition bg-white/70 pr-10 focus:border-[#c9a46c] focus:ring-2 focus:ring-[#c9a46c]/20"
               />
+
               <button
                 type="button"
                 onClick={() => setShowSenha(!showSenha)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#c9a46c]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#c9a46c]"
               >
                 {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -103,22 +106,24 @@ export default function Login() {
         </div>
 
         {/* BOTÃO */}
-        <div className="mt-6">
+        <div className="mt-7">
           <button
             onClick={handleLogin}
             disabled={!formValido}
-            className={`w-full py-2 rounded-full text-white ${
+            className={`w-full py-3 rounded-xl font-medium transition shadow-md
+            ${
               formValido
-                ? "bg-[#c9a46c] hover:bg-[#b8935c]"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
+                ? "bg-[#c9a46c] hover:bg-[#b8935c] text-white"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }
+          `}
           >
             Entrar
           </button>
         </div>
 
         {/* LINK */}
-        <p className="text-xs text-center mt-4 text-gray-500">
+        <p className="text-xs text-center mt-6 text-gray-500">
           Não tem conta?{" "}
           <span className="underline cursor-pointer text-[#c9a46c]">
             Cadastre-se

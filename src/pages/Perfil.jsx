@@ -8,6 +8,7 @@ import {
   Lock,
   Check,
   X,
+  MapPin,
 } from "lucide-react";
 
 import Navbar from "../assets/components/Navbar";
@@ -17,8 +18,10 @@ import ModalResetSenha from "../assets/components/ModalResetSenha";
 import { atualizarUsuario, detalharUsuario } from "../assets/service/usuarios";
 import ModalResetNovaSenha from "../assets/components/ModalResetNovaSenha";
 
+import ModalEnderecos from "../assets/components/EnderecoModalUsuario";
+
 export default function PerfilUsuario() {
-  const id = localStorage.getItem("idUsuario");
+  const id = sessionStorage.getItem("idUsuario");
 
   const [usuario, setUsuario] = useState({});
   const [editando, setEditando] = useState(false);
@@ -29,10 +32,9 @@ export default function PerfilUsuario() {
 
   const [imagem, setImagem] = useState(null);
 
-  // MODAL RESET SENHA
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
   const [modalNovaSenhaOpen, setModalNovaSenhaOpen] = useState(false);
-
+  const [modalEnderecoOpen, setModalEnderecoOpen] = useState(false);
 
   useEffect(() => {
     async function carregarUsuario() {
@@ -138,6 +140,21 @@ export default function PerfilUsuario() {
     },
   ];
 
+  function formatarTelefone(valor) {
+    valor = valor.replace(/\D/g, "");
+    valor = valor.slice(0, 11);
+
+    if (valor.length <= 10) {
+      return valor
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      return valor
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f5f5]">
       <Navbar />
@@ -148,7 +165,7 @@ export default function PerfilUsuario() {
           <div
             className="
               bg-white
-              rounded-[2rem]
+              rounded-4xl
               shadow-sm
               border
               border-[#ece7e2]
@@ -463,7 +480,9 @@ export default function PerfilUsuario() {
                         <input
                           type="text"
                           value={telefone}
-                          onChange={(e) => setTelefone(e.target.value)}
+                          onChange={(e) =>
+                            setTelefone(formatarTelefone(e.target.value))
+                          }
                           className="
                             w-full
                             border
@@ -476,7 +495,9 @@ export default function PerfilUsuario() {
                           "
                         />
                       ) : (
-                        <p className="text-[#3d2b1f]">{usuario?.telefone}</p>
+                        <p className="text-[#3d2b1f]">
+                          {formatarTelefone(usuario?.telefone || "")}
+                        </p>
                       )}
                     </div>
 
@@ -511,6 +532,42 @@ export default function PerfilUsuario() {
                         </button>
                       </div>
                     </div>
+
+                    {/* ENDEREÇOS */}
+                    <div className="bg-white rounded-2xl p-4 border border-[#ece7e2]">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-3 mb-2 text-[#c9a46c]">
+                            <MapPin size={18} />
+
+                            <span className="text-sm font-medium">
+                              Endereços
+                            </span>
+                          </div>
+
+                          <p className="text-[#3d2b1f]">
+                            Gerencie seus endereços cadastrados
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => setModalEnderecoOpen(true)}
+                          className="
+                          px-4
+                          py-2
+                          rounded-full
+                          bg-[#c9a46c]
+                          hover:bg-[#b89258]
+                          transition
+                          text-white
+                          text-sm
+                          font-medium
+                        "
+                        >
+                          Gerenciar
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -532,6 +589,11 @@ export default function PerfilUsuario() {
       <ModalResetNovaSenha
         open={modalNovaSenhaOpen}
         onClose={() => setModalNovaSenhaOpen(false)}
+      />
+
+      <ModalEnderecos
+        aberto={modalEnderecoOpen}
+        fecharModal={() => setModalEnderecoOpen(false)}
       />
 
       <Footer />
