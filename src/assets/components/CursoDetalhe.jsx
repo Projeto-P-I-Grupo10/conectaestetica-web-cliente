@@ -30,15 +30,8 @@ export default function CursoDetalhe() {
           (item) => item.idCurso === Number(id)
         );
 
-        const quantidade = avaliacoesDoCurso.length;
-
-        const media =
-          quantidade > 0
-            ? avaliacoesDoCurso.reduce(
-              (soma, item) => soma + item.avaliacao,
-              0
-            ) / quantidade
-            : 0;
+        const quantidade = data.avaliacoesTotal;
+        const media = data.avaliacaoCurso;
 
         setAvaliacaoCurso({
           media: media.toFixed(1),
