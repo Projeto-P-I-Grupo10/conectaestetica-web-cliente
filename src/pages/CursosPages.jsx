@@ -19,39 +19,9 @@ export default function CursosPage() {
 
   const navigate = useNavigate();
 
-  async function carregarAvaliacoesDosCursos(listaCursos) {
-    const avaliacoesMap = {};
 
-    for (const curso of listaCursos) {
-      try {
-        const avaliacoes = await listarAvaliacoesCurso(curso.cursoId);
 
-        const quantidade = avaliacoes.length;
 
-        const media =
-          quantidade > 0
-            ? avaliacoes.reduce(
-              (soma, item) => soma + Number(item.avaliacao),
-              0
-            ) / quantidade
-            : 0;
-
-        avaliacoesMap[curso.cursoId] = {
-          media: media.toFixed(1),
-          quantidade,
-        };
-      } catch (erro) {
-        console.error(`Erro ao buscar avaliações do curso ${curso.cursoId}`, erro);
-
-        avaliacoesMap[curso.cursoId] = {
-          media: 0,
-          quantidade: 0,
-        };
-      }
-    }
-
-    setAvaliacoesPorCurso(avaliacoesMap);
-  }
 
   useEffect(() => {
     async function carregarCursos() {
@@ -60,7 +30,6 @@ export default function CursosPage() {
         if (Array.isArray(data) && data.length > 0) {
           setCursos(data);
           console.log(data);
-          carregarAvaliacoesDosCursos(data);
         } else {
           setCursos([
             { cursoId: 1, cursoNome: "Skin Care Profissional", turmaPreco: 299.9, cursoImagem: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop" },
@@ -137,6 +106,8 @@ export default function CursosPage() {
       curso?.cursoNome?.toLowerCase().includes(pesquisa.toLowerCase())
     );
   }, [cursos, pesquisa]);
+
+  console.log("Cursos renderizados:", cursosFiltrados);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f5f5]">
@@ -216,7 +187,7 @@ export default function CursosPage() {
                 Array.isArray(cursosFiltrados) && cursosFiltrados.length > 0 ? (
                   cursosFiltrados.map((curso) => (
                     <CursoCard
-                      key={curso?.cursoId}
+                      key={`${curso?.turmaId}-${curso?.cursoId}`}
                       titulo={curso?.cursoNome}
                       preco={curso?.turmaPreco}
                       avaliacao={Number(curso?.avaliacaoCurso || 0).toFixed(1)}

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import Swal from "sweetalert2";
 import {
   criarAvaliacaoCurso,
   listarAvaliacoesCurso,
+  atualizarAvaliacaoCurso,
+  deletarAvaliacaoCurso,
 } from "../service/avaliacaoCurso";
 
 export default function AvaliacaoForm({ cursoId }) {
@@ -12,32 +15,66 @@ export default function AvaliacaoForm({ cursoId }) {
   const [comentarios, setComentarios] = useState([]);
   const [enviando, setEnviando] = useState(false);
   const [mostrarTodos, setMostrarTodos] = useState(false);
+  const [avaliacaoEditando, setAvaliacaoEditando] = useState(null);
 
   console.log("testeasfewfwrwefefe" + cursoId)
   useEffect(() => {
     async function carregarComentarios() {
-        try {
-            const data = await listarAvaliacoesCurso(cursoId);
-            setComentarios(data);
-            console.log(data)
-        } catch (erro) {
-            console.error("Erro ao buscar comentários", erro);
-        }
+      try {
+        const data = await listarAvaliacoesCurso(cursoId);
+        setComentarios(data);
+        console.log(data)
+      } catch (erro) {
+        console.error("Erro ao buscar comentários", erro);
+      }
     }
 
     if (cursoId) {
-        carregarComentarios();
+      carregarComentarios();
     }
-}, [cursoId]);
+  }, [cursoId]);
+
+  function prepararEdicao(item) {
+    setAvaliacaoEditando(item);
+    setNota(Number(item.avaliacao));
+    setComentario(item.comentario || "");
+  }
+
+  async function removerAvaliacao(id) {
+    const confirmar = confirm("Deseja remover esta avaliação?");
+
+    if (!confirmar) return;
+
+    try {
+      await deletarAvaliacaoCurso(id);
+      await Swal.fire({
+        title: "Avaliação removida com sucesso!",
+        text: "Avaliação removida com sucesso!s",
+        icon: "success",
+      });
+      window.location.reload();
+    } catch (erro) {
+      console.error("Erro ao remover avaliação", erro);
+      alert("Erro ao remover avaliação.");
+    }
+  }
 
   async function enviarAvaliacao() {
     if (nota === 0) {
-      alert("Selecione uma nota.");
+      Swal.fire({
+        title: "Selecione uma nota!",
+        text: "Avalie o curso!",
+        icon: "warning",
+      });
       return;
     }
 
     if (!comentario.trim()) {
-      alert("Digite um comentário.");
+      Swal.fire({
+        title: "Escreva um comentário!",
+        text: "Escreva algo",
+        icon: "warning",
+      });
       return;
     }
 
@@ -56,23 +93,25 @@ export default function AvaliacaoForm({ cursoId }) {
         comentario: comentario.trim(),
       };
 
-      const novaAvaliacao = await criarAvaliacaoCurso(dados);
+      if (avaliacaoEditando) {
+        await atualizarAvaliacaoCurso(avaliacaoEditando.id, dados);
+        await Swal.fire({
+          title: "Avaliação atualizada com sucesso!",
+          text: "Avaliação foi atualizada!",
+          icon: "success",
+        });
+      } else {
+        await criarAvaliacaoCurso(dados);
+       await Swal.fire({
+          title: "Avaliação adicionada com sucesso!",
+          text: "Avaliação foi adicionada!",
+          icon: "success",
+        });
+      }
 
-      setComentarios((comentariosAtuais) => [
-        ...comentariosAtuais,
-        {
-          ...novaAvaliacao,
-          id: novaAvaliacao.id,
-          nome: sessionStorage.getItem("nome") || "Usuário",
-          avaliacao: Number(nota),
-          comentario: comentario.trim(),
-        },
-      ]);
+      window.location.reload();
 
-      alert("Avaliação enviada com sucesso!");
 
-      setNota(0);
-      setComentario("");
     } catch (erro) {
       console.error("Erro ao enviar avaliação", erro);
       console.log("Resposta do back:", erro.response?.data);
@@ -128,10 +167,9 @@ export default function AvaliacaoForm({ cursoId }) {
                   size={34}
                   className={`
                     transition
-                    ${
-                      estrela <= (hover || nota)
-                        ? "fill-[#c9a46c] text-[#c9a46c]"
-                        : "text-[#d6d3d1]"
+                    ${estrela <= (hover || nota)
+                      ? "fill-[#c9a46c] text-[#c9a46c]"
+                      : "text-[#d6d3d1]"
                     }
                   `}
                 />
@@ -222,6 +260,32 @@ export default function AvaliacaoForm({ cursoId }) {
             </div>
 
             <p className="text-gray-600 leading-relaxed">{item.comentario}</p>
+            {Number(sessionStorage.getItem("idUsuario")) === item.usuario?.id && (
+              <div className="flex gap-4 mt-4">
+                <button
+                  type="button"
+                  onClick={() => prepararEdicao(item)}
+                  className="text-sm text-[#c9a46c] font-medium"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!item.id) {
+                      alert("Essa avaliação não possui ID retornado pelo back.");
+                      return;
+                    }
+
+                    removerAvaliacao(item.id);
+                  }}
+                  className="text-sm text-red-500 font-medium"
+                >
+                  Remover
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
