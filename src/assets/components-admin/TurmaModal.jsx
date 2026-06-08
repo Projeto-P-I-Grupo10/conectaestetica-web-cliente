@@ -19,6 +19,7 @@ function formatarMoeda(valor) {
 }
 
 function limparMoeda(valor) {
+  if (!valor) return 0;
   return Number(valor.toString().replace(/\D/g, "")) / 100;
 }
 
@@ -50,51 +51,38 @@ export default function TurmaModal({
     enderecoId: "",
   });
 
+  /* =========================
+     PREENCHER FORM (EDIÇÃO)
+  ========================= */
+
   useEffect(() => {
     if (editando && turmaSelecionada) {
-      const turma =
-        typeof turmaSelecionada === "object"
-          ? turmaSelecionada
-          : null;
-
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
-        nome: turma?.nome || "",
-        cursoAtivo: turma?.cursoAtivo ?? true,
+        nome: turmaSelecionada.nome || "",
+        cursoAtivo: turmaSelecionada.cursoAtivo ?? true,
 
-        dataInicio: turma?.dataInicio
-          ? turma.dataInicio.slice(0, 16)
+        dataInicio: turmaSelecionada.dataInicio?.slice(0, 16) || "",
+        dataEncerramento: turmaSelecionada.dataEncerramento?.slice(0, 16) || "",
+
+        preco: turmaSelecionada.preco
+          ? String(Math.round(Number(turmaSelecionada.preco) * 100))
           : "",
 
-        dataEncerramento: turma?.dataEncerramento
-          ? turma.dataEncerramento.slice(0, 16)
-          : "",
+        qtdVagas: String(turmaSelecionada.qtdVagas || ""),
 
-        // 🔥 converte para centavos para máscara funcionar
-        preco: turma?.preco
-          ? String(Math.round(Number(turma.preco) * 100))
-          : "",
-
-        qtdVagas: turma?.qtdVagas
-          ? String(turma.qtdVagas)
-          : "",
-
-        porcentagemLucro: turma?.porcentagemLucro
-          ? String(Number(turma.porcentagemLucro) * 100)
+        porcentagemLucro: turmaSelecionada.porcentagemLucro
+          ? String(Number(turmaSelecionada.porcentagemLucro) * 100)
           : "10",
 
-        cursoId: turma?.cursoId
-          ? String(turma.cursoId)
-          : "",
-
-        enderecoId: turma?.enderecoId
-          ? String(turma.enderecoId)
-          : "",
+        cursoId: String(turmaSelecionada.cursoId || ""),
+        enderecoId: String(turmaSelecionada.enderecoId || ""),
       });
 
       return;
     }
 
+    /* RESET CRIAÇÃO */
     setForm({
       nome: "",
       cursoAtivo: true,
@@ -106,20 +94,19 @@ export default function TurmaModal({
       cursoId: "",
       enderecoId: "",
     });
-  }, [turmaSelecionada, aberto, editando]);
+  }, [turmaSelecionada, aberto]);
+
+  /* =========================
+     SALVAR
+  ========================= */
 
   async function handleSalvar() {
     try {
       if (!form.nome.trim()) return alert("Informe o nome da turma.");
       if (!form.cursoId) return alert("Selecione um curso.");
-      if (!editando && !form.enderecoId)
-        return alert("Selecione um endereço.");
-      if (!form.dataInicio)
-        return alert("Informe a data de início.");
-      if (!form.dataEncerramento)
-        return alert("Informe a data de encerramento.");
-      if (!form.porcentagemLucro)
-        return alert("Informe a porcentagem de lucro.");
+      if (!form.enderecoId) return alert("Selecione um endereço.");
+      if (!form.dataInicio) return alert("Informe a data de início.");
+      if (!form.dataEncerramento) return alert("Informe a data de encerramento.");
 
       setLoading(true);
 
@@ -135,12 +122,12 @@ export default function TurmaModal({
         cursoId: Number(form.cursoId),
         enderecoId: Number(form.enderecoId),
 
-        porcentagemLucro:
-          Number(form.porcentagemLucro || 0) / 100,
+        porcentagemLucro: Number(form.porcentagemLucro || 0) / 100,
       };
 
+      /* 🔥 CORREÇÃO DO ID DO PUT */
       if (editando) {
-        await editarTurma(turmaSelecionada.id || turmaSelecionada, payload);
+        await editarTurma(turmaSelecionada.turmaId, payload);
       } else {
         await cadastrarTurma(payload);
       }
@@ -232,33 +219,28 @@ export default function TurmaModal({
               </select>
             </div>
 
-            {/* ENDEREÇO */}
-            {!editando && (
-              <div>
-                <label className="text-sm text-gray-500 mb-2 block">
-                  Endereço
-                </label>
+            {/* ENDEREÇO (AGORA FUNCIONA NA EDIÇÃO) */}
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                Endereço
+              </label>
 
-                <select
-                  value={form.enderecoId}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      enderecoId: e.target.value,
-                    })
-                  }
-                  className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
-                >
-                  <option value="">Selecione um endereço</option>
-                  {enderecos.map((endereco) => (
-                    <option key={endereco.id} value={endereco.id}>
-                      {endereco.rua}, {endereco.numero} -{" "}
-                      {endereco.cidade}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+              <select
+                value={form.enderecoId}
+                onChange={(e) =>
+                  setForm({ ...form, enderecoId: e.target.value })
+                }
+                className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
+              >
+                <option value="">Selecione um endereço</option>
+
+                {enderecos.map((endereco) => (
+                  <option key={endereco.id} value={endereco.id}>
+                    {endereco.rua}, {endereco.numero} - {endereco.cidade}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* DATA INICIO */}
             <Input
@@ -286,7 +268,7 @@ export default function TurmaModal({
               }
             />
 
-            {/* PREÇO (COM MÁSCARA) */}
+            {/* PREÇO COM MÁSCARA */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
                 Preço
@@ -294,15 +276,12 @@ export default function TurmaModal({
 
               <input
                 value={formatarMoeda(form.preco)}
-                onChange={(e) => {
-                  const apenasNumeros =
-                    e.target.value.replace(/\D/g, "");
-
+                onChange={(e) =>
                   setForm({
                     ...form,
-                    preco: apenasNumeros,
-                  });
-                }}
+                    preco: e.target.value.replace(/\D/g, ""),
+                  })
+                }
                 className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
               />
             </div>
@@ -313,10 +292,7 @@ export default function TurmaModal({
               label="Quantidade de Vagas"
               value={form.qtdVagas}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  qtdVagas: e.target.value,
-                })
+                setForm({ ...form, qtdVagas: e.target.value })
               }
             />
 
