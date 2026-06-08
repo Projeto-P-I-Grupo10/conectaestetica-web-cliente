@@ -50,7 +50,7 @@ export async function atualizarUsuario(usuario,id)
     telefone: usuario?.telefone,
   })
     .then(response => {
-      return response;
+      return response.data;
     })
     .catch(error => {
     console.error("Erro:", error.response?.data || error.message);

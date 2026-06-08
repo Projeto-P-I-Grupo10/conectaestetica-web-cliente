@@ -5,14 +5,14 @@ import {
   deletarEndereco,
   editarEndereco,
   listarEnderecosPorUsuario,
-  selecionarEnderecoAtual
-} from "../service/enderecoUsuario"; 
+  selecionarEnderecoAtual,
+} from "../service/enderecoUsuario";
 
 export default function EnderecoModalUsuario({
   aberto,
   fecharModal,
   onSalvar,
-  onExcluir
+  onExcluir,
 }) {
   const [enderecos, setEnderecos] = useState([]);
 
@@ -24,24 +24,26 @@ export default function EnderecoModalUsuario({
     rua: "",
     numero: "",
     complemento: "",
-    bairro: "",
     cidade: "",
     uf: "",
   });
-  const usuarioId = Number(sessionStorage.getItem('idUsuario'));
-  console.log("usuarioId do sessionStorage:", sessionStorage.getItem('idUsuario'));
+  const usuarioId = Number(sessionStorage.getItem("idUsuario"));
+  console.log(
+    "usuarioId do sessionStorage:",
+    sessionStorage.getItem("idUsuario"),
+  );
 
   useEffect(() => {
     if (aberto && usuarioId) {
       listarEnderecosPorUsuario(usuarioId).then((lista) => {
-           setEnderecos(lista);
+        setEnderecos(lista);
 
         const atual = lista.find((e) => e.enderecoAtual === true);
         if (atual) {
           setEnderecoAtualId(atual.id);
           setForm({
             id: atual.id,
-            cep: atual.cep || "",
+            cep: aplicarMascaraCep(atual.cep || ""),
             rua: atual.rua || "",
             numero: atual.numero || "",
             complemento: atual.complemento || "",
@@ -54,14 +56,78 @@ export default function EnderecoModalUsuario({
     }
   }, [aberto, usuarioId]);
 
-  console.log(enderecos)
-  function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  function aplicarMascaraCep(valor) {
+    const numeros = valor.replace(/\D/g, "").slice(0, 8);
+
+    if (numeros.length <= 5) {
+      return numeros;
+    }
+
+    return `${numeros.slice(0, 5)}-${numeros.slice(5)}`;
   }
 
+  async function buscarCep(cep) {
+    try {
+      const cepLimpo = cep.replace(/\D/g, "");
+
+      if (cepLimpo.length !== 8) return;
+
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cepLimpo}/json/`,
+      );
+
+      const data = await response.json();
+
+      if (data.erro) {
+        return;
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        rua: data.logradouro || "",
+        bairro: data.bairro || "",
+        cidade: data.localidade || "",
+        uf: data.uf || "",
+      }));
+    } catch (error) {
+      console.error("Erro ao buscar CEP:", error);
+    }
+  }
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+
+    if (name === "cep") {
+      const cepFormatado = aplicarMascaraCep(value);
+
+      setForm((prev) => ({
+        ...prev,
+        cep: cepFormatado,
+      }));
+
+      const cepLimpo = cepFormatado.replace(/\D/g, "");
+
+      if (cepLimpo.length === 8) {
+        buscarCep(cepLimpo);
+      }
+
+      return;
+    }
+
+    if (name === "uf") {
+      setForm((prev) => ({
+        ...prev,
+        uf: value.toUpperCase().slice(0, 2),
+      }));
+
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
   function limparFormulario() {
     setForm({
       id: null,
@@ -69,7 +135,7 @@ export default function EnderecoModalUsuario({
       rua: "",
       numero: "",
       complemento: "",
-      bairro: "",
+
       cidade: "",
       uf: "",
     });
@@ -84,7 +150,7 @@ export default function EnderecoModalUsuario({
 
     setForm({
       id: atualizado.id,
-      cep: atualizado.cep || "",
+      cep: aplicarMascaraCep(atualizado.cep || ""),
       rua: atualizado.rua || "",
       numero: atualizado.numero || "",
       complemento: atualizado.complemento || "",
@@ -100,7 +166,7 @@ export default function EnderecoModalUsuario({
 
   async function handleSalvar() {
     if (
-      !form.cep ||
+      !form.cep.replace(/\D/g, "") ||
       !form.rua ||
       !form.numero ||
       !form.bairro ||
@@ -111,15 +177,32 @@ export default function EnderecoModalUsuario({
       return;
     }
 
-    
     if (form.id) {
-      const atualizado = await editarEndereco(form.id, { ...form, usuarioId });
+
+      const atualizado = await editarEndereco(form.id, {
+        ...form,
+        cep: form.cep.replace(/\D/g, ""),
+        usuarioId,
+      });
       setEnderecos((prev) =>
-        prev.map((endereco) => (endereco.id === form.id ? atualizado : endereco))
+        prev.map((endereco) =>
+          endereco.id === form.id ? atualizado : endereco,
+        ),
       );
     } else {
-      const novo = await cadastrarEndereco({ ...form, usuarioId });
+      const novo = await cadastrarEndereco({
+        ...form,
+        cep: form.cep.replace(/\D/g, ""),
+        usuarioId,
+      });
       setEnderecos((prev) => [...prev, novo]);
+    }
+
+    const cepLimpo = form.cep.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) {
+      alert("CEP inválido.");
+      return;
     }
 
     if (onSalvar) {
@@ -127,19 +210,17 @@ export default function EnderecoModalUsuario({
     }
 
     limparFormulario();
-    
-    }
+  }
 
   async function handleExcluir(id) {
-  await deletarEndereco(id);
-  setEnderecos((prev) => prev.filter((endereco) => endereco.id !== id));
-  if (form.id === id) limparFormulario();
+    await deletarEndereco(id);
+    setEnderecos((prev) => prev.filter((endereco) => endereco.id !== id));
+    if (form.id === id) limparFormulario();
 
-  if (onExcluir) {
-    onExcluir(id);
+    if (onExcluir) {
+      onExcluir(id);
+    }
   }
-}
-
 
   if (!aberto) return null;
 
@@ -231,13 +312,6 @@ export default function EnderecoModalUsuario({
               />
 
               <Input
-                label="Bairro"
-                name="bairro"
-                value={form.bairro}
-                onChange={handleChange}
-              />
-
-              <Input
                 label="Cidade"
                 name="cidade"
                 value={form.cidade}
@@ -277,9 +351,9 @@ export default function EnderecoModalUsuario({
             </h3>
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {enderecos.map((endereco,index) => (
+              {enderecos.map((endereco, index) => (
                 <div
-                 key={endereco.id ?? index}
+                  key={endereco.id ?? index}
                   className="
                     bg-[#faf8f6]
                     border border-[#ece7e2]

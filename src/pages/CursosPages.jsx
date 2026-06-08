@@ -8,7 +8,7 @@ import FiltroCursos from "../assets/components/FiltrosCursos";
 import CursoCard from "../assets/components/CursoCard";
 
 import { listarCurso } from "../assets/service/cursos";
-import api from "../assets/service/api"; // ajusta o caminho conforme o projeto
+import api from "../assets/service/api";
 
 export default function CursosPage() {
   const [cursos, setCursos] = useState([]);
@@ -16,12 +16,10 @@ export default function CursosPage() {
   const [cursosProximos, setCursosProximos] = useState(null);
   const [loadingProximos, setLoadingProximos] = useState(false);
   const [erroProximos, setErroProximos] = useState(null);
+  const [areaSelecionada, setAreaSelecionada] = useState("");
+  const [ordenacao, setOrdenacao] = useState("");
 
   const navigate = useNavigate();
-
-
-
-
 
   useEffect(() => {
     async function carregarCursos() {
@@ -32,20 +30,74 @@ export default function CursosPage() {
           console.log(data);
         } else {
           setCursos([
-            { cursoId: 1, cursoNome: "Skin Care Profissional", turmaPreco: 299.9, cursoImagem: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop" },
-            { cursoId: 2, cursoNome: "Botox Avançado", turmaPreco: 499.9, cursoImagem: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop" },
-            { cursoId: 3, cursoNome: "Massoterapia Relaxante", turmaPreco: 199.9, cursoImagem: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop" },
-            { cursoId: 4, cursoNome: "Harmonização Facial", turmaPreco: 799.9, cursoImagem: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1200&auto=format&fit=crop" },
-            { cursoId: 5, cursoNome: "Limpeza de Pele", turmaPreco: 149.9, cursoImagem: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop" },
-            { cursoId: 6, cursoNome: "Estética Corporal", turmaPreco: 349.9, cursoImagem: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1200&auto=format&fit=crop" },
+            {
+              cursoId: 1,
+              cursoNome: "Skin Care Profissional",
+              turmaPreco: 299.9,
+              cursoImagem:
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop",
+            },
+            {
+              cursoId: 2,
+              cursoNome: "Botox Avançado",
+              turmaPreco: 499.9,
+              cursoImagem:
+                "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop",
+            },
+            {
+              cursoId: 3,
+              cursoNome: "Massoterapia Relaxante",
+              turmaPreco: 199.9,
+              cursoImagem:
+                "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
+            },
+            {
+              cursoId: 4,
+              cursoNome: "Harmonização Facial",
+              turmaPreco: 799.9,
+              cursoImagem:
+                "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1200&auto=format&fit=crop",
+            },
+            {
+              cursoId: 5,
+              cursoNome: "Limpeza de Pele",
+              turmaPreco: 149.9,
+              cursoImagem:
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop",
+            },
+            {
+              cursoId: 6,
+              cursoNome: "Estética Corporal",
+              turmaPreco: 349.9,
+              cursoImagem:
+                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1200&auto=format&fit=crop",
+            },
           ]);
         }
       } catch (erro) {
         console.error("Erro ao buscar cursos", erro);
         setCursos([
-          { cursoId: 1, cursoNome: "Skin Care Profissional", turmaPreco: 299.9, cursoImagem: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop" },
-          { cursoId: 2, cursoNome: "Botox Avançado", turmaPreco: 499.9, cursoImagem: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop" },
-          { cursoId: 3, cursoNome: "Massoterapia Relaxante", turmaPreco: 199.9, cursoImagem: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop" },
+          {
+            cursoId: 1,
+            cursoNome: "Skin Care Profissional",
+            turmaPreco: 299.9,
+            cursoImagem:
+              "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop",
+          },
+          {
+            cursoId: 2,
+            cursoNome: "Botox Avançado",
+            turmaPreco: 499.9,
+            cursoImagem:
+              "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop",
+          },
+          {
+            cursoId: 3,
+            cursoNome: "Massoterapia Relaxante",
+            turmaPreco: 199.9,
+            cursoImagem:
+              "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=1200&auto=format&fit=crop",
+          },
         ]);
       }
     }
@@ -61,7 +113,9 @@ export default function CursosPage() {
       const idUsuario = Number(sessionStorage.getItem("idUsuario"));
 
       // busca endereços do usuário na plataforma
-      const resEnderecos = await api.get(`/historicos-endereco/usuario/${idUsuario}`);
+      const resEnderecos = await api.get(
+        `/historicos-endereco/usuario/${idUsuario}`,
+      );
       const enderecos = resEnderecos.data;
       console.log("ENDEREÇOS RETORNADOS:", enderecos);
 
@@ -77,7 +131,7 @@ export default function CursosPage() {
 
       // chama o microserviço de geolocalização
       const resProximos = await fetch(
-        `http://localhost:8082/cursos-proximos?endereco=${encodeURIComponent(enderecoFormatado)}`
+        `http://localhost:8082/cursos-proximos?endereco=${encodeURIComponent(enderecoFormatado)}`,
       );
       const data = await resProximos.json();
 
@@ -87,7 +141,6 @@ export default function CursosPage() {
       }
 
       setCursosProximos(data);
-
     } catch (erro) {
       console.error("Erro ao buscar cursos próximos", erro);
       setErroProximos("Erro ao buscar cursos próximos. Tente novamente.");
@@ -102,11 +155,48 @@ export default function CursosPage() {
   }
 
   const cursosFiltrados = useMemo(() => {
-    return cursos.filter((curso) =>
-      curso?.cursoNome?.toLowerCase().includes(pesquisa.toLowerCase())
-    );
-  }, [cursos, pesquisa]);
+    let resultado = [...cursos];
 
+    // pesquisa
+    if (pesquisa.trim()) {
+      resultado = resultado.filter((curso) =>
+        curso?.cursoNome?.toLowerCase().includes(pesquisa.toLowerCase()),
+      );
+    }
+
+    if (areaSelecionada) {
+      resultado = resultado.filter(
+        (curso) =>
+          curso?.areaNome?.toLowerCase() === areaSelecionada.toLowerCase(),
+      );
+    }
+
+    switch (ordenacao) {
+      case "preco":
+        resultado.sort(
+          (a, b) => Number(a.turmaPreco || 0) - Number(b.turmaPreco || 0),
+        );
+        break;
+
+      case "recentes":
+        resultado.sort(
+          (a, b) => new Date(b.turmaDataInicio) - new Date(a.turmaDataInicio),
+        );
+        break;
+
+      case "avaliacao":
+        resultado.sort(
+          (a, b) =>
+            Number(b.avaliacaoCurso || 0) - Number(a.avaliacaoCurso || 0),
+        );
+        break;
+
+      default:
+        break;
+    }
+
+    return resultado;
+  }, [cursos, pesquisa, areaSelecionada, ordenacao]);
   console.log("Cursos renderizados:", cursosFiltrados);
 
   return (
@@ -115,7 +205,12 @@ export default function CursosPage() {
 
       <main className="flex-1 flex justify-center py-10 mt-32">
         <div className="w-full max-w-7xl px-6 flex flex-col lg:flex-row gap-10">
-          <FiltroCursos />
+          <FiltroCursos
+            areaSelecionada={areaSelecionada}
+            setAreaSelecionada={setAreaSelecionada}
+            ordenacao={ordenacao}
+            setOrdenacao={setOrdenacao}
+          />
 
           <div className="flex-1">
             <div className="mb-10">
@@ -124,7 +219,8 @@ export default function CursosPage() {
               </h1>
 
               <p className="text-gray-600 mb-8">
-                Descubra cursos de estética desenvolvidos pelos melhores profissionais da área.
+                Descubra cursos de estética desenvolvidos pelos melhores
+                profissionais da área.
               </p>
 
               {/* BARRA PESQUISA + BOTÃO */}
@@ -141,7 +237,9 @@ export default function CursosPage() {
                 </div>
 
                 <button
-                  onClick={cursosProximos ? limparCursosProximos : buscarCursosProximos}
+                  onClick={
+                    cursosProximos ? limparCursosProximos : buscarCursosProximos
+                  }
                   disabled={loadingProximos}
                   className="flex items-center gap-2 bg-[#c9a46c] hover:bg-[#b8935b] text-white rounded-full px-5 py-4 shadow-sm transition whitespace-nowrap disabled:opacity-50"
                 >
@@ -178,29 +276,35 @@ export default function CursosPage() {
                   ))
                 ) : (
                   <div className="col-span-full bg-white border border-[#ece7e2] rounded-3xl p-10 text-center">
-                    <h2 className="text-2xl text-[#3d2b1f] mb-2">Nenhum curso próximo encontrado</h2>
-                    <p className="text-gray-500">Não encontramos cursos perto do seu endereço.</p>
+                    <h2 className="text-2xl text-[#3d2b1f] mb-2">
+                      Nenhum curso próximo encontrado
+                    </h2>
+                    <p className="text-gray-500">
+                      Não encontramos cursos perto do seu endereço.
+                    </p>
                   </div>
                 )
+              ) : // mostra todos os cursos normalmente
+              Array.isArray(cursosFiltrados) && cursosFiltrados.length > 0 ? (
+                cursosFiltrados.map((curso) => (
+                  <CursoCard
+                    key={`${curso?.turmaId}-${curso?.cursoId}`}
+                    titulo={curso?.cursoNome}
+                    preco={curso?.turmaPreco}
+                    avaliacao={Number(curso?.avaliacaoCurso || 0).toFixed(1)}
+                    imagem={curso?.cursoImagem}
+                    onClick={() => navigate(`/curso/${curso?.turmaId}`)}
+                  />
+                ))
               ) : (
-                // mostra todos os cursos normalmente
-                Array.isArray(cursosFiltrados) && cursosFiltrados.length > 0 ? (
-                  cursosFiltrados.map((curso) => (
-                    <CursoCard
-                      key={`${curso?.turmaId}-${curso?.cursoId}`}
-                      titulo={curso?.cursoNome}
-                      preco={curso?.turmaPreco}
-                      avaliacao={Number(curso?.avaliacaoCurso || 0).toFixed(1)}
-                      imagem={curso?.cursoImagem}
-                      onClick={() => navigate(`/curso/${curso?.turmaId}`)}
-                    />
-                  ))
-                ) : (
-                  <div className="col-span-full bg-white border border-[#ece7e2] rounded-3xl p-10 text-center">
-                    <h2 className="text-2xl text-[#3d2b1f] mb-2">Nenhum curso encontrado</h2>
-                    <p className="text-gray-500">Tente pesquisar outro nome de curso.</p>
-                  </div>
-                )
+                <div className="col-span-full bg-white border border-[#ece7e2] rounded-3xl p-10 text-center">
+                  <h2 className="text-2xl text-[#3d2b1f] mb-2">
+                    Nenhum curso encontrado
+                  </h2>
+                  <p className="text-gray-500">
+                    Tente pesquisar outro nome de curso.
+                  </p>
+                </div>
               )}
             </div>
           </div>

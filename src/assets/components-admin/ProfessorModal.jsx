@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import Swal from "sweetalert2";
 
-import {
-  cadastrarProfessor,
-  editarProfessor,
-} from "../service/professor";
+import { cadastrarProfessor, editarProfessor } from "../service/professor";
 
 function normalizeProfessor(prof) {
   return {
@@ -65,6 +63,33 @@ export default function ProfessorModal({
 
   async function handleSalvarProfessor() {
     try {
+      if (!form.nome.trim()) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Nome obrigatório",
+          text: "Informe o nome do professor.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
+      if (!form.email.trim()) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Email obrigatório",
+          text: "Informe o email do professor.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
+      if (!form.descricao.trim()) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Descrição obrigatória",
+          text: "Informe uma descrição para o professor.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
       setLoading(true);
 
       const payload = {
@@ -85,10 +110,36 @@ export default function ProfessorModal({
         await cadastrarProfessor(payload);
       }
 
-      if (onSuccess) onSuccess();
+      Swal.fire({
+        icon: "success",
+        title: editando ? "Professor atualizado" : "Professor cadastrado",
+        text: editando
+          ? "As alterações foram salvas com sucesso."
+          : "O professor foi cadastrado com sucesso.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
+      if (onSuccess) {
+        await onSuccess();
+      }
+
       fecharModal();
     } catch (error) {
-      console.error("Erro ao salvar professor:", error.response?.data || error);
+      console.error(
+        "Erro ao salvar professor:",
+        error?.response?.data || error,
+      );
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao salvar",
+        text:
+          error?.response?.data?.message ||
+          error?.response?.data?.erro ||
+          "Não foi possível salvar o professor.",
+        confirmButtonColor: "#c9a46c",
+      });
     } finally {
       setLoading(false);
     }
@@ -99,7 +150,6 @@ export default function ProfessorModal({
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
       <div className="w-full max-w-5xl max-h-[92vh] bg-white rounded-[2.5rem] border border-[#ece7e2] shadow-xl overflow-hidden">
-
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-[#ece7e2]">
           <div>
@@ -124,43 +174,33 @@ export default function ProfessorModal({
 
         {/* BODY */}
         <div className="p-8 overflow-y-auto max-h-[75vh]">
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             {/* NOME */}
             <Input
               label="Nome"
               value={form.nome}
-              onChange={(e) =>
-                setForm({ ...form, nome: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
             />
 
             {/* EMAIL */}
             <Input
               label="Email"
               value={form.email}
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
 
             {/* FOTO */}
             <Input
               label="Foto (URL ou nome do arquivo)"
               value={form.foto}
-              onChange={(e) =>
-                setForm({ ...form, foto: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, foto: e.target.value })}
             />
 
             {/* REDESOCIAL */}
             <Input
               label="Rede Social"
               value={form.redesocial}
-              onChange={(e) =>
-                setForm({ ...form, redesocial: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, redesocial: e.target.value })}
             />
 
             {/* DESCRIÇÃO */}
@@ -177,12 +217,10 @@ export default function ProfessorModal({
                 className="w-full min-h-36 border border-[#ece7e2] rounded-2xl px-5 py-4"
               />
             </div>
-
           </div>
 
           {/* FOOTER */}
           <div className="flex justify-end gap-4 mt-10">
-
             <button
               onClick={fecharModal}
               className="px-6 py-3 rounded-2xl border border-[#ece7e2]"
@@ -201,9 +239,7 @@ export default function ProfessorModal({
                   ? "Salvar alterações"
                   : "Salvar professor"}
             </button>
-
           </div>
-
         </div>
       </div>
     </div>

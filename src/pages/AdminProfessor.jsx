@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 import SidebarAdmin from "../assets/components-admin/SidebarAdmin";
 import ProfessorModal from "../assets/components-admin/ProfessorModal";
@@ -45,7 +46,17 @@ export default function AdminProfessores() {
       setProfessores(normalizados);
     } catch (erro) {
       console.error("Erro ao buscar professores:", erro);
+
       setProfessores([]);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao carregar professores",
+        text:
+          erro?.response?.data?.message ||
+          "Não foi possível carregar os professores.",
+        confirmButtonColor: "#c9a46c",
+      });
     }
   }
 
@@ -65,11 +76,37 @@ export default function AdminProfessores() {
   }
 
   async function confirmarDelete() {
-    await deletarProfessor(professorExcluir.id);
+    try {
+      if (!professorExcluir?.id) return;
 
-    setProfessores((prev) => prev.filter((p) => p.id !== professorExcluir.id));
+      await deletarProfessor(professorExcluir.id);
 
-    setProfessorExcluir(null);
+      setProfessores((prev) =>
+        prev.filter((p) => p.id !== professorExcluir.id),
+      );
+
+      setProfessorExcluir(null);
+      setDeleteModalAberto(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "Professor excluído",
+        text: "O professor foi removido com sucesso.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao excluir",
+        text:
+          error?.response?.data?.message ||
+          "Não foi possível excluir o professor.",
+        confirmButtonColor: "#c9a46c",
+      });
+    }
   }
 
   return (
@@ -85,6 +122,7 @@ export default function AdminProfessores() {
                 <h1 className="text-4xl font-light text-[#3d2b1f] mb-3">
                   Gerenciar Professores
                 </h1>
+
                 <p className="text-gray-500 text-lg">
                   Controle todos os professores da plataforma.
                 </p>
@@ -105,14 +143,19 @@ export default function AdminProfessores() {
             {/* HEADER */}
             <div className="grid grid-cols-[120px_1fr_1fr_1fr_1fr_150px] gap-4 px-8 py-5 border-b border-[#ece7e2] bg-[#faf8f6]">
               <span className="text-sm text-gray-500 font-medium">Foto</span>
+
               <span className="text-sm text-gray-500 font-medium">Nome</span>
+
               <span className="text-sm text-gray-500 font-medium">Email</span>
+
               <span className="text-sm text-gray-500 font-medium">
                 Descrição
               </span>
+
               <span className="text-sm text-gray-500 font-medium">
                 Rede Social
               </span>
+
               <span className="text-sm text-gray-500 font-medium">Ações</span>
             </div>
 
@@ -142,7 +185,6 @@ export default function AdminProfessores() {
 
                     <span className="text-gray-600">{prof.redesocial}</span>
 
-                    {/* AÇÕES */}
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => abrirEditar(prof)}
@@ -170,7 +212,6 @@ export default function AdminProfessores() {
         </div>
       </div>
 
-      {/* MODAL CRIAR/EDITAR */}
       <ProfessorModal
         aberto={modalAberto}
         fecharModal={() => setModalAberto(false)}
@@ -178,16 +219,12 @@ export default function AdminProfessores() {
         onSuccess={carregarProfessores}
       />
 
-      {/* MODAL DELETE GENÉRICO */}
       <DeleteModal
         aberto={deleteModalAberto}
         fecharModal={() => setDeleteModalAberto(false)}
         titulo="Excluir professor"
         descricao={`Tem certeza que deseja excluir o professor "${professorExcluir?.nome}"?`}
-        onConfirmar={async () => {
-          await confirmarDelete();
-          setDeleteModalAberto(false);
-        }}
+        onConfirmar={confirmarDelete}
       />
     </main>
   );

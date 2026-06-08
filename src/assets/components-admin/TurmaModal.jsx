@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import Swal from "sweetalert2";
 
 import { cadastrarTurma, editarTurma } from "../service/turmas";
-
-/* =========================
-   MÁSCARA DE MOEDA
-========================= */
 
 function formatarMoeda(valor) {
   if (!valor) return "";
@@ -19,12 +16,9 @@ function formatarMoeda(valor) {
 }
 
 function limparMoeda(valor) {
+  if (!valor) return 0;
   return Number(valor.toString().replace(/\D/g, "")) / 100;
 }
-
-/* =========================
-   COMPONENTE
-========================= */
 
 export default function TurmaModal({
   aberto,
@@ -52,49 +46,32 @@ export default function TurmaModal({
 
   useEffect(() => {
     if (editando && turmaSelecionada) {
-      const turma =
-        typeof turmaSelecionada === "object"
-          ? turmaSelecionada
-          : null;
-
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
-        nome: turma?.nome || "",
-        cursoAtivo: turma?.cursoAtivo ?? true,
+        nome: turmaSelecionada.nome || "",
+        cursoAtivo: turmaSelecionada.cursoAtivo ?? true,
 
-        dataInicio: turma?.dataInicio
-          ? turma.dataInicio.slice(0, 16)
+        dataInicio: turmaSelecionada.dataInicio?.slice(0, 16) || "",
+        dataEncerramento: turmaSelecionada.dataEncerramento?.slice(0, 16) || "",
+
+        preco: turmaSelecionada.preco
+          ? String(Math.round(Number(turmaSelecionada.preco) * 100))
           : "",
 
-        dataEncerramento: turma?.dataEncerramento
-          ? turma.dataEncerramento.slice(0, 16)
-          : "",
+        qtdVagas: String(turmaSelecionada.qtdVagas || ""),
 
-        // 🔥 converte para centavos para máscara funcionar
-        preco: turma?.preco
-          ? String(Math.round(Number(turma.preco) * 100))
-          : "",
-
-        qtdVagas: turma?.qtdVagas
-          ? String(turma.qtdVagas)
-          : "",
-
-        porcentagemLucro: turma?.porcentagemLucro
-          ? String(Number(turma.porcentagemLucro) * 100)
+        porcentagemLucro: turmaSelecionada.porcentagemLucro
+          ? String(Number(turmaSelecionada.porcentagemLucro) * 100)
           : "10",
 
-        cursoId: turma?.cursoId
-          ? String(turma.cursoId)
-          : "",
-
-        enderecoId: turma?.enderecoId
-          ? String(turma.enderecoId)
-          : "",
+        cursoId: String(turmaSelecionada.cursoId || ""),
+        enderecoId: String(turmaSelecionada.enderecoId || ""),
       });
 
       return;
     }
 
+    /* RESET CRIAÇÃO */
     setForm({
       nome: "",
       cursoAtivo: true,
@@ -110,16 +87,50 @@ export default function TurmaModal({
 
   async function handleSalvar() {
     try {
-      if (!form.nome.trim()) return alert("Informe o nome da turma.");
-      if (!form.cursoId) return alert("Selecione um curso.");
-      if (!editando && !form.enderecoId)
-        return alert("Selecione um endereço.");
-      if (!form.dataInicio)
-        return alert("Informe a data de início.");
-      if (!form.dataEncerramento)
-        return alert("Informe a data de encerramento.");
-      if (!form.porcentagemLucro)
-        return alert("Informe a porcentagem de lucro.");
+      if (!form.nome.trim()) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Nome obrigatório",
+          text: "Informe o nome da turma.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
+      if (!form.cursoId) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Curso obrigatório",
+          text: "Selecione um curso.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
+      if (!form.enderecoId) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Endereço obrigatório",
+          text: "Selecione um endereço.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
+      if (!form.dataInicio) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Data de início obrigatória",
+          text: "Informe a data de início.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
+      if (!form.dataEncerramento) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Data de encerramento obrigatória",
+          text: "Informe a data de encerramento.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
 
       setLoading(true);
 
@@ -135,31 +146,48 @@ export default function TurmaModal({
         cursoId: Number(form.cursoId),
         enderecoId: Number(form.enderecoId),
 
-        porcentagemLucro:
-          Number(form.porcentagemLucro || 0) / 100,
+        porcentagemLucro: Number(form.porcentagemLucro || 0) / 100,
       };
 
       if (editando) {
-        await editarTurma(turmaSelecionada.id || turmaSelecionada, payload);
+        await editarTurma(turmaSelecionada.turmaId, payload);
       } else {
         await cadastrarTurma(payload);
       }
 
+      Swal.fire({
+        icon: "success",
+        title: editando ? "Turma atualizada" : "Turma cadastrada",
+        text: editando
+          ? "As alterações foram salvas com sucesso."
+          : "A turma foi cadastrada com sucesso.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
       onSuccess?.();
       fecharModal();
     } catch (error) {
-      console.error("Erro ao salvar turma:", error.response?.data || error);
+      console.error("Erro ao salvar turma:", error?.response?.data || error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao salvar",
+        text:
+          error?.response?.data?.message ||
+          error?.response?.data?.erro ||
+          "Não foi possível salvar a turma.",
+        confirmButtonColor: "#c9a46c",
+      });
     } finally {
       setLoading(false);
     }
   }
-
   if (!aberto) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
       <div className="w-full max-w-5xl max-h-[92vh] bg-white rounded-[2.5rem] border border-[#ece7e2] shadow-xl overflow-hidden">
-
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-[#ece7e2]">
           <div>
@@ -179,21 +207,16 @@ export default function TurmaModal({
         {/* BODY */}
         <div className="p-8 overflow-y-auto max-h-[75vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             {/* NOME */}
             <Input
               label="Nome da Turma"
               value={form.nome}
-              onChange={(e) =>
-                setForm({ ...form, nome: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
             />
 
             {/* STATUS */}
             <div>
-              <label className="text-sm text-gray-500 mb-2 block">
-                Status
-              </label>
+              <label className="text-sm text-gray-500 mb-2 block">Status</label>
 
               <select
                 value={String(form.cursoAtivo)}
@@ -212,15 +235,11 @@ export default function TurmaModal({
 
             {/* CURSO */}
             <div>
-              <label className="text-sm text-gray-500 mb-2 block">
-                Curso
-              </label>
+              <label className="text-sm text-gray-500 mb-2 block">Curso</label>
 
               <select
                 value={form.cursoId}
-                onChange={(e) =>
-                  setForm({ ...form, cursoId: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, cursoId: e.target.value })}
                 className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
               >
                 <option value="">Selecione um curso</option>
@@ -232,33 +251,28 @@ export default function TurmaModal({
               </select>
             </div>
 
-            {/* ENDEREÇO */}
-            {!editando && (
-              <div>
-                <label className="text-sm text-gray-500 mb-2 block">
-                  Endereço
-                </label>
+            {/* ENDEREÇO (AGORA FUNCIONA NA EDIÇÃO) */}
+            <div>
+              <label className="text-sm text-gray-500 mb-2 block">
+                Endereço
+              </label>
 
-                <select
-                  value={form.enderecoId}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      enderecoId: e.target.value,
-                    })
-                  }
-                  className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
-                >
-                  <option value="">Selecione um endereço</option>
-                  {enderecos.map((endereco) => (
-                    <option key={endereco.id} value={endereco.id}>
-                      {endereco.rua}, {endereco.numero} -{" "}
-                      {endereco.cidade}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+              <select
+                value={form.enderecoId}
+                onChange={(e) =>
+                  setForm({ ...form, enderecoId: e.target.value })
+                }
+                className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
+              >
+                <option value="">Selecione um endereço</option>
+
+                {enderecos.map((endereco) => (
+                  <option key={endereco.id} value={endereco.id}>
+                    {endereco.rua}, {endereco.numero} - {endereco.cidade}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* DATA INICIO */}
             <Input
@@ -286,23 +300,18 @@ export default function TurmaModal({
               }
             />
 
-            {/* PREÇO (COM MÁSCARA) */}
+            {/* PREÇO COM MÁSCARA */}
             <div>
-              <label className="text-sm text-gray-500 mb-2 block">
-                Preço
-              </label>
+              <label className="text-sm text-gray-500 mb-2 block">Preço</label>
 
               <input
                 value={formatarMoeda(form.preco)}
-                onChange={(e) => {
-                  const apenasNumeros =
-                    e.target.value.replace(/\D/g, "");
-
+                onChange={(e) =>
                   setForm({
                     ...form,
-                    preco: apenasNumeros,
-                  });
-                }}
+                    preco: e.target.value.replace(/\D/g, ""),
+                  })
+                }
                 className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
               />
             </div>
@@ -312,12 +321,7 @@ export default function TurmaModal({
               type="number"
               label="Quantidade de Vagas"
               value={form.qtdVagas}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  qtdVagas: e.target.value,
-                })
-              }
+              onChange={(e) => setForm({ ...form, qtdVagas: e.target.value })}
             />
 
             {/* LUCRO */}
@@ -351,8 +355,8 @@ export default function TurmaModal({
               {loading
                 ? "Salvando..."
                 : editando
-                ? "Salvar Alterações"
-                : "Salvar Turma"}
+                  ? "Salvar Alterações"
+                  : "Salvar Turma"}
             </button>
           </div>
         </div>
@@ -365,9 +369,7 @@ export default function TurmaModal({
 function Input({ label, value, onChange, type = "text" }) {
   return (
     <div>
-      <label className="text-sm text-gray-500 mb-2 block">
-        {label}
-      </label>
+      <label className="text-sm text-gray-500 mb-2 block">{label}</label>
 
       <input
         type={type}
