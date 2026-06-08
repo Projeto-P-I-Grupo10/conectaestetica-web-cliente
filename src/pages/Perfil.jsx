@@ -96,7 +96,7 @@ export default function PerfilUsuario() {
       const response = await atualizarUsuario(usuarioAtualizado, id);
 
       console.log("Usuário atualizado:", response);
-
+      sessionStorage.setItem("nome", response.nome);
       window.location.reload();
     } catch (erro) {
       console.error("Erro ao atualizar usuário", erro);
