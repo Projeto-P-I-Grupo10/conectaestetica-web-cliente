@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 import SidebarAdmin from "../assets/components-admin/SidebarAdmin";
 import CursoModal from "../assets/components-admin/CursoModal";
@@ -16,7 +17,17 @@ function normalizeCurso(curso) {
 
     imagem: curso.imagem || curso.cursoImagem,
 
+    professorId:
+      curso.professor?.id || curso.professorId || curso.fkProfessor || "",
+
     professorNome: curso.professor?.nome || curso.professorNome || "-",
+
+    areaId:
+      curso.area?.id ||
+      curso.areaId ||
+      curso.areaCursoId ||
+      curso.fkAreaCurso ||
+      "",
 
     areaNome: curso.area?.nome || curso.areaNome || "-",
   };
@@ -45,7 +56,17 @@ export default function AdminCursos() {
       setCursos(normalizados);
     } catch (erro) {
       console.error("Erro ao buscar cursos:", erro);
+
       setCursos([]);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao carregar cursos",
+        text:
+          erro?.response?.data?.message ||
+          "Não foi possível carregar os cursos.",
+        confirmButtonColor: "#c9a46c",
+      });
     }
   }
 
@@ -62,6 +83,7 @@ export default function AdminCursos() {
                 <h1 className="text-4xl font-light text-[#3d2b1f] mb-3">
                   Gerenciar Cursos
                 </h1>
+
                 <p className="text-gray-500 text-lg">
                   Controle todos os cursos da plataforma.
                 </p>
@@ -85,11 +107,15 @@ export default function AdminCursos() {
             {/* HEADER */}
             <div className="grid grid-cols-[120px_1.5fr_1fr_180px_150px] gap-4 px-8 py-5 border-b border-[#ece7e2] bg-[#faf8f6]">
               <span className="text-sm text-gray-500 font-medium">Imagem</span>
+
               <span className="text-sm text-gray-500 font-medium">Curso</span>
+
               <span className="text-sm text-gray-500 font-medium">
                 Professor
               </span>
+
               <span className="text-sm text-gray-500 font-medium">Área</span>
+
               <span className="text-sm text-gray-500 font-medium">Ações</span>
             </div>
 
@@ -113,6 +139,7 @@ export default function AdminCursos() {
                       <h3 className="font-medium text-[#3d2b1f]">
                         {curso.nome}
                       </h3>
+
                       <p className="text-sm text-gray-500 mt-1">
                         {curso.descricao}
                       </p>
@@ -158,7 +185,7 @@ export default function AdminCursos() {
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL CURSO */}
       <CursoModal
         aberto={modalAberto}
         fecharModal={() => setModalAberto(false)}
@@ -166,7 +193,7 @@ export default function AdminCursos() {
         onSuccess={carregarCursos}
       />
 
-      {/* DELETE */}
+      {/* MODAL EXCLUSÃO */}
       <DeleteModal
         aberto={deleteModalAberto}
         fecharModal={() => setDeleteModalAberto(false)}
@@ -180,9 +207,25 @@ export default function AdminCursos() {
 
             setCursoExcluir(null);
             setDeleteModalAberto(false);
+
+            Swal.fire({
+              icon: "success",
+              title: "Curso excluído",
+              text: "O curso foi removido com sucesso.",
+              timer: 1800,
+              showConfirmButton: false,
+            });
           } catch (error) {
             console.error(error);
-            alert("Erro ao excluir curso.");
+
+            Swal.fire({
+              icon: "error",
+              title: "Erro ao excluir",
+              text:
+                error?.response?.data?.message ||
+                "Não foi possível excluir o curso.",
+              confirmButtonColor: "#c9a46c",
+            });
           }
         }}
       />

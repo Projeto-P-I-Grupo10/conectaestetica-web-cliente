@@ -8,9 +8,20 @@ export default function CursoCard({
   distancia = null,
   onClick = () => {},
 }) {
-  const precoFormatado = preco != null
-    ? Number(preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-    : null;
+  const precoFormatado =
+    preco != null
+      ? Number(preco).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })
+      : null;
+
+  // 🔥 resolve imagem (URL ou arquivo local)
+  const imagemFinal = imagem?.startsWith("http")
+    ? imagem
+    : imagem
+      ? `/img/${imagem}`
+      : "/img/default.jpg";
 
   return (
     <div
@@ -20,13 +31,18 @@ export default function CursoCard({
       {/* IMAGEM */}
       <div className="relative">
         <img
-          src={imagem || "/placeholder.jpg"}
+          src={imagemFinal}
           alt={titulo}
           className="w-full h-64 object-cover rounded-2xl"
+          onError={(e) => {
+            e.target.src = "/img/default.jpg";
+          }}
         />
 
-        <div className="absolute inset-0 from-black/70 to-transparent rounded-2xl flex items-end p-4">
-          <p className="text-white text-lg font-light leading-tight">{titulo}</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-2xl flex items-end p-4">
+          <p className="text-white text-lg font-light leading-tight">
+            {titulo}
+          </p>
         </div>
       </div>
 

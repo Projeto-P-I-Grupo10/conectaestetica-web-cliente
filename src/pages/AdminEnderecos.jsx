@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 import SidebarAdmin from "../assets/components-admin/SidebarAdmin";
 import EnderecoModal from "../assets/components-admin/EnderecoModal";
 import DeleteModal from "../assets/components-admin/DeleteModal";
+
 import {
   listarEnderecosCurso,
   cadastrarEnderecoCurso,
   editarEnderecoCurso,
-  deletarEnderecoCurso
+  deletarEnderecoCurso,
 } from "../assets/service/enderecoCurso";
-
 
 function normalizeEndereco(endereco) {
   return {
@@ -35,11 +36,30 @@ export default function AdminEnderecos() {
   const [deleteModalAberto, setDeleteModalAberto] = useState(false);
   const [enderecoExcluir, setEnderecoExcluir] = useState(null);
 
-
   useEffect(() => {
-    listarEnderecosCurso().then((lista) => setEnderecos(lista.map(normalizeEndereco)));
+    carregarEnderecos();
   }, []);
 
+  async function carregarEnderecos() {
+    try {
+      const lista = await listarEnderecosCurso();
+
+      setEnderecos((lista || []).map(normalizeEndereco));
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao carregar",
+        text:
+          error?.response?.data?.message ||
+          "Não foi possível carregar os endereços.",
+        confirmButtonColor: "#c9a46c",
+      });
+
+      setEnderecos([]);
+    }
+  }
 
   function abrirCriar() {
     setEnderecoSelecionado(null);
@@ -57,11 +77,33 @@ export default function AdminEnderecos() {
   }
 
   async function confirmarDelete() {
-    setEnderecos((prev) =>
-      prev.filter((e) => e.id !== enderecoExcluir.id)
-    );
+    try {
+      await deletarEnderecoCurso(enderecoExcluir.id);
 
-    setEnderecoExcluir(null);
+      await carregarEnderecos();
+
+      setDeleteModalAberto(false);
+      setEnderecoExcluir(null);
+
+      Swal.fire({
+        icon: "success",
+        title: "Endereço excluído",
+        text: "O endereço foi removido com sucesso.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao excluir",
+        text:
+          error?.response?.data?.message ||
+          "Não foi possível excluir o endereço.",
+        confirmButtonColor: "#c9a46c",
+      });
+    }
   }
 
   return (
@@ -70,11 +112,9 @@ export default function AdminEnderecos() {
 
       <div className="ml-72 py-20 px-6">
         <div className="max-w-7xl mx-auto">
-
           {/* HEADER */}
           <div className="bg-white border border-[#ece7e2] rounded-[2.5rem] p-8 shadow-sm mb-10">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-
               <div>
                 <h1 className="text-4xl font-light text-[#3d2b1f] mb-3">
                   Gerenciar Endereços
@@ -90,51 +130,23 @@ export default function AdminEnderecos() {
                 className="bg-[#c9a46c] hover:bg-[#b89258] transition-all hover:scale-[1.02] active:scale-[0.98] text-white px-6 py-4 rounded-2xl flex items-center gap-3 shadow-sm w-fit"
               >
                 <Plus size={22} />
-                <span className="font-medium">
-                  Novo Endereço
-                </span>
+                <span className="font-medium">Novo Endereço</span>
               </button>
-
             </div>
           </div>
 
           {/* TABELA */}
           <div className="bg-white border border-[#ece7e2] rounded-[2.5rem] shadow-sm overflow-hidden">
-
-            {/* HEADER */}
             <div className="grid grid-cols-[2fr_120px_1fr_1fr_120px_140px_150px] gap-4 px-8 py-5 border-b border-[#ece7e2] bg-[#faf8f6]">
-
-              <span className="text-sm text-gray-500 font-medium">
-                Rua
-              </span>
-
-              <span className="text-sm text-gray-500 font-medium">
-                Número
-              </span>
-
-              <span className="text-sm text-gray-500 font-medium">
-                Bairro
-              </span>
-
-              <span className="text-sm text-gray-500 font-medium">
-                Cidade
-              </span>
-
-              <span className="text-sm text-gray-500 font-medium">
-                Estado
-              </span>
-
-              <span className="text-sm text-gray-500 font-medium">
-                CEP
-              </span>
-
-              <span className="text-sm text-gray-500 font-medium">
-                Ações
-              </span>
-
+              <span className="text-sm text-gray-500 font-medium">Rua</span>
+              <span className="text-sm text-gray-500 font-medium">Número</span>
+              <span className="text-sm text-gray-500 font-medium">Bairro</span>
+              <span className="text-sm text-gray-500 font-medium">Cidade</span>
+              <span className="text-sm text-gray-500 font-medium">Estado</span>
+              <span className="text-sm text-gray-500 font-medium">CEP</span>
+              <span className="text-sm text-gray-500 font-medium">Ações</span>
             </div>
 
-            {/* LINHAS */}
             <div>
               {enderecos.length > 0 ? (
                 enderecos.map((endereco) => (
@@ -142,7 +154,6 @@ export default function AdminEnderecos() {
                     key={endereco.id}
                     className="grid grid-cols-[2fr_120px_1fr_1fr_120px_140px_150px] gap-4 items-center px-8 py-6 border-b border-[#f3efea] hover:bg-[#fcfbfa] transition"
                   >
-                    {/* RUA + COMPLEMENTO */}
                     <div>
                       <h3 className="font-medium text-[#3d2b1f]">
                         {endereco.rua}
@@ -155,32 +166,16 @@ export default function AdminEnderecos() {
                       )}
                     </div>
 
-                    {/* NÚMERO */}
-                    <span className="text-gray-600">
-                      {endereco.numero}
-                    </span>
+                    <span className="text-gray-600">{endereco.numero}</span>
 
-                    {/* BAIRRO */}
-                    <span className="text-gray-600">
-                      {endereco.bairro}
-                    </span>
+                    <span className="text-gray-600">{endereco.bairro}</span>
 
-                    {/* CIDADE */}
-                    <span className="text-gray-600">
-                      {endereco.cidade}
-                    </span>
+                    <span className="text-gray-600">{endereco.cidade}</span>
 
-                    {/* ESTADO */}
-                    <span className="text-gray-600">
-                      {endereco.estado}
-                    </span>
+                    <span className="text-gray-600">{endereco.estado}</span>
 
-                    {/* CEP */}
-                    <span className="text-gray-600">
-                      {endereco.cep}
-                    </span>
+                    <span className="text-gray-600">{endereco.cep}</span>
 
-                    {/* AÇÕES */}
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => abrirEditar(endereco)}
@@ -208,38 +203,65 @@ export default function AdminEnderecos() {
         </div>
       </div>
 
-      {/* MODAL CREATE / EDIT */}
       <EnderecoModal
         aberto={modalAberto}
-        fecharModal={() => setModalAberto(false)}
+        fecharModal={() => {
+          setModalAberto(false);
+          setEnderecoSelecionado(null);
+        }}
         enderecoSelecionado={enderecoSelecionado}
         onSuccess={async (data) => {
-          if (data.id) {
-            const atualizado = await editarEnderecoCurso(data.id, data);
-            setEnderecos((prev) =>
-              prev.map((e) => (e.id === data.id ? atualizado : e))
-            );
-          } else {
-            const novo = await cadastrarEnderecoCurso(data);
-            setEnderecos((prev) => [...prev, novo]);
+          try {
+            if (enderecoSelecionado?.id) {
+              await editarEnderecoCurso(enderecoSelecionado.id, data);
+
+              Swal.fire({
+                icon: "success",
+                title: "Endereço atualizado",
+                text: "As alterações foram salvas com sucesso.",
+                timer: 1800,
+                showConfirmButton: false,
+              });
+            } else {
+              await cadastrarEnderecoCurso(data);
+
+              Swal.fire({
+                icon: "success",
+                title: "Endereço cadastrado",
+                text: "O endereço foi cadastrado com sucesso.",
+                timer: 1800,
+                showConfirmButton: false,
+              });
+            }
+
+            await carregarEnderecos();
+
+            setModalAberto(false);
+            setEnderecoSelecionado(null);
+          } catch (error) {
+            console.error(error);
+
+            Swal.fire({
+              icon: "error",
+              title: "Erro ao salvar",
+              text:
+                error?.response?.data?.message ||
+                "Não foi possível salvar o endereço.",
+              confirmButtonColor: "#c9a46c",
+            });
+
+            throw error;
           }
-          setModalAberto(false);
         }}
       />
 
-      {/* MODAL DELETE */}
       <DeleteModal
         aberto={deleteModalAberto}
         fecharModal={() => setDeleteModalAberto(false)}
         titulo="Excluir endereço"
         descricao={`Tem certeza que deseja excluir o endereço "${enderecoExcluir?.rua}"?`}
-        onConfirmar={async () => {
-          await deletarEnderecoCurso(enderecoExcluir.id);
-          await confirmarDelete();
-          setDeleteModalAberto(false);
-        }}
+        onConfirmar={confirmarDelete}
       />
-
     </main>
   );
 }

@@ -9,7 +9,6 @@ import { listarAvaliacoesCurso } from "../service/avaliacaoCurso";
 
 import { exibirCursoDetalheId } from "../service/cursos";
 
-
 export default function CursoDetalhe() {
   const { id } = useParams();
 
@@ -21,34 +20,33 @@ export default function CursoDetalhe() {
     quantidade: 0,
   });
 
-
   useEffect(() => {
-  async function carregarCurso() {
-    try {
-      const data = await exibirCursoDetalheId(id);
+    async function carregarCurso() {
+      try {
+        const data = await exibirCursoDetalheId(id);
 
-      setCurso(data);
+        setCurso(data);
 
-      const avaliacoes = await listarAvaliacoesCurso(data.cursoId);
+        const avaliacoes = await listarAvaliacoesCurso(data.cursoId);
 
-      const media = Number(data?.avaliacaoCurso || 0);
-      const quantidade = avaliacoes.length;
+        const media = Number(data?.avaliacaoCurso || 0);
+        const quantidade = avaliacoes.length;
 
-      setAvaliacaoCurso({
-        media: media.toFixed(1),
-        quantidade,
-      });
+        setAvaliacaoCurso({
+          media: media.toFixed(1),
+          quantidade,
+        });
 
-      console.log("Curso recebido:", data);
-      console.log("Avaliações recebidas:", avaliacoes);
-    } catch (erro) {
-      console.error("Erro ao buscar curso", erro);
-      setCurso(null);
+        console.log("Curso recebido:", data);
+        console.log("Avaliações recebidas:", avaliacoes);
+      } catch (erro) {
+        console.error("Erro ao buscar curso", erro);
+        setCurso(null);
+      }
     }
-  }
 
-  carregarCurso();
-}, [id]);
+    carregarCurso();
+  }, [id]);
 
   const precoFormatado = Number(curso?.turmaPreco || 0).toLocaleString(
     "pt-BR",
@@ -61,9 +59,8 @@ export default function CursoDetalhe() {
   function formatarData(data) {
     if (!data) return "-";
 
-    return new Date(data).toLocaleDateString("pt-BR");
+    return new Date(data).toLocaleString("pt-BR");
   }
-
   return (
     <main className="min-h-screen bg-[#f5f5f5] py-36 px-6">
       <div className="max-w-7xl mx-auto">
@@ -145,7 +142,8 @@ export default function CursoDetalhe() {
                 </div>
 
                 <span className="text-gray-500">
-                  {avaliacaoCurso.media} • {avaliacaoCurso.quantidade} avaliações
+                  {avaliacaoCurso.media} • {avaliacaoCurso.quantidade}{" "}
+                  avaliações
                 </span>
               </div>
 
@@ -163,7 +161,11 @@ export default function CursoDetalhe() {
               {/* BOTÕES */}
               <div className="flex flex-col md:flex-row gap-4">
                 <button
-                  onClick={() => navigate(`/matricula`, { state: { turmaId: curso?.turmaId } })}
+                  onClick={() =>
+                    navigate(`/matricula`, {
+                      state: { turmaId: curso?.turmaId },
+                    })
+                  }
                   className="
                     bg-[#c9a46c]
                     hover:bg-[#b89258]

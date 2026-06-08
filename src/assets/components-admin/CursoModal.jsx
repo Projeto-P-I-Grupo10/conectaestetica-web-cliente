@@ -1,29 +1,10 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import Swal from "sweetalert2";
 
 import { listarProfessores } from "../service/professor";
 import { listarAreas } from "../service/area";
 import { cadastrarCursos, editarCursos } from "../service/cursos";
-
-function normalizeCurso(curso) {
-  return {
-    id: curso.id || curso.cursoId,
-
-    nome: curso.nome || curso.cursoNome,
-    descricao: curso.descricao || curso.cursoDescricao,
-    imagem: curso.imagem || curso.cursoImagem,
-
-    professor: {
-      id: curso.professor?.id || curso.professorId || "",
-      nome: curso.professor?.nome || curso.professorNome || "",
-    },
-
-    area: {
-      id: curso.area?.id || curso.areaId || "",
-      nome: curso.area?.nome || curso.areaNome || "",
-    },
-  };
-}
 
 export default function CursoModal({
   aberto,
@@ -45,7 +26,7 @@ export default function CursoModal({
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const resetForm = () => {
+  function resetForm() {
     setForm({
       nome: "",
       professor: "",
@@ -53,19 +34,17 @@ export default function CursoModal({
       descricao: "",
       imagem: "",
     });
-  };
+  }
 
   useEffect(() => {
     if (cursoSelecionado) {
-      const curso = normalizeCurso(cursoSelecionado);
-
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
-        nome: curso.nome,
-        professor: curso.professor.id,
-        area: curso.area.id,
-        descricao: curso.descricao,
-        imagem: curso.imagem,
+        nome: cursoSelecionado.nome || "",
+        professor: String(cursoSelecionado.professorId || ""),
+        area: String(cursoSelecionado.areaId || ""),
+        descricao: cursoSelecionado.descricao || "",
+        imagem: cursoSelecionado.imagem || "",
       });
     } else {
       resetForm();
@@ -73,7 +52,7 @@ export default function CursoModal({
   }, [cursoSelecionado]);
 
   useEffect(() => {
-    async function carregar() {
+    async function carregarDados() {
       try {
         const [professoresData, areasData] = await Promise.all([
           listarProfessores(),
@@ -87,22 +66,48 @@ export default function CursoModal({
         );
 
         setAreas(Array.isArray(areasData) ? areasData : areasData?.areas || []);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
+
+        Swal.fire({
+          icon: "error",
+          title: "Erro ao carregar dados",
+          text: "Não foi possível carregar professores e áreas.",
+          confirmButtonColor: "#c9a46c",
+        });
       }
     }
 
-    carregar();
+    carregarDados();
   }, []);
 
   async function handleSalvarCurso() {
     try {
+      if (!form.nome.trim()) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Nome obrigatório",
+          text: "Informe o nome do curso.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+
       if (!form.professor) {
-        return alert("Selecione um professor.");
+        return Swal.fire({
+          icon: "warning",
+          title: "Professor obrigatório",
+          text: "Selecione um professor.",
+          confirmButtonColor: "#c9a46c",
+        });
       }
 
       if (!form.area) {
-        return alert("Selecione uma área.");
+        return Swal.fire({
+          icon: "warning",
+          title: "Área obrigatória",
+          text: "Selecione uma área.",
+          confirmButtonColor: "#c9a46c",
+        });
       }
 
       setLoading(true);
@@ -115,21 +120,36 @@ export default function CursoModal({
         professorId: Number(form.professor),
       };
 
-      const cursoId = cursoSelecionado
-        ? normalizeCurso(cursoSelecionado).id
-        : null;
-
       if (editando) {
-        await editarCursos(cursoId, payload);
+        await editarCursos(cursoSelecionado.id, payload);
       } else {
         await cadastrarCursos(payload);
       }
 
-      if (onSuccess) onSuccess();
+      Swal.fire({
+        icon: "success",
+        title: editando ? "Curso atualizado" : "Curso cadastrado",
+        text: editando
+          ? "As alterações foram salvas com sucesso."
+          : "Curso cadastrado com sucesso.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
 
+      onSuccess?.();
       fecharModal();
     } catch (error) {
-      console.error("Erro ao salvar curso:", error.response?.data || error);
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao salvar",
+        text:
+          error?.response?.data?.message ||
+          error?.response?.data?.erro ||
+          "Não foi possível salvar o curso.",
+        confirmButtonColor: "#c9a46c",
+      });
     } finally {
       setLoading(false);
     }
@@ -165,7 +185,6 @@ export default function CursoModal({
         {/* BODY */}
         <div className="p-8 overflow-y-auto max-h-[75vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* NOME */}
             <Input
               label="Nome do curso"
               value={form.nome}
@@ -177,7 +196,6 @@ export default function CursoModal({
               }
             />
 
-            {/* PROFESSOR */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
                 Professor
@@ -195,15 +213,14 @@ export default function CursoModal({
               >
                 <option value="">Selecione um professor</option>
 
-                {professores.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nome}
+                {professores.map((professor) => (
+                  <option key={professor.id} value={professor.id}>
+                    {professor.nome}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* ÁREA */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">Área</label>
 
@@ -215,13 +232,7 @@ export default function CursoModal({
                     area: e.target.value,
                   })
                 }
-                className="
-                  w-full
-                  bg-[#faf8f6]
-                  border border-[#ece7e2]
-                  rounded-2xl
-                  px-5 py-4
-                "
+                className="w-full bg-[#faf8f6] border border-[#ece7e2] rounded-2xl px-5 py-4"
               >
                 <option value="">Selecione uma área</option>
 
@@ -233,10 +244,9 @@ export default function CursoModal({
               </select>
             </div>
 
-            {/* IMAGEM */}
             <div className="md:col-span-2">
               <label className="text-sm text-gray-500 mb-2 block">
-                Imagem do curso (ex: botox.png)
+                Imagem do curso
               </label>
 
               <input
@@ -260,7 +270,6 @@ export default function CursoModal({
               )}
             </div>
 
-            {/* DESCRIÇÃO */}
             <div className="md:col-span-2">
               <label className="text-sm text-gray-500 mb-2 block">
                 Descrição
@@ -274,19 +283,23 @@ export default function CursoModal({
                     descricao: e.target.value,
                   })
                 }
-                className="w-full min-h-36 border rounded-2xl px-5 py-4"
+                className="w-full min-h-36 border border-[#ece7e2] rounded-2xl px-5 py-4"
               />
             </div>
           </div>
 
-          {/* FOOTER */}
           <div className="flex justify-end gap-4 mt-10">
-            <button onClick={fecharModal}>Cancelar</button>
+            <button
+              onClick={fecharModal}
+              className="px-6 py-3 rounded-2xl border border-[#ece7e2]"
+            >
+              Cancelar
+            </button>
 
             <button
               onClick={handleSalvarCurso}
               disabled={loading}
-              className="bg-[#c9a46c] text-white px-8 py-4 rounded-2xl"
+              className="bg-[#c9a46c] hover:bg-[#b89258] text-white px-8 py-4 rounded-2xl transition"
             >
               {loading
                 ? "Salvando..."
@@ -309,7 +322,7 @@ function Input({ label, value, onChange }) {
       <input
         value={value}
         onChange={onChange}
-        className="w-full border rounded-2xl px-5 py-4"
+        className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
       />
     </div>
   );

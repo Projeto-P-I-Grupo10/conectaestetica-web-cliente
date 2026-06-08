@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 import SidebarAdmin from "../assets/components-admin/SidebarAdmin";
 import TurmaModal from "../assets/components-admin/TurmaModal";
@@ -8,10 +9,6 @@ import DeleteModal from "../assets/components-admin/DeleteModal";
 import { listarTurmas, deletarTurma } from "../assets/service/turmas";
 import { tabelaCursos } from "../assets/service/cursos";
 import { listarEnderecosCurso } from "../assets/service/enderecoCurso";
-
-/* =========================
-   NORMALIZER
-========================= */
 
 function normalizeTurma(t) {
   return {
@@ -38,12 +35,9 @@ function normalizeTurma(t) {
   };
 }
 
-/* =========================
-   FORMATADORES
-========================= */
-
 function formatarData(data) {
   if (!data) return "-";
+
   return new Date(data).toLocaleDateString("pt-BR");
 }
 
@@ -88,6 +82,17 @@ export default function AdminTurmas() {
       setTurmas((turmasData || []).map(normalizeTurma));
       setCursos(cursosData || []);
       setEnderecos(enderecosData || []);
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao carregar dados",
+        text:
+          error?.response?.data?.message ||
+          "Não foi possível carregar as turmas.",
+        confirmButtonColor: "#c9a46c",
+      });
     } finally {
       setLoading(false);
     }
@@ -109,12 +114,34 @@ export default function AdminTurmas() {
   }
 
   async function confirmarDelete() {
-    if (!turmaExcluir?.id) return;
+    try {
+      if (!turmaExcluir?.id) return;
 
-    await deletarTurma(turmaExcluir.id);
-    await carregarDados();
+      await deletarTurma(turmaExcluir.id);
 
-    setTurmaExcluir(null);
+      await carregarDados();
+
+      setTurmaExcluir(null);
+      setDeleteModalAberto(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "Turma excluída",
+        text: "A turma foi removida com sucesso.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erro ao excluir",
+        text:
+          error?.response?.data?.message || "Não foi possível excluir a turma.",
+        confirmButtonColor: "#c9a46c",
+      });
+    }
   }
 
   return (
@@ -123,13 +150,14 @@ export default function AdminTurmas() {
 
       <div className="ml-72 py-20 px-6">
         <div className="max-w-7xl mx-auto">
-          {/* HEADER (ESTILO MODAL) */}
+          {/* HEADER */}
           <div className="bg-white border border-[#ece7e2] rounded-[2.5rem] p-8 shadow-sm mb-10">
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-4xl font-light text-[#3d2b1f]">
                   Gerenciar Turmas
                 </h1>
+
                 <p className="text-gray-500 mt-2">
                   Controle todas as turmas da plataforma
                 </p>
@@ -159,7 +187,7 @@ export default function AdminTurmas() {
             </div>
           </div>
 
-          {/* TABELA (ESTILO MODAL) */}
+          {/* TABELA */}
           <div className="bg-white border border-[#ece7e2] rounded-[2.5rem] shadow-sm overflow-hidden">
             {/* HEADER */}
             <div className="grid grid-cols-[2fr_1.2fr_1.5fr_120px_120px_120px_150px] px-8 py-5 bg-[#faf8f6] border-b border-[#ece7e2]">
@@ -192,32 +220,30 @@ export default function AdminTurmas() {
                     transition
                   "
                 >
-                  {/* TURMA */}
                   <div>
                     <p className="font-medium text-[#3d2b1f]">{turma.nome}</p>
+
                     <p className="text-sm text-gray-500">
                       {formatarData(turma.dataInicio)} •{" "}
                       {formatarData(turma.dataEncerramento)}
                     </p>
                   </div>
 
-                  {/* CURSO */}
                   <div>
                     <p className="font-medium">{turma.cursoNome}</p>
                     <p className="text-xs text-gray-500">{turma.areaNome}</p>
                   </div>
 
-                  {/* ENDEREÇO */}
                   <div>
                     <p className="text-sm text-gray-700">
                       {turma.enderecoRua}, {turma.enderecoNumero}
                     </p>
+
                     <p className="text-xs text-gray-500">
                       {turma.enderecoCidade}
                     </p>
                   </div>
 
-                  {/* STATUS */}
                   <span
                     className={
                       turma.cursoAtivo ? "text-green-600" : "text-red-500"
@@ -226,15 +252,12 @@ export default function AdminTurmas() {
                     {turma.cursoAtivo ? "Ativo" : "Inativo"}
                   </span>
 
-                  {/* PREÇO */}
                   <span className="text-gray-700">
                     {formatarPreco(turma.preco)}
                   </span>
 
-                  {/* VAGAS */}
                   <span className="text-gray-700">{turma.qtdVagas}</span>
 
-                  {/* AÇÕES */}
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => abrirEditar(turma)}
@@ -281,7 +304,6 @@ export default function AdminTurmas() {
         </div>
       </div>
 
-      {/* MODAL */}
       <TurmaModal
         aberto={modalAberto}
         fecharModal={() => {
@@ -294,7 +316,6 @@ export default function AdminTurmas() {
         onSuccess={carregarDados}
       />
 
-      {/* DELETE */}
       <DeleteModal
         aberto={deleteModalAberto}
         fecharModal={() => setDeleteModalAberto(false)}
