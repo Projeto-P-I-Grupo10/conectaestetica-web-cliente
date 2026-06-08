@@ -24,7 +24,6 @@ export default function EnderecoModalUsuario({
     rua: "",
     numero: "",
     complemento: "",
-    bairro: "",
     cidade: "",
     uf: "",
   });
@@ -44,7 +43,7 @@ export default function EnderecoModalUsuario({
           setEnderecoAtualId(atual.id);
           setForm({
             id: atual.id,
-            cep: atual.cep || "",
+            cep: aplicarMascaraCep(atual.cep || ""),
             rua: atual.rua || "",
             numero: atual.numero || "",
             complemento: atual.complemento || "",
@@ -136,7 +135,7 @@ export default function EnderecoModalUsuario({
       rua: "",
       numero: "",
       complemento: "",
-      bairro: "",
+
       cidade: "",
       uf: "",
     });
@@ -151,7 +150,7 @@ export default function EnderecoModalUsuario({
 
     setForm({
       id: atualizado.id,
-      cep: atualizado.cep || "",
+      cep: aplicarMascaraCep(atualizado.cep || ""),
       rua: atualizado.rua || "",
       numero: atualizado.numero || "",
       complemento: atualizado.complemento || "",
@@ -179,6 +178,7 @@ export default function EnderecoModalUsuario({
     }
 
     if (form.id) {
+
       const atualizado = await editarEndereco(form.id, {
         ...form,
         cep: form.cep.replace(/\D/g, ""),
