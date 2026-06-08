@@ -16,6 +16,8 @@ export default function CursosPage() {
   const [cursosProximos, setCursosProximos] = useState(null);
   const [loadingProximos, setLoadingProximos] = useState(false);
   const [erroProximos, setErroProximos] = useState(null);
+  const [areaSelecionada, setAreaSelecionada] = useState("");
+  const [ordenacao, setOrdenacao] = useState("");
 
   const navigate = useNavigate();
 
@@ -153,11 +155,48 @@ export default function CursosPage() {
   }
 
   const cursosFiltrados = useMemo(() => {
-    return cursos.filter((curso) =>
-      curso?.cursoNome?.toLowerCase().includes(pesquisa.toLowerCase()),
-    );
-  }, [cursos, pesquisa]);
+    let resultado = [...cursos];
 
+    // pesquisa
+    if (pesquisa.trim()) {
+      resultado = resultado.filter((curso) =>
+        curso?.cursoNome?.toLowerCase().includes(pesquisa.toLowerCase()),
+      );
+    }
+
+    if (areaSelecionada) {
+      resultado = resultado.filter(
+        (curso) =>
+          curso?.areaNome?.toLowerCase() === areaSelecionada.toLowerCase(),
+      );
+    }
+
+    switch (ordenacao) {
+      case "preco":
+        resultado.sort(
+          (a, b) => Number(a.turmaPreco || 0) - Number(b.turmaPreco || 0),
+        );
+        break;
+
+      case "recentes":
+        resultado.sort(
+          (a, b) => new Date(b.turmaDataInicio) - new Date(a.turmaDataInicio),
+        );
+        break;
+
+      case "avaliacao":
+        resultado.sort(
+          (a, b) =>
+            Number(b.avaliacaoCurso || 0) - Number(a.avaliacaoCurso || 0),
+        );
+        break;
+
+      default:
+        break;
+    }
+
+    return resultado;
+  }, [cursos, pesquisa, areaSelecionada, ordenacao]);
   console.log("Cursos renderizados:", cursosFiltrados);
 
   return (
@@ -166,7 +205,12 @@ export default function CursosPage() {
 
       <main className="flex-1 flex justify-center py-10 mt-32">
         <div className="w-full max-w-7xl px-6 flex flex-col lg:flex-row gap-10">
-          <FiltroCursos />
+          <FiltroCursos
+            areaSelecionada={areaSelecionada}
+            setAreaSelecionada={setAreaSelecionada}
+            ordenacao={ordenacao}
+            setOrdenacao={setOrdenacao}
+          />
 
           <div className="flex-1">
             <div className="mb-10">

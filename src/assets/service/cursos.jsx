@@ -17,6 +17,22 @@ export async function exibirCursoDetalheId(id) {
   return response.data;
 }
 
+export async function filtroRecentes() {
+  const response = await api.get(`/turmas/detalhes-recentes`);
+  return response.data;
+}
+
+export async function filtroPreco() {
+  const response = await api.get(`/turmas/detalhes-preco`);
+  return response.data;
+}
+
+
+export async function filtroAvaliacao() {
+  const response = await api.get(`/turmas/detalhes-avaliacao`);
+  return response.data;
+}
+
 // End-points dos cursos em si ]
 
 export async function deletarCurso(id) {
