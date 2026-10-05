@@ -25,6 +25,7 @@ export async function atualizarStatus(id, data) {
 }
 
 export async function deleatMatricula(id) {
+    // eslint-disable-next-line no-undef
     const response = await api.put(`/matriculas/${id}`, data);
     return response.data;
 }

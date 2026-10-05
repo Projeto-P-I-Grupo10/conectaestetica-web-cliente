@@ -282,7 +282,7 @@ export default function CursoDetalhe() {
                   </h3>
 
                   <p className="text-[#c9a46c] mb-4">
-                    @{curso?.professorRedesocial}
+                    {curso?.professorRedesocial}
                   </p>
 
                   <p className="text-gray-600 leading-relaxed">
@@ -453,7 +453,11 @@ export default function CursoDetalhe() {
               </p>
 
               <button
-                onClick={() => navigate(`/pagamentos/${curso?.turmaId}`)}
+                onClick={() =>
+                  navigate(`/matricula`, {
+                    state: { turmaId: curso?.turmaId },
+                  })
+                }
                 className="
                   w-full
                   bg-[#c9a46c]

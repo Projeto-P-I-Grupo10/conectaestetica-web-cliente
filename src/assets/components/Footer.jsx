@@ -129,6 +129,7 @@ export default function Footer() {
 
               <li>
                 <button
+                  onClick={() => navigate("/formulario")}
                   className="
                     flex
                     items-center
@@ -143,7 +144,7 @@ export default function Footer() {
                 </button>
               </li>
 
-              <li>
+              {/* <li>
                 <button
                   className="
                     flex
@@ -157,7 +158,7 @@ export default function Footer() {
                   <ChevronRight size={18} />
                   Sobre nós
                 </button>
-              </li>
+              </li> */}
             </ul>
           </div>
 

@@ -64,8 +64,24 @@ export default function TurmaModal({
           ? String(Number(turmaSelecionada.porcentagemLucro) * 100)
           : "10",
 
-        cursoId: String(turmaSelecionada.cursoId || ""),
-        enderecoId: String(turmaSelecionada.enderecoId || ""),
+        /* CURSO: usa o id se vier; senão procura pelo nome */
+        cursoId: String(
+          turmaSelecionada.cursoId ||
+            cursos.find((curso) => curso.nome === turmaSelecionada.cursoNome)
+              ?.id ||
+            "",
+        ),
+
+        enderecoId: String(
+          turmaSelecionada.enderecoId ||
+            enderecos.find(
+              (endereco) =>
+                endereco.rua === turmaSelecionada.enderecoRua &&
+                endereco.numero === turmaSelecionada.enderecoNumero &&
+                endereco.cidade === turmaSelecionada.enderecoCidade,
+            )?.id ||
+            "",
+        ),
       });
 
       return;
@@ -83,6 +99,7 @@ export default function TurmaModal({
       cursoId: "",
       enderecoId: "",
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turmaSelecionada, aberto, editando]);
 
   async function handleSalvar() {
@@ -170,19 +187,24 @@ export default function TurmaModal({
     } catch (error) {
       console.error("Erro ao salvar turma:", error?.response?.data || error);
 
+      const erros = error?.response?.data;
+
+      const mensagens =
+        erros && typeof erros === "object"
+          ? Object.values(erros)
+          : ["Não foi possível salvar a turma."];
+
       Swal.fire({
         icon: "error",
         title: "Erro ao salvar",
-        text:
-          error?.response?.data?.message ||
-          error?.response?.data?.erro ||
-          "Não foi possível salvar a turma.",
+        html: mensagens.join("<br>"),
         confirmButtonColor: "#c9a46c",
       });
     } finally {
       setLoading(false);
     }
   }
+
   if (!aberto) return null;
 
   return (
@@ -243,6 +265,7 @@ export default function TurmaModal({
                 className="w-full border border-[#ece7e2] rounded-2xl px-5 py-4"
               >
                 <option value="">Selecione um curso</option>
+
                 {cursos.map((curso) => (
                   <option key={curso.id} value={curso.id}>
                     {curso.nome}
@@ -251,7 +274,7 @@ export default function TurmaModal({
               </select>
             </div>
 
-            {/* ENDEREÇO (AGORA FUNCIONA NA EDIÇÃO) */}
+            {/* ENDEREÇO */}
             <div>
               <label className="text-sm text-gray-500 mb-2 block">
                 Endereço
@@ -319,7 +342,7 @@ export default function TurmaModal({
             {/* VAGAS */}
             <Input
               type="number"
-              label="Quantidade de Vagas"
+              label="Quantidade de Vagas (min 20)"
               value={form.qtdVagas}
               onChange={(e) => setForm({ ...form, qtdVagas: e.target.value })}
             />

@@ -16,6 +16,8 @@ import AdminProfessor from "../pages/AdminProfessor";
 import AdminTurmas from "../pages/AdminTurmas";
 import AdminEnderecos from "../pages/AdminEnderecos";
 import AdminAreas from "../pages/AdminAreas"
+import AdminLogin from "../pages/LoginAdmin"
+
 
 export const router = createBrowserRouter([
   {
@@ -56,7 +58,10 @@ export const router = createBrowserRouter([
   },
 
   // Area de admin
-
+ {
+    path: "Admin/Login",
+    element: <AdminLogin />,
+  },
   {
     path: "Admin/Dashboard",
     element: <AdminDashboard />,
