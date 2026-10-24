@@ -29,7 +29,7 @@ export default function DivulgarCurso() {
   const navigate = useNavigate();
 
   return (
-    <section className="w-full bg-[#6B4A3A] py-20 px-6 mt-20">
+    <section className="w-full bg-[#6B4A3A] py-20 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Título */}
         <div className="text-center text-white">

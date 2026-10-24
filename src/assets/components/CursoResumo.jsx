@@ -23,7 +23,7 @@ export default function CursoResumo({ id, avaliacaoCurso }) {
     {
       style: "currency",
       currency: "BRL",
-    }
+    },
   );
 
   return (
@@ -39,14 +39,11 @@ export default function CursoResumo({ id, avaliacaoCurso }) {
       <div className="p-4 flex flex-col justify-between w-full">
         <div className="flex justify-between">
           <h3 className="font-semibold">{curso?.cursoNome}</h3>
-
         </div>
 
         <p className="text-lg font-bold">{precoFormatado}</p>
 
-        <p className="text-sm text-gray-500">
-          Parcele em até 10x sem juros
-        </p>
+        <p className="text-sm text-gray-500">Parcele em até 10x sem juros</p>
 
         {/* ESTRELAS */}
         <div>
@@ -65,8 +62,8 @@ export default function CursoResumo({ id, avaliacaoCurso }) {
           </div>
 
           <p className="text-sm text-gray-500 mt-1">
-            {avaliacaoCurso?.media || 0} •{" "}
-            {avaliacaoCurso?.quantidade || 0} avaliações
+            {avaliacaoCurso?.media || 0} • {avaliacaoCurso?.quantidade || 0}{" "}
+            avaliações
           </p>
         </div>
       </div>

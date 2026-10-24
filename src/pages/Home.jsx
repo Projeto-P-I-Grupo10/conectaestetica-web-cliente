@@ -14,7 +14,7 @@ export default function Home() {
       <Navbar />
       <Carrossel />
       <DivulgarCurso />
-      <CategoriasCursos />
+      {/* <CategoriasCursos /> */}
       <PorqueEscolher />
       {/* <Depoimentos />
       <EstatisticasPlataforma /> */}

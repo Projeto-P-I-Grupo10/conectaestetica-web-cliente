@@ -41,7 +41,6 @@ export default function CursoCard({
 
         <div className="absolute inset-0 from-black/70 to-transparent rounded-2xl flex items-end p-4">
           <p className="text-white text-lg font-light leading-tight">
-            {titulo}
           </p>
         </div>
       </div>
