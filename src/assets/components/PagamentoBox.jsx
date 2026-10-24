@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { consultarStatusPix, pagamentoPix } from "../service/pagamento";
-import { useParams } from "react-router-dom";
-import { exibirCursoId, exibirCursoDetalheId } from "../service/cursos";
+import {
+  consultarStatusPix,
+  dispararPagamentoPix,
+  aguardarQrCode,
+} from "../service/pagamento";
+import { exibirCursoDetalheId } from "../service/cursos";
 import Swal from "sweetalert2";
 
 export default function PagamentoBox({ id }) {
@@ -9,6 +12,7 @@ export default function PagamentoBox({ id }) {
   const [curso, setCurso] = useState({});
   const [pagamento, setPagamento] =  useState(null);
   const [tempoRestante, setTempoRestante] = useState(null);
+  const [gerandoPix, setGerandoPix] = useState(false);
 
   useEffect(() => {
     async function carregarCurso() {
@@ -54,91 +58,97 @@ export default function PagamentoBox({ id }) {
   }
 
   async function handlePagamento(tipo, cursoData) {
+    if (tipo !== "pix") return;
 
-    console.log("trazendo o preco: " + cursoData?.turmaPreco)
-    if (tipo === "pix") {
-      const dadosPag = {
-        metodoPagamento: tipo,
-        idTurma: Number(id),
-        idUsuario: Number(sessionStorage.getItem("idUsuario")),
-        email: sessionStorage.getItem("email"),
-        valor: parseFloat(cursoData?.turmaPreco)
-      };
+    const idCurso = Number(id);
+    const idUsuario = Number(sessionStorage.getItem("idUsuario"));
 
-      console.log("JSON enviado:", JSON.stringify(dadosPag));
+    const dadosPag = {
+      metodoPagamento: tipo,
+      idTurma: idCurso,
+      idUsuario,
+      email: sessionStorage.getItem("email"),
+      valor: parseFloat(cursoData?.turmaPreco),
+    };
 
-      try {
-        const data = await pagamentoPix(dadosPag);
-        setPagamento(data);
+    setGerandoPix(true);
+    setPagamento(null);
 
-        setTempoRestante(600);
+    try {
+      await dispararPagamentoPix(dadosPag);
 
-        const countdown = setInterval(() => {
-          setTempoRestante((prev) => {
-            if (prev <= 1) {
-              clearInterval(countdown);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+      const data = await aguardarQrCode(idCurso, idUsuario);
+      setPagamento(data);
+      setGerandoPix(false);
 
-        const polling = setInterval(async () => {
-          try {
-            console.log(curso.turmaId)
-            const statusResponse = await consultarStatusPix(curso.turmaId, dadosPag.idUsuario);
+      setTempoRestante(600);
+      const countdown = setInterval(() => {
+        setTempoRestante((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdown);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-            if (statusResponse.status === "approved") {
-              clearInterval(polling);
-              clearInterval(countdown);
+      const polling = setInterval(async () => {
+        try {
+          const statusResponse = await consultarStatusPix(idCurso, idUsuario);
+          const status = statusResponse?.status?.toLowerCase();
 
-              Swal.fire({
-                title: "Pagamento aprovado!",
-                text: "Seu curso foi liberado 🎉",
-                icon: "success",
-                confirmButtonText: "Continuar"
-              });
-
-            } else if (statusResponse.status === "expired") {
-              clearInterval(polling);
-              clearInterval(countdown);
-
-              Swal.fire({
-                title: "Tempo esgotado",
-                text: "O PIX expirou, gere outro pagamento",
-                icon: "warning"
-              });
-            }
-
-          } catch (error) {
-            console.error("Erro ao consultar status:", error);
+          if (status === "approved") {
             clearInterval(polling);
             clearInterval(countdown);
+            setTempoRestante(null);
 
             Swal.fire({
-              title: "Erro",
-              text: "Falha ao verificar pagamento",
-              icon: "error"
+              title: "Pagamento aprovado!",
+              text: "Seu curso foi liberado 🎉",
+              icon: "success",
+              confirmButtonText: "Continuar",
+            });
+          } else if (status === "expired" || status === "cancelled") {
+            clearInterval(polling);
+            clearInterval(countdown);
+            setTempoRestante(null);
+            setPagamento(null);
+
+            Swal.fire({
+              title: "Tempo esgotado",
+              text: "O PIX expirou, gere outro pagamento",
+              icon: "warning",
             });
           }
-        }, 5000);
-
-      } catch (e) {
-        if (e.response?.status === 409) {
-          Swal.fire({
-            title: "Atenção",
-            text: "Já existe um pagamento PIX pendente para este curso.",
-            icon: "info",
-          });
-        } else {
-          console.error(e);
+        } catch (error) {
+          console.error("Erro ao consultar status:", error);
+          clearInterval(polling);
+          clearInterval(countdown);
 
           Swal.fire({
             title: "Erro",
-            text: "Não foi possível gerar o pagamento",
+            text: "Falha ao verificar pagamento",
             icon: "error",
           });
         }
+      }, 5000);
+    } catch (e) {
+      setGerandoPix(false);
+
+      if (e.response?.status === 409) {
+        Swal.fire({
+          title: "Atenção",
+          text: "Já existe um pagamento PIX pendente para este curso.",
+          icon: "info",
+        });
+      } else {
+        console.error(e);
+
+        Swal.fire({
+          title: "Erro",
+          text: "Não foi possível gerar o pagamento",
+          icon: "error",
+        });
       }
     }
   }
@@ -155,8 +165,13 @@ export default function PagamentoBox({ id }) {
       {/* PIX */}
       <div
         onClick={() => {
+          if (gerandoPix) return;
+          const jaSelecionado = metodo === "pix";
           setMetodo("pix");
-          handlePagamento("pix", curso);
+          // Só dispara um novo PIX se ainda não houver um QR ativo.
+          if (!jaSelecionado && !pagamento?.qrCode) {
+            handlePagamento("pix", curso);
+          }
         }}
         className={`border rounded-md p-3 cursor-pointer ${
           metodo === "pix" ? "border-blue-500" : ""
@@ -170,28 +185,38 @@ export default function PagamentoBox({ id }) {
         {metodo === "pix" && (
           <div className="mt-4 flex flex-col items-center gap-3">
 
-            <img
-              src={`data:image/png;base64,${pagamento?.qrCodeImage}`}
-              alt="qr"
-            />
-
-            <div className="flex flex-col items-center gap-2">
-              <button className="bg-[#c49a6c] text-white px-4 py-2 rounded-md">
-                {limitarTexto(pagamento?.qrCode)}
-              </button>
-
-              <button
-                onClick={copiarPix}
-                className="text-sm text-blue-600 underline"
-              >
-                Copiar código PIX
-              </button>
-            </div>
-
-            {tempoRestante !== null && (
-              <p className="text-red-600 font-bold">
-                Expira em: {formatarTempo(tempoRestante)}
+            {gerandoPix && (
+              <p className="text-gray-600 text-sm text-center">
+                Gerando QR Code, aguarde...
               </p>
+            )}
+
+            {!gerandoPix && pagamento?.qrCodeImage && (
+              <>
+                <img
+                  src={`data:image/png;base64,${pagamento.qrCodeImage}`}
+                  alt="QR Code do PIX"
+                />
+
+                <div className="flex flex-col items-center gap-2">
+                  <button className="bg-[#c49a6c] text-white px-4 py-2 rounded-md">
+                    {limitarTexto(pagamento?.qrCode)}
+                  </button>
+
+                  <button
+                    onClick={copiarPix}
+                    className="text-sm text-blue-600 underline"
+                  >
+                    Copiar código PIX
+                  </button>
+                </div>
+
+                {tempoRestante !== null && (
+                  <p className="text-red-600 font-bold">
+                    Expira em: {formatarTempo(tempoRestante)}
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
