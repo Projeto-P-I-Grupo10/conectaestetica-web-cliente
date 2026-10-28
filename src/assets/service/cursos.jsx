@@ -18,22 +18,21 @@ export async function exibirCursoDetalheId(id) {
 }
 
 export async function filtroRecentes() {
-  const response = await api.get(`/turmas/detalhes-recentes`);
+  const response = await api.get("/turmas/detalhes-recentes");
   return response.data;
 }
 
 export async function filtroPreco() {
-  const response = await api.get(`/turmas/detalhes-preco`);
+  const response = await api.get("/turmas/detalhes-preco");
   return response.data;
 }
-
 
 export async function filtroAvaliacao() {
-  const response = await api.get(`/turmas/detalhes-avaliacao`);
+  const response = await api.get("/turmas/detalhes-avaliacao");
   return response.data;
 }
 
-// End-points dos cursos em si ]
+// End-points dos cursos em si
 
 export async function deletarCurso(id) {
   const response = await api.delete(`/cursos/${id}`);
@@ -41,7 +40,7 @@ export async function deletarCurso(id) {
 }
 
 export async function cadastrarCursos(data) {
-  const response = await api.post(`/cursos`, data);
+  const response = await api.post("/cursos", data);
   return response.data;
 }
 
@@ -50,7 +49,18 @@ export async function editarCursos(id, data) {
   return response.data;
 }
 
-export async function tabelaCursos() {
-  const response = await api.get("/cursos");
+export async function tabelaCursos(
+  page = 0,
+  size = 20,
+  sort = "id,asc"
+) {
+  const response = await api.get("/cursos", {
+    params: {
+      page,
+      size,
+      sort,
+    },
+  });
+
   return response.data;
 }

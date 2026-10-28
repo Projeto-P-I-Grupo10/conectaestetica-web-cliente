@@ -35,38 +35,67 @@ function normalizeCurso(curso) {
 
 export default function AdminCursos() {
   const [cursos, setCursos] = useState([]);
+
+  const [paginaAtual, setPaginaAtual] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+
   const [modalAberto, setModalAberto] = useState(false);
   const [cursoSelecionado, setCursoSelecionado] = useState(null);
 
   const [deleteModalAberto, setDeleteModalAberto] = useState(false);
   const [cursoExcluir, setCursoExcluir] = useState(null);
+  const [recarregar, setRecarregar] = useState(0);
 
   useEffect(() => {
+    let ativo = true;
+
+    async function carregarCursos() {
+      try {
+        const data = await tabelaCursos(paginaAtual, 1, "id,asc");
+
+        if (!ativo) return;
+
+        const normalizados = Array.isArray(data.content)
+          ? data.content.map(normalizeCurso)
+          : [];
+
+        setCursos(normalizados);
+        setTotalPaginas(data.totalPages || 0);
+      } catch (erro) {
+        if (!ativo) return;
+
+        console.error("Erro ao buscar cursos:", erro);
+
+        setCursos([]);
+        setTotalPaginas(0);
+
+        Swal.fire({
+          icon: "error",
+          title: "Erro ao carregar cursos",
+          text:
+            erro?.response?.data?.message ||
+            "Não foi possível carregar os cursos.",
+          confirmButtonColor: "#c9a46c",
+        });
+      }
+    }
+
     carregarCursos();
-  }, []);
 
-  async function carregarCursos() {
-    try {
-      const data = await tabelaCursos();
+    return () => {
+      ativo = false;
+    };
+  }, [paginaAtual, recarregar]);
 
-      const normalizados = Array.isArray(data) ? data.map(normalizeCurso) : [];
+  function paginaAnterior() {
+    if (paginaAtual > 0) {
+      setPaginaAtual((prev) => prev - 1);
+    }
+  }
 
-      console.log("Cursos normalizados:", normalizados);
-
-      setCursos(normalizados);
-    } catch (erro) {
-      console.error("Erro ao buscar cursos:", erro);
-
-      setCursos([]);
-
-      Swal.fire({
-        icon: "error",
-        title: "Erro ao carregar cursos",
-        text:
-          erro?.response?.data?.message ||
-          "Não foi possível carregar os cursos.",
-        confirmButtonColor: "#c9a46c",
-      });
+  function proximaPagina() {
+    if (paginaAtual < totalPaginas - 1) {
+      setPaginaAtual((prev) => prev + 1);
     }
   }
 
@@ -181,6 +210,33 @@ export default function AdminCursos() {
                 </div>
               )}
             </div>
+
+            {/* PAGINAÇÃO */}
+            {totalPaginas > 0 && (
+              <div className="flex items-center justify-between px-8 py-5 bg-[#faf8f6]">
+                <span className="text-sm text-gray-500">
+                  Página {paginaAtual + 1} de {totalPaginas}
+                </span>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={paginaAnterior}
+                    disabled={paginaAtual === 0}
+                    className="px-5 py-3 rounded-xl border border-[#ece7e2] text-[#3d2b1f] bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#c9a46c] hover:text-white transition"
+                  >
+                    Anterior
+                  </button>
+
+                  <button
+                    onClick={proximaPagina}
+                    disabled={paginaAtual === totalPaginas - 1}
+                    className="px-5 py-3 rounded-xl border border-[#ece7e2] text-[#3d2b1f] bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#c9a46c] hover:text-white transition"
+                  >
+                    Próxima
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -190,7 +246,7 @@ export default function AdminCursos() {
         aberto={modalAberto}
         fecharModal={() => setModalAberto(false)}
         cursoSelecionado={cursoSelecionado}
-        onSuccess={carregarCursos}
+        onSuccess={() => setRecarregar((n) => n + 1)}
       />
 
       {/* MODAL EXCLUSÃO */}

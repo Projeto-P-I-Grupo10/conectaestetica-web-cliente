@@ -82,3 +82,30 @@ export async function atualizarSenhaUsuario(novaSenha,id)
     console.error("Erro:", error.response?.data || error.message);
     });
 }
+
+export async function listarTurmasCompradasPorUsuario(id) {
+  return await api
+    .get(`/usuarios/${id}/turmas-compradas-por-usuario`)
+    .then(response => {
+      return response.data;
+    })
+    .catch(error => {
+      console.error("Erro:", error.response?.data || error.message);
+    });
+}
+
+export async function listarUsuarios(page = 0, size = 20) {
+  return await api
+    .get("/usuarios", {
+      params: {
+        page,
+        size,
+      },
+    })
+    .then(response => {
+      return response.data;
+    })
+    .catch(error => {
+      console.error("Erro:", error.response?.data || error.message);
+    });
+}

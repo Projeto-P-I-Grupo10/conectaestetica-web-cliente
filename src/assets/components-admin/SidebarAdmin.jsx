@@ -57,7 +57,7 @@ export default function SidebarAdmin() {
     {
       nome: "Alunos",
       icon: <Users size={20} />,
-      path: "/admin/alunos",
+      path: "/admin/UsuariosAlunos",
     },
 
     {
