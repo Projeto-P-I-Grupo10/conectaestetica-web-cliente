@@ -80,9 +80,9 @@ export default function Carrossel() {
               {slide.descricao}
             </p>
 
-            <button className="bg-[#c9a46c] hover:bg-[#b89258] transition px-8 py-4 rounded-full font-medium">
+            {/* <button className="bg-[#c9a46c] hover:bg-[#b89258] transition px-8 py-4 rounded-full font-medium">
               Conheça mais
-            </button>
+            </button> */}
           </div>
         </div>
       ))}
