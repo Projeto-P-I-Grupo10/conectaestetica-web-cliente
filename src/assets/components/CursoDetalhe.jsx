@@ -161,11 +161,7 @@ export default function CursoDetalhe() {
               {/* BOTÕES */}
               <div className="flex flex-col md:flex-row gap-4">
                 <button
-                  onClick={() =>
-                    navigate(`/matricula`, {
-                      state: { turmaId: curso?.turmaId },
-                    })
-                  }
+                  onClick={() => navigate(`/pagamentos/${curso?.turmaId}`)}
                   className="
                     bg-[#c9a46c]
                     hover:bg-[#b89258]
@@ -453,11 +449,7 @@ export default function CursoDetalhe() {
               </p>
 
               <button
-                onClick={() =>
-                  navigate(`/matricula`, {
-                    state: { turmaId: curso?.turmaId },
-                  })
-                }
+                onClick={() => navigate(`/pagamentos/${curso?.turmaId}`)}
                 className="
                   w-full
                   bg-[#c9a46c]

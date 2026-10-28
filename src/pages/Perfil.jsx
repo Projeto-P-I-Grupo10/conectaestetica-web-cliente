@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   Pencil,
   BookOpen,
@@ -15,7 +16,12 @@ import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import ModalResetSenha from "../assets/components/ModalResetSenha";
 
-import { atualizarUsuario, detalharUsuario } from "../assets/service/usuarios";
+import {
+  atualizarUsuario,
+  detalharUsuario,
+  listarTurmasCompradasPorUsuario,
+} from "../assets/service/usuarios";
+
 import ModalResetNovaSenha from "../assets/components/ModalResetNovaSenha";
 
 import ModalEnderecos from "../assets/components/EnderecoModalUsuario";
@@ -24,6 +30,7 @@ export default function PerfilUsuario() {
   const id = sessionStorage.getItem("idUsuario");
 
   const [usuario, setUsuario] = useState({});
+  const [cursos, setCursos] = useState([]);
   const [editando, setEditando] = useState(false);
 
   const [nome, setNome] = useState("");
@@ -41,7 +48,10 @@ export default function PerfilUsuario() {
       try {
         const data = await detalharUsuario(id);
 
+        const cursosComprados = await listarTurmasCompradasPorUsuario(id);
+
         setUsuario(data);
+        setCursos(cursosComprados || []);
 
         setNome(data.nome);
         setEmail(data.email);
@@ -96,7 +106,9 @@ export default function PerfilUsuario() {
       const response = await atualizarUsuario(usuarioAtualizado, id);
 
       console.log("Usuário atualizado:", response);
+
       sessionStorage.setItem("nome", response.nome);
+
       window.location.reload();
     } catch (erro) {
       console.error("Erro ao atualizar usuário", erro);
@@ -125,21 +137,6 @@ export default function PerfilUsuario() {
     }
   }
 
-  const cursos = [
-    {
-      id: 1,
-      titulo: "Curso - Skin care",
-      imagem:
-        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 2,
-      titulo: "Curso - Botox",
-      imagem:
-        "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop",
-    },
-  ];
-
   function formatarTelefone(valor) {
     valor = valor.replace(/\D/g, "");
     valor = valor.slice(0, 11);
@@ -161,7 +158,6 @@ export default function PerfilUsuario() {
 
       <section className="pt-36 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
-          {/* CONTAINER */}
           <div
             className="
               bg-white
@@ -218,68 +214,93 @@ export default function PerfilUsuario() {
 
                 {/* LISTA */}
                 <div className="space-y-6">
-                  {cursos.map((curso) => (
+                  {cursos.length > 0 ? (
+                    cursos.map((curso, index) => (
+                      <div
+                        key={index}
+                        className="
+                          bg-[#faf8f6]
+                          border
+                          border-[#ece7e2]
+                          rounded-3xl
+                          overflow-hidden
+                          flex
+                          flex-col
+                          md:flex-row
+                          hover:shadow-lg
+                          transition-all
+                          duration-300
+                        "
+                      >
+                        {/* IMAGEM */}
+                        <img
+                          src={curso.imagemCurso}
+                          alt={curso.nomeCurso}
+                          className="
+                            w-full
+                            md:w-64
+                            h-52
+                            object-cover
+                          "
+                        />
+
+                        {/* CONTEUDO */}
+                        <div className="flex-1 p-6 flex flex-col justify-between">
+                          <div>
+                            <h3 className="text-2xl font-medium text-[#3d2b1f] mb-3">
+                              {curso.nomeCurso}
+                            </h3>
+
+                            <p className="text-gray-600 leading-relaxed">
+                              {curso.descricaoCurso}
+                            </p>
+                          </div>
+
+                          <div className="mt-6">
+                            <button
+                              className="
+                                bg-[#c9a46c]
+                                hover:bg-[#b89258]
+                                transition
+                                text-white
+                                px-8
+                                py-3
+                                rounded-full
+                                font-medium
+                                shadow-sm
+                              "
+                            >
+                              Acessar curso
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
                     <div
-                      key={curso.id}
                       className="
                         bg-[#faf8f6]
                         border
                         border-[#ece7e2]
                         rounded-3xl
-                        overflow-hidden
-                        flex
-                        flex-col
-                        md:flex-row
-                        hover:shadow-lg
-                        transition-all
-                        duration-300
+                        p-8
+                        text-center
                       "
                     >
-                      {/* IMAGEM */}
-                      <img
-                        src={curso.imagem}
-                        alt={curso.titulo}
-                        className="
-                          w-full
-                          md:w-64
-                          h-52
-                          object-cover
-                        "
+                      <BookOpen
+                        size={40}
+                        className="mx-auto mb-4 text-[#c9a46c]"
                       />
 
-                      {/* CONTEUDO */}
-                      <div className="flex-1 p-6 flex flex-col justify-between">
-                        <div>
-                          <h3 className="text-2xl font-medium text-[#3d2b1f] mb-3">
-                            {curso.titulo}
-                          </h3>
+                      <h3 className="text-xl font-medium text-[#3d2b1f]">
+                        Você ainda não possui cursos
+                      </h3>
 
-                          <p className="text-gray-600 leading-relaxed">
-                            Continue acompanhando suas aulas e desenvolvendo
-                            suas habilidades na área da estética.
-                          </p>
-                        </div>
-
-                        <div className="mt-6">
-                          <button
-                            className="
-                              bg-[#c9a46c]
-                              hover:bg-[#b89258]
-                              transition
-                              text-white
-                              px-8
-                              py-3
-                              rounded-full
-                              font-medium
-                              shadow-sm
-                            "
-                          >
-                            Acessar curso
-                          </button>
-                        </div>
-                      </div>
+                      <p className="text-gray-500 mt-2">
+                        Os cursos adquiridos aparecerão aqui.
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -553,16 +574,16 @@ export default function PerfilUsuario() {
                         <button
                           onClick={() => setModalEnderecoOpen(true)}
                           className="
-                          px-4
-                          py-2
-                          rounded-full
-                          bg-[#c9a46c]
-                          hover:bg-[#b89258]
-                          transition
-                          text-white
-                          text-sm
-                          font-medium
-                        "
+                            px-4
+                            py-2
+                            rounded-full
+                            bg-[#c9a46c]
+                            hover:bg-[#b89258]
+                            transition
+                            text-white
+                            text-sm
+                            font-medium
+                          "
                         >
                           Gerenciar
                         </button>
