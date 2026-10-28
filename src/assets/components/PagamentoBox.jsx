@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   consultarStatusPix,
   dispararPagamentoPix,
   aguardarQrCode,
+  carregarQrCodeAtivo,
 } from "../service/pagamento";
 import { exibirCursoDetalheId } from "../service/cursos";
 import Swal from "sweetalert2";
@@ -10,42 +11,157 @@ import Swal from "sweetalert2";
 export default function PagamentoBox({ id }) {
   const [metodo, setMetodo] = useState(null);
   const [curso, setCurso] = useState({});
-  const [pagamento, setPagamento] =  useState(null);
+  const [pagamento, setPagamento] = useState(null);
   const [tempoRestante, setTempoRestante] = useState(null);
   const [gerandoPix, setGerandoPix] = useState(false);
+
+  const countdownRef = useRef(null);
+  const pollingRef = useRef(null);
+
+  const idCurso = Number(id);
+  const idUsuario = Number(sessionStorage.getItem("idUsuario"));
 
   useEffect(() => {
     async function carregarCurso() {
       try {
         const data = await exibirCursoDetalheId(id);
         setCurso(data);
-        console.log("data: " + data?.turmaPreco)
-        console.log("curso: " +curso?.turmaPreco)
       } catch (erro) {
         console.error("Erro ao buscar cursos", erro);
       }
     }
     carregarCurso();
-  }, []);
+  }, [id]);
+
+  // Reexibição do QR após reload / reabertura da página.
+  // Se já existir um PIX com QR ativo (dataExpiracao futura), reexibe com o
+  // tempo restante e retoma o polling de status, em vez de gerar um novo.
+  useEffect(() => {
+    if (!idCurso || !idUsuario) return;
+
+    let cancelado = false;
+
+    (async () => {
+      const ativo = await carregarQrCodeAtivo(idCurso, idUsuario);
+      if (cancelado || !ativo) return;
+
+      setMetodo("pix");
+      exibirQr(ativo);
+      iniciarCountdown(ativo.dataExpiracao);
+      iniciarPollingStatus();
+    })();
+
+    return () => {
+      cancelado = true;
+      limparTimers();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idCurso, idUsuario]);
+
+  // Limpa os timers ao desmontar o componente.
+  useEffect(() => limparTimers, []);
+
+  function limparTimers() {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }
+
+  function exibirQr(data) {
+    setPagamento(data);
+    setGerandoPix(false);
+  }
+
+  function segundosRestantesAte(dataExpiracao) {
+    if (!dataExpiracao) return 0;
+    const restante = Math.floor(
+      (new Date(dataExpiracao) - new Date()) / 1000
+    );
+    return Math.max(0, restante);
+  }
+
+  // Countdown derivado de dataExpiracao (hora do servidor), nunca de um valor
+  // fixo. Assim, reabrir com 6 min restantes mostra 6 min.
+  function iniciarCountdown(dataExpiracao) {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+
+    const atualizar = () => {
+      const restante = segundosRestantesAte(dataExpiracao);
+      setTempoRestante(restante);
+      if (restante <= 0) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
+
+    atualizar();
+    countdownRef.current = setInterval(atualizar, 1000);
+  }
+
+  function iniciarPollingStatus() {
+    if (pollingRef.current) clearInterval(pollingRef.current);
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const statusResponse = await consultarStatusPix(idCurso, idUsuario);
+        const status = statusResponse?.status?.toLowerCase();
+
+        if (status === "approved") {
+          limparTimers();
+          setTempoRestante(null);
+
+          Swal.fire({
+            title: "Pagamento aprovado!",
+            text: "Seu curso foi liberado 🎉",
+            icon: "success",
+            confirmButtonText: "Continuar",
+          });
+        } else if (status === "expired" || status === "cancelled") {
+          limparTimers();
+          setTempoRestante(null);
+          setPagamento(null);
+
+          Swal.fire({
+            title: "Tempo esgotado",
+            text: "O PIX expirou, gere outro pagamento",
+            icon: "warning",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao consultar status:", error);
+        limparTimers();
+
+        Swal.fire({
+          title: "Erro",
+          text: "Falha ao verificar pagamento",
+          icon: "error",
+        });
+      }
+    }, 5000);
+  }
 
   function limitarTexto(texto, limite = 20) {
     if (!texto) return "";
-    return texto.length > limite
-      ? texto.slice(0, limite) + "..."
-      : texto;
+    return texto.length > limite ? texto.slice(0, limite) + "..." : texto;
   }
 
   function copiarPix() {
     if (!pagamento?.qrCode) return;
 
-    navigator.clipboard.writeText(pagamento?.qrCode)
+    navigator.clipboard
+      .writeText(pagamento?.qrCode)
       .then(() => {
         Swal.fire({
           title: "Copiado!",
           text: "Código PIX copiado com sucesso",
           icon: "success",
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       })
       .catch(() => {
@@ -59,9 +175,6 @@ export default function PagamentoBox({ id }) {
 
   async function handlePagamento(tipo, cursoData) {
     if (tipo !== "pix") return;
-
-    const idCurso = Number(id);
-    const idUsuario = Number(sessionStorage.getItem("idUsuario"));
 
     const dadosPag = {
       metodoPagamento: tipo,
@@ -78,64 +191,23 @@ export default function PagamentoBox({ id }) {
       await dispararPagamentoPix(dadosPag);
 
       const data = await aguardarQrCode(idCurso, idUsuario);
-      setPagamento(data);
-      setGerandoPix(false);
+      exibirQr(data);
 
-      setTempoRestante(600);
-      const countdown = setInterval(() => {
-        setTempoRestante((prev) => {
-          if (prev <= 1) {
-            clearInterval(countdown);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      const polling = setInterval(async () => {
-        try {
-          const statusResponse = await consultarStatusPix(idCurso, idUsuario);
-          const status = statusResponse?.status?.toLowerCase();
-
-          if (status === "approved") {
-            clearInterval(polling);
-            clearInterval(countdown);
-            setTempoRestante(null);
-
-            Swal.fire({
-              title: "Pagamento aprovado!",
-              text: "Seu curso foi liberado 🎉",
-              icon: "success",
-              confirmButtonText: "Continuar",
-            });
-          } else if (status === "expired" || status === "cancelled") {
-            clearInterval(polling);
-            clearInterval(countdown);
-            setTempoRestante(null);
-            setPagamento(null);
-
-            Swal.fire({
-              title: "Tempo esgotado",
-              text: "O PIX expirou, gere outro pagamento",
-              icon: "warning",
-            });
-          }
-        } catch (error) {
-          console.error("Erro ao consultar status:", error);
-          clearInterval(polling);
-          clearInterval(countdown);
-
-          Swal.fire({
-            title: "Erro",
-            text: "Falha ao verificar pagamento",
-            icon: "error",
-          });
-        }
-      }, 5000);
+      iniciarCountdown(data?.dataExpiracao);
+      iniciarPollingStatus();
     } catch (e) {
       setGerandoPix(false);
 
       if (e.response?.status === 409) {
+        // Já existe um PIX pendente: recupera o QR ativo e reexibe.
+        const ativo = await carregarQrCodeAtivo(idCurso, idUsuario);
+        if (ativo) {
+          exibirQr(ativo);
+          iniciarCountdown(ativo.dataExpiracao);
+          iniciarPollingStatus();
+          return;
+        }
+
         Swal.fire({
           title: "Atenção",
           text: "Já existe um pagamento PIX pendente para este curso.",

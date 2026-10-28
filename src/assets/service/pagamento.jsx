@@ -36,6 +36,22 @@ export async function aguardarQrCode(
   throw new Error("QR Code não ficou pronto a tempo");
 }
 
+export async function carregarQrCodeAtivo(idCurso, idUsuario) {
+  try {
+    const { data } = await apiPag.get(
+      `/pagamentos/${idCurso}/${idUsuario}/qrcode`
+    );
+    const expira = data?.dataExpiracao ? new Date(data.dataExpiracao) : null;
+    if (data?.qrCode && expira && expira > new Date()) {
+      return data; // QR ainda válido → reexibir
+    }
+  } catch (error) {
+    // 404/500 "Pagamento não encontrado" → ainda não há QR ativo
+    console.warn("Nenhum QR Code ativo encontrado:", error?.message);
+  }
+  return null; // precisa gerar um novo
+}
+
 export async function consultarStatusPix(idCurso, idUsuario) {
   try {
     const response = await apiPag.get(
