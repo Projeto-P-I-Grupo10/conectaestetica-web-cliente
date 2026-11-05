@@ -71,7 +71,7 @@ export default function CursosPage() {
       const enderecoFormatado = `${enderecoAtual.rua}, ${enderecoAtual.numero}, ${enderecoAtual.cidade}`;
 
       const resProximos = await fetch(
-        `http://localhost:8082/cursos-proximos?endereco=${encodeURIComponent(enderecoFormatado)}&distancia=${distancia}`
+        `http://localhost:8082/api/cursos-proximos?endereco=${encodeURIComponent(enderecoFormatado)}&distancia=${distancia}`
       );
       const data = await resProximos.json();
 
