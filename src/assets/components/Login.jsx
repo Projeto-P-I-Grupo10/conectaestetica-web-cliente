@@ -102,6 +102,15 @@ export default function Login() {
                 {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
+            <div className="text-right mt-2">
+              <span
+                onClick={() => navigate("/esqueci-senha", { state: { email: emailValido ? email : "" } })}
+                className="text-xs underline cursor-pointer text-[#c9a46c] hover:text-[#b8935c]"
+              >
+                Esqueci minha senha
+              </span>
+            </div>
           </div>
         </div>
 

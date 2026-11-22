@@ -109,3 +109,13 @@ export async function listarUsuarios(page = 0, size = 20) {
       console.error("Erro:", error.response?.data || error.message);
     });
 }
+
+// Recuperação de senha por e-mail (rotas públicas, usuário não está logado).
+// Aqui o erro é propagado de propósito, para a tela decidir a mensagem.
+export async function solicitarRecuperacaoSenha(email) {
+  return await api.post("/usuarios/esqueci-senha", { email });
+}
+
+export async function redefinirSenhaComToken(token, novaSenha) {
+  return await api.post("/usuarios/redefinir-senha", { token, novaSenha });
+}

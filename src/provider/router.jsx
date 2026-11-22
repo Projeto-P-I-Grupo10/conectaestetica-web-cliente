@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 import Cadastro from "../pages/Cadastro";
 import Login from "../pages/Login";
+import EsqueciSenha from "../pages/EsqueciSenha";
+import RedefinirSenha from "../pages/RedefinirSenha";
 import CursosPage from "../pages/CursosPages";
 import CursoDetalhe from "../pages/CursoDetalhe";
 import Pagamento from "../pages/Pagamento";
@@ -27,6 +29,15 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/esqueci-senha",
+    element: <EsqueciSenha />,
+  },
+  {
+    // o link do e-mail abre aqui: /redefinir-senha?token=...
+    path: "/redefinir-senha",
+    element: <RedefinirSenha />,
   },
   {
     path: "/",
